@@ -10,7 +10,7 @@
 // ── Configuração ──────────────────────────────────────────────────
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://127.0.0.1:8000'
-  : 'https://dieton-backend-production.up.railway.app';
+  : 'https://dieton-backend-production-8126.up.railway.app';
 
 const API_BASE_URL = API_URL + '/api/v1';
 let API_MODE = false; // começa em false, detecta automaticamente
