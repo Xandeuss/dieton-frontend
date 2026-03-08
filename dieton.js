@@ -26,8 +26,71 @@ function fillDemo(e, p) {
 }
 
 // ═══════════════════════════════════════════════════════
-// DATA
+// DATA PERSISTENCE
 // ═══════════════════════════════════════════════════════
+var DB = {
+  KEY: 'dieton_v1',
+  _keyFor: function (userId) { return 'dieton_v1_' + (userId || 'anon'); },
+  save: function () {
+    if (!cu) return;
+    try {
+      var snapshot = { pats: pats, tasks: tasks, notifs: notifs, templates: templates, savedAt: Date.now() };
+      localStorage.setItem(DB._keyFor(cu.id || cu.email), JSON.stringify(snapshot));
+    } catch (e) { console.warn('DietOn: falha ao salvar dados', e); }
+  },
+  load: function () {
+    if (!cu) return false;
+    try {
+      var raw = localStorage.getItem(DB._keyFor(cu.id || cu.email));
+      if (!raw) return false;
+      var data = JSON.parse(raw);
+      if (data.pats && data.pats.length) { pats = data.pats; }
+      if (data.tasks && data.tasks.length) { tasks = data.tasks; }
+      if (data.notifs) { notifs = data.notifs; }
+      if (data.templates && data.templates.length) { templates = data.templates; }
+      return true;
+    } catch (e) { console.warn('DietOn: falha ao carregar dados', e); return false; }
+  },
+  clear: function () { if (!cu) return; try { localStorage.removeItem(DB._keyFor(cu.id || cu.email)); } catch (e) { } },
+  exportJSON: function () {
+    var data = { pats: pats, tasks: tasks, notifs: notifs, templates: templates, exportedAt: new Date().toISOString(), version: '1.0' };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'dieton-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click(); URL.revokeObjectURL(a.href);
+    showToast('Backup exportado com sucesso!', 's');
+  }
+};
+function dbSave() { DB.save(); }
+
+// ─── ONBOARDING ───
+var _onbStep = 0;
+var _onbSlides = [
+  { icon: '🥗', title: 'Bem-vindo ao DietOn', body: 'Plataforma clínica completa de nutrição. Gerencie pacientes, prescreva planos, acompanhe evolução e use IA.' },
+  { icon: '👨‍⚕️', title: 'Gerencie seus pacientes', body: 'Cadastre com anamnese completa. Alertas gerados automaticamente.' },
+  { icon: '📝', title: 'Prescrição inteligente', body: 'Monte planos com banco TACO, calcule TMB/GET e exporte PDFs.' },
+  { icon: '🤖', title: 'IA Nutricional', body: 'Gere planos completos em segundos com IA.' },
+  { icon: '✅', title: 'Tudo pronto!', body: 'Explore todos os módulos pelo menu lateral.' }
+];
+function showToast(msg, type) {
+  var conf = { s: { cls: 't-s', ic: '✓' }, i: { cls: 't-i', ic: 'i' }, w: { cls: 't-w', ic: '!' }, e: { cls: 't-e', ic: '✕' } };
+  var c = conf[type] || conf.i;
+  var t = document.createElement('div'); t.className = 'toast ' + c.cls;
+  t.innerHTML = '<div class="t-ico">' + c.ic + '</div><span>' + msg + '</span>';
+  document.body.appendChild(t);
+  setTimeout(function () { t.style.transition = 'opacity .3s,transform .3s'; t.style.opacity = '0'; t.style.transform = 'translateY(8px)'; setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 310); }, 3200);
+}
+function showOnboarding() { _onbStep = 0; renderOnbSlide(); openM('m-onboard'); }
+function renderOnbSlide() {
+  var el = document.getElementById('onb-body'); if (!el) return;
+  var s = _onbSlides[_onbStep];
+  var dots = _onbSlides.map(function (_, i) { return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + (i === _onbStep ? 'var(--g4)' : 'var(--n2)') + ';margin:0 3px"></span>'; }).join('');
+  var prev = _onbStep > 0 ? '<button class="btn btn-ghost btn-sm" style="margin-right:8px" onclick="_onbStep--;renderOnbSlide()">← Anterior</button>' : '';
+  var nxtAct = _onbStep < _onbSlides.length - 1 ? '_onbStep++;renderOnbSlide()' : 'closeM(\'m-onboard\')';
+  var nxtLbl = _onbStep < _onbSlides.length - 1 ? 'Próximo →' : 'Começar agora';
+  el.innerHTML = '<div style="text-align:center;padding:10px 0 20px"><div style="font-size:48px;margin-bottom:14px">' + s.icon + '</div><div style="font-family:var(--jk);font-size:17px;font-weight:800;color:var(--n9);margin-bottom:10px">' + s.title + '</div><div style="font-size:13px;color:var(--n5);line-height:1.8;max-width:360px;margin:0 auto 20px">' + s.body + '</div><div style="margin-bottom:20px">' + dots + '</div>' + prev + '<button class="btn btn-p btn-lg" style="min-width:160px" onclick="' + nxtAct + '">' + nxtLbl + '</button></div>';
+}
+
 // ═══════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════
