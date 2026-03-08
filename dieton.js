@@ -489,7 +489,7 @@ function initPro() {
   <button class="ni" id="ni-busca" onclick="goP('busca',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>Busca Global</button>
   <button class="ni" id="ni-diary-pro" onclick="goP('diary-pro',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 5h-3.17L15 3H9L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 14H4V7h4.05l1.83-2h4.24l1.83 2H20v12zm-8-11c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>Di\u00e1rio Visual<span class="nb nb-y" id="nb-diary-pro" style="display:none">0</span></button>`;
   goP('dash', document.getElementById('ni-dash'));
-  try { if (!localStorage.getItem('dieton_onboarded')) { setTimeout(showOnboarding, 600); localStorage.setItem('dieton_onboarded', '1'); } } catch (e) { }
+  try { if (!localStorage.getItem('dieton_onboarded')) { localStorage.setItem('dieton_onboarded', '1'); setTimeout(showOnboarding, 600); } else if (!localStorage.getItem('dieton_tour_done')) { setTimeout(showTour, 700); } } catch (e) { }
 }
 
 function initPac() {
@@ -504,7 +504,10 @@ function initPac() {
   <button class="ni" id="pi-plan" onclick="goP('pplan',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Meu Plano</button>
   <button class="ni" id="pi-diary" onclick="goP('pdiary',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2z"/></svg>Diário Alimentar</button>
   <button class="ni" id="pi-task" onclick="goP('ptask',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>Tarefas<span class="nb nb-y">${tasks.filter(function (t) { return !t.done }).length}</span></button>
-  <button class="ni" id="pi-ev" onclick="goP('pev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Evolução</button>`;
+  <button class="ni" id="pi-ev" onclick="goP('pev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Evolução</button>
+  <button class="ni" id="ni-r24" onclick="goP('r24',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 010 16zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>Recordatório 24h</button>
+  <button class="ni" id="ni-supl" onclick="goP('supl',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>Suplementação</button>
+  <button class="ni" id="ni-fin" onclick="goP('fin',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>Financeiro</button>`;
   goP('pdash', document.getElementById('pi-dash'));
 }
 
@@ -523,7 +526,7 @@ function goP(id, btn) {
   document.getElementById('tb-title').textContent = t[id] || id;
   var pages = {
     dash: rDash, pat: rPat, agenda: rAgenda, presc: rPresc, week: rWeek, ev: rEv, micro: rMicro, rec: rRec, ai: rAI, notif: rNotif, tpl: rTpl, 'pac-diary': rPacDiary, anam: rAnam, busca: rBusca, 'diary-pro': rDiaryPro,
-    pdash: rPDash, pplan: rPPlan, pdiary: rPDiary, ptask: rPTask, pev: rPEv
+    pdash: rPDash, pplan: rPPlan, pdiary: rPDiary, ptask: rPTask, pev: rPEv, r24: rR24, supl: rSupl, fin: rFin
   };
   var rbts = {
     dash: '<button class="btn btn-s btn-sm" onclick=""><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5z"/></svg> Exportar PDF</button><button class="btn btn-p btn-sm" onclick="openM(\'m-pat\')">+ Novo Paciente</button>',
@@ -2762,6 +2765,314 @@ var _onbSlides = [
     action: 'Começar agora 🚀'
   }
 ];
+
+// ══════════════════════════════════════════════════════════════════
+// RECORDATÓRIO 24H
+// ══════════════════════════════════════════════════════════════════
+var _r24Data = {};
+var _r24PatId = null;
+
+function rR24() {
+  var p = selPat || pats[0];
+  if (!p) return '<div style="text-align:center;padding:40px;color:var(--n4)">Selecione um paciente primeiro.</div>';
+  _r24PatId = p.id;
+  if (!_r24Data.meals) _r24Data = { date: new Date().toLocaleDateString('pt-BR'), meals: {} };
+  apiGetR24(p.id).then(function(saved) {
+    if (saved && saved.meals) { _r24Data = { date: saved.record_date || _r24Data.date, meals: saved.meals, obs: saved.obs }; }
+    var btn = document.getElementById('ni-r24'); if (btn) goP('r24', btn);
+  }).catch(function() {});
+
+  var mealNames = ['☀️ Café da manhã','🥐 Lanche manhã','🍽️ Almoço','🌤️ Lanche tarde','🌙 Jantar','🌚 Ceia'];
+  var mealsHtml = mealNames.map(function(nm, i) {
+    var foods = (_r24Data.meals[i] || []);
+    var foodList = foods.map(function(f, fi) {
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--n1);font-size:12.5px;color:var(--n7)">'
+        + escHtml(f) + '<button onclick="r24RemFood(' + i + ',' + fi + ')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:13px;padding:0 6px">✕</button></div>';
+    }).join('');
+    return '<div style="background:#fff;border-radius:12px;border:1px solid var(--n2);padding:14px;margin-bottom:10px">'
+      + '<div style="font-weight:700;font-size:13px;color:var(--n8);margin-bottom:8px">' + nm + '</div>'
+      + foodList
+      + '<div style="display:flex;gap:6px;margin-top:8px">'
+      + '<input class="inp" id="r24-food-' + i + '" placeholder="Adicionar alimento…" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')r24AddFood(' + i + ')">'
+      + '<button class="btn btn-s btn-sm" onclick="r24AddFood(' + i + ')" style="flex-shrink:0">+</button>'
+      + '</div></div>';
+  }).join('');
+
+  return '<div class="ch"><span class="ct">📋 Recordatório 24h — ' + escHtml(p.n) + '</span>'
+    + '<div style="display:flex;gap:6px">'
+    + '<button class="btn btn-s btn-sm" onclick="r24Share()">📤 WhatsApp</button>'
+    + '<button class="btn btn-ghost btn-sm" onclick="r24Clear()" style="color:#dc2626">🗑️ Limpar</button>'
+    + '</div></div>'
+    + '<div style="background:#fff3ed;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#92400e">'
+    + '📅 Data: <strong>' + _r24Data.date + '</strong></div>'
+    + mealsHtml
+    + '<div style="background:#fff;border-radius:12px;border:1px solid var(--n2);padding:14px;margin-bottom:10px">'
+    + '<div style="font-weight:700;font-size:13px;color:var(--n8);margin-bottom:6px">📝 Observações</div>'
+    + '<textarea class="inp" id="r24-obs" rows="3" placeholder="Padrão alimentar, queixas, comportamento alimentar…" style="width:100%;resize:vertical">' + escHtml(_r24Data.obs || '') + '</textarea>'
+    + '</div>'
+    + '<button class="btn btn-p" onclick="r24Save()" style="width:100%">💾 Salvar Recordatório</button>';
+}
+
+function r24AddFood(mi) {
+  var inp = document.getElementById('r24-food-' + mi);
+  if (!inp || !inp.value.trim()) return;
+  if (!_r24Data.meals[mi]) _r24Data.meals[mi] = [];
+  _r24Data.meals[mi].push(inp.value.trim());
+  inp.value = '';
+  var btn = document.getElementById('ni-r24'); goP('r24', btn);
+}
+function r24RemFood(mi, fi) {
+  if (_r24Data.meals[mi]) _r24Data.meals[mi].splice(fi, 1);
+  var btn = document.getElementById('ni-r24'); goP('r24', btn);
+}
+function r24Save() {
+  var obs = document.getElementById('r24-obs');
+  if (obs) _r24Data.obs = obs.value;
+  apiSaveR24(_r24PatId, _r24Data);
+  showToast('Recordatório salvo ✅', 's');
+}
+function r24Clear() {
+  if (!confirm('Limpar o recordatório atual?')) return;
+  apiClearR24(_r24PatId);
+  _r24Data = { date: new Date().toLocaleDateString('pt-BR'), meals: {} };
+  var btn = document.getElementById('ni-r24'); goP('r24', btn);
+  showToast('Recordatório limpo', 'i');
+}
+function r24Share() {
+  var p = selPat || pats[0]; if (!p) return;
+  var mealNames = ['☀️ Café da manhã','🥐 Lanche manhã','🍽️ Almoço','🌤️ Lanche tarde','🌙 Jantar','🌚 Ceia'];
+  var lines = ['📋 *Recordatório Alimentar 24h*', '', 'Paciente: ' + p.n, 'Data: ' + _r24Data.date, ''];
+  mealNames.forEach(function(nm, i) {
+    var foods = _r24Data.meals[i] || [];
+    if (foods.length) { lines.push(nm); foods.forEach(function(f) { lines.push('  • ' + f); }); lines.push(''); }
+  });
+  if (_r24Data.obs) lines.push('📝 Obs: ' + _r24Data.obs);
+  window.open('https://wa.me/?text=' + encodeURIComponent(lines.join('\n')), '_blank');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SUPLEMENTAÇÃO
+// ══════════════════════════════════════════════════════════════════
+function rSupl() {
+  var p = selPat || pats[0];
+  if (!p) return '<div style="text-align:center;padding:40px;color:var(--n4)">Selecione um paciente primeiro.</div>';
+  if (!p.suplementos) p.suplementos = [];
+  apiGetSupplements(p.id).then(function(list) {
+    if (list && list.length) { p.suplementos = list; DB.save(); var btn = document.getElementById('ni-supl'); if (btn) goP('supl', btn); }
+  }).catch(function() {});
+
+  var list = p.suplementos.length
+    ? p.suplementos.map(function(s, i) {
+        var sc = s.status === 'ativo' ? '#16a34a' : s.status === 'pausado' ? '#d97706' : '#6b7280';
+        return '<div style="background:#fff;border-radius:12px;border:1px solid var(--n2);padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start">'
+          + '<div><div style="font-weight:700;font-size:14px;color:var(--n9)">' + escHtml(s.nome) + '</div>'
+          + '<div style="font-size:12px;color:var(--n5);margin-top:2px">' + escHtml(s.dose || '') + (s.horario ? ' · ' + escHtml(s.horario) : '') + (s.duracao ? ' · ' + escHtml(s.duracao) : '') + '</div>'
+          + (s.obs ? '<div style="font-size:11px;color:var(--n4);margin-top:2px">' + escHtml(s.obs) + '</div>' : '') + '</div>'
+          + '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0;margin-left:10px">'
+          + '<span style="font-size:10px;font-weight:700;color:' + sc + ';background:' + sc + '18;padding:2px 8px;border-radius:99px">' + s.status + '</span>'
+          + '<button class="btn btn-ghost btn-sm" onclick="suplDel(' + i + ')" style="padding:4px 8px;font-size:11px;color:#dc2626">✕</button>'
+          + '</div></div>';
+      }).join('')
+    : '<div style="text-align:center;padding:30px;color:var(--n4);font-size:13px">Nenhum suplemento cadastrado.</div>';
+
+  return '<div class="ch"><span class="ct">💊 Suplementação — ' + escHtml(p.n) + '</span>'
+    + '<button class="btn btn-p btn-sm" onclick="openM('m-supl-form')">+ Adicionar</button></div>'
+    + '<div>' + list + '</div>'
+    + '<div class="ov" id="m-supl-form" style="display:none"><div class="modal" style="max-width:400px">'
+    + '<div class="mh"><div class="mt">💊 Novo Suplemento</div><button class="mc" onclick="closeM('m-supl-form')">×</button></div>'
+    + '<div style="padding:16px;display:flex;flex-direction:column;gap:10px">'
+    + '<input class="inp" id="s-nome" placeholder="Nome do suplemento *">'
+    + '<input class="inp" id="s-dose" placeholder="Dose (ex: 1000mg)">'
+    + '<input class="inp" id="s-hora" placeholder="Horário (ex: Com café da manhã)">'
+    + '<input class="inp" id="s-dur" placeholder="Duração (ex: 30 dias)">'
+    + '<select class="sel" id="s-status"><option value="ativo">Ativo</option><option value="pausado">Pausado</option><option value="concluido">Concluído</option></select>'
+    + '<input class="inp" id="s-obs" placeholder="Observações (opcional)">'
+    + '<button class="btn btn-p" onclick="suplAdd()">Salvar</button>'
+    + '</div></div></div>';
+}
+function suplAdd() {
+  var p = selPat || pats[0]; if (!p) return;
+  var nome = document.getElementById('s-nome').value.trim();
+  if (!nome) { showToast('Informe o nome do suplemento', 'w'); return; }
+  if (!p.suplementos) p.suplementos = [];
+  var obj = { nome: nome, dose: document.getElementById('s-dose').value.trim(),
+    horario: document.getElementById('s-hora').value.trim(),
+    duracao: document.getElementById('s-dur').value.trim(),
+    status: document.getElementById('s-status').value,
+    obs: document.getElementById('s-obs').value.trim() };
+  apiAddSupplement(p.id, obj).then(function(res) {
+    if (res && res.id) obj.id = res.id;
+    p.suplementos.push(obj); DB.save();
+    closeM('m-supl-form'); showToast('Suplemento adicionado ✅', 's');
+    var btn = document.getElementById('ni-supl'); goP('supl', btn);
+  });
+}
+function suplDel(idx) {
+  var p = selPat || pats[0]; if (!p || !p.suplementos) return;
+  if (!confirm('Remover suplemento?')) return;
+  var rem = p.suplementos.splice(idx, 1)[0];
+  if (rem && rem.id) apiDeleteSupplement(p.id, rem.id);
+  DB.save(); showToast('Suplemento removido', 'i');
+  var btn = document.getElementById('ni-supl'); goP('supl', btn);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FINANCEIRO
+// ══════════════════════════════════════════════════════════════════
+function rFin() {
+  if (!cu.financeiro) cu.financeiro = [];
+  apiGetFinancial().then(function(list) {
+    if (list && list.length) {
+      cu.financeiro = list.map(function(f) { return { id: f.id, paciente: f.patient_name || f.paciente, data: f.record_date || f.data, tipo: f.tipo, valor: f.valor || f.value, status: f.status, obs: f.obs }; });
+      DB.save(); var btn = document.getElementById('ni-fin'); if (btn) goP('fin', btn);
+    }
+  }).catch(function() {});
+
+  var fin = cu.financeiro;
+  var pago = fin.filter(function(f) { return f.status === 'pago'; }).reduce(function(s, f) { return s + (f.valor || 0); }, 0);
+  var pendente = fin.filter(function(f) { return f.status !== 'pago'; }).reduce(function(s, f) { return s + (f.valor || 0); }, 0);
+
+  var list = fin.length
+    ? fin.map(function(f, i) {
+        var pg = f.status === 'pago';
+        return '<div style="background:#fff;border-radius:12px;border:1px solid var(--n2);padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">'
+          + '<div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--n9)">' + escHtml(f.paciente || '') + '</div>'
+          + '<div style="font-size:11.5px;color:var(--n5)">' + escHtml(f.tipo || '') + (f.data ? ' · ' + f.data : '') + '</div>'
+          + (f.obs ? '<div style="font-size:11px;color:var(--n4)">' + escHtml(f.obs) + '</div>' : '') + '</div>'
+          + '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:10px">'
+          + '<div style="text-align:right"><div style="font-weight:800;font-size:15px;color:' + (pg ? '#16a34a' : '#d97706') + '">R$ ' + Number(f.valor || 0).toFixed(2) + '</div>'
+          + '<div style="font-size:10px;font-weight:700;color:' + (pg ? '#16a34a' : '#d97706') + '">' + (pg ? 'PAGO' : 'PENDENTE') + '</div></div>'
+          + (!pg ? '<button class="btn btn-s btn-sm" onclick="finPagar(' + i + ')" style="font-size:11px;white-space:nowrap">✓ Pago</button>' : '')
+          + '<button class="btn btn-ghost btn-sm" onclick="finDel(' + i + ')" style="padding:4px 8px;font-size:11px;color:#dc2626">✕</button>'
+          + '</div></div>';
+      }).join('')
+    : '<div style="text-align:center;padding:30px;color:var(--n4);font-size:13px">Nenhuma cobrança registrada.</div>';
+
+  return '<div class="ch"><span class="ct">💰 Financeiro</span>'
+    + '<button class="btn btn-p btn-sm" onclick="openM('m-fin-form')">+ Nova Cobrança</button></div>'
+    + '<div style="display:flex;gap:10px;margin-bottom:16px">'
+    + '<div style="flex:1;background:#f0fdf4;border-radius:10px;padding:12px 14px"><div style="font-size:10px;font-weight:700;color:#16a34a;letter-spacing:.06em;text-transform:uppercase">Recebido</div><div style="font-size:18px;font-weight:800;color:#16a34a">R$ ' + pago.toFixed(2) + '</div></div>'
+    + '<div style="flex:1;background:#fffbeb;border-radius:10px;padding:12px 14px"><div style="font-size:10px;font-weight:700;color:#d97706;letter-spacing:.06em;text-transform:uppercase">Pendente</div><div style="font-size:18px;font-weight:800;color:#d97706">R$ ' + pendente.toFixed(2) + '</div></div>'
+    + '</div>'
+    + list
+    + '<div class="ov" id="m-fin-form" style="display:none"><div class="modal" style="max-width:400px">'
+    + '<div class="mh"><div class="mt">💰 Nova Cobrança</div><button class="mc" onclick="closeM('m-fin-form')">×</button></div>'
+    + '<div style="padding:16px;display:flex;flex-direction:column;gap:10px">'
+    + '<input class="inp" id="f-pac" placeholder="Nome do paciente *">'
+    + '<input class="inp" id="f-data" type="date" value="' + new Date().toISOString().slice(0,10) + '">'
+    + '<select class="sel" id="f-tipo"><option>Consulta inicial</option><option>Retorno</option><option>Plano mensal</option><option>Pacote trimestral</option><option>Outro</option></select>'
+    + '<input class="inp" id="f-valor" type="number" placeholder="Valor (R$) *" min="0" step="0.01">'
+    + '<select class="sel" id="f-status"><option value="pendente">Pendente</option><option value="pago">Pago</option></select>'
+    + '<input class="inp" id="f-obs" placeholder="Observações (opcional)">'
+    + '<button class="btn btn-p" onclick="finAdd()">Registrar</button>'
+    + '</div></div></div>';
+}
+function finAdd() {
+  var pac = document.getElementById('f-pac').value.trim();
+  var valor = parseFloat(document.getElementById('f-valor').value);
+  if (!pac) { showToast('Informe o paciente', 'w'); return; }
+  if (isNaN(valor) || valor <= 0) { showToast('Informe um valor válido', 'w'); return; }
+  if (!cu.financeiro) cu.financeiro = [];
+  var data = document.getElementById('f-data').value;
+  var rec = { paciente: pac, data: new Date(data).toLocaleDateString('pt-BR'),
+    tipo: document.getElementById('f-tipo').value, valor: valor,
+    status: document.getElementById('f-status').value,
+    obs: document.getElementById('f-obs').value };
+  apiAddFinancial(rec);
+  cu.financeiro.push(rec); DB.save();
+  closeM('m-fin-form'); showToast('Cobrança registrada ✅', 's');
+  var btn = document.getElementById('ni-fin'); goP('fin', btn);
+}
+function finPagar(idx) {
+  if (!cu || !cu.financeiro) return;
+  var item = cu.financeiro[idx]; item.status = 'pago';
+  if (item.id) apiPayFinancial(item.id);
+  DB.save(); showToast('Pagamento registrado ✅', 's');
+  var btn = document.getElementById('ni-fin'); goP('fin', btn);
+}
+function finDel(idx) {
+  if (!confirm('Remover cobrança?')) return;
+  var rem = cu.financeiro.splice(idx, 1)[0];
+  if (rem && rem.id) apiDeleteFinancial(rem.id);
+  DB.save(); showToast('Cobrança removida', 'i');
+  var btn = document.getElementById('ni-fin'); goP('fin', btn);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// TOUR GUIADO
+// ══════════════════════════════════════════════════════════════════
+var _tourStep = 0, _tourActive = false;
+var _tourSteps = [
+  { el: null, icon: '🎉', title: 'Bem-vindo ao DietOn!', body: 'Este tour rápido mostra as principais funcionalidades. Leva menos de 2 minutos!', pos: 'center' },
+  { el: 'ni-pat', icon: '👥', title: 'Cadastrar Pacientes', body: 'Acesse sua lista de pacientes aqui. Use <strong>+ Novo Paciente</strong> para cadastrar com anamnese, exames e histórico clínico completo.', pos: 'right' },
+  { el: 'ni-notif', icon: '🔔', title: 'Notificações', body: 'Alertas automáticos — IMC crítico, vitamina D baixa, glicemia alterada. O ponto vermelho indica alertas pendentes.', pos: 'right' },
+  { el: 'ni-r24', icon: '📋', title: 'Recordatório 24h', body: 'Registre o que o paciente comeu nas últimas 24h refeição por refeição. Salve e compartilhe por WhatsApp diretamente do app.', pos: 'right' },
+  { el: 'ni-supl', icon: '💊', title: 'Suplementação', body: 'Adicione suplementos prescritos para o paciente, controle o status (ativo / pausado / concluído) e exporte a lista.', pos: 'right' },
+  { el: 'ni-fin', icon: '💰', title: 'Financeiro', body: 'Registre cobranças, marque pagamentos como recebidos e veja o resumo com total recebido e pendente.', pos: 'right' },
+  { el: 'ni-agenda', icon: '🗓️', title: 'Agenda & Tarefas', body: 'Organize consultas na agenda e crie tarefas por categoria. O contador mostra tarefas pendentes.', pos: 'right' },
+  { el: 'tb-right', icon: '🔑', title: 'Sua TAG de Convite', body: '<strong>Muito importante!</strong> Clique no seu avatar no canto superior direito → <strong>Perfil</strong> → <strong>"Código de Convite"</strong>. Compartilhe com seus pacientes para que se vinculem a você.', pos: 'left' },
+  { el: null, icon: '✅', title: 'Tudo pronto!', body: 'Explore o sistema à vontade. O botão <strong>❓</strong> no topo sempre abre este tour novamente.', pos: 'center' }
+];
+function showTour() {
+  _tourStep = 0; _tourActive = true;
+  document.getElementById('tour-overlay').style.display = 'block';
+  document.getElementById('tour-tip').style.display = 'block';
+  _tourRender();
+}
+function tourEnd() {
+  _tourActive = false;
+  document.getElementById('tour-overlay').style.display = 'none';
+  document.getElementById('tour-tip').style.display = 'none';
+  _tourClearRing();
+  try { localStorage.setItem('dieton_tour_done', '1'); } catch(e) {}
+}
+function tourNext() { if (_tourStep < _tourSteps.length - 1) { _tourStep++; _tourRender(); } else tourEnd(); }
+function tourPrev() { if (_tourStep > 0) { _tourStep--; _tourRender(); } }
+function _tourClearRing() {
+  var ring = document.getElementById('tour-ring'), hole = document.getElementById('tour-hole'), ov = document.getElementById('tour-overlay');
+  if (ring) ring.style.opacity = '0';
+  if (hole) { hole.setAttribute('x','0'); hole.setAttribute('y','0'); hole.setAttribute('width','0'); hole.setAttribute('height','0'); }
+  if (ov) ov.style.pointerEvents = 'none';
+}
+function _tourRender() {
+  var s = _tourSteps[_tourStep], total = _tourSteps.length;
+  document.getElementById('tour-prog').style.width = Math.round((_tourStep / (total - 1)) * 100) + '%';
+  document.getElementById('tour-step-lbl').textContent = 'Passo ' + (_tourStep + 1) + ' de ' + total;
+  document.getElementById('tour-icon').textContent = s.icon;
+  document.getElementById('tour-title').textContent = s.title;
+  document.getElementById('tour-body').innerHTML = s.body;
+  var dots = ''; for (var i = 0; i < total; i++) dots += '<span style="display:inline-block;width:' + (i === _tourStep ? '18px' : '6px') + ';height:6px;border-radius:99px;background:' + (i === _tourStep ? '#e85a0a' : '#d1d5db') + ';transition:all .25s ease"></span>';
+  document.getElementById('tour-dots').innerHTML = dots;
+  document.getElementById('tour-prev').style.display = _tourStep > 0 ? 'block' : 'none';
+  document.getElementById('tour-next').textContent = _tourStep < total - 1 ? 'Próximo →' : 'Finalizar 🚀';
+  var el = s.el ? document.getElementById(s.el) : null;
+  if (!el || s.pos === 'center') { _tourClearRing(); _tourPositionCenter(); }
+  else { _tourHighlight(el, s.pos); }
+}
+function _tourHighlight(el, pos) {
+  var rect = el.getBoundingClientRect(), pad = 8;
+  var x = rect.left - pad, y = rect.top - pad, w = rect.width + pad * 2, h = rect.height + pad * 2;
+  var hole = document.getElementById('tour-hole');
+  hole.setAttribute('x', x); hole.setAttribute('y', y); hole.setAttribute('width', w); hole.setAttribute('height', h);
+  var ring = document.getElementById('tour-ring');
+  ring.style.opacity = '1'; ring.style.left = x + 'px'; ring.style.top = y + 'px'; ring.style.width = w + 'px'; ring.style.height = h + 'px';
+  document.getElementById('tour-overlay').style.pointerEvents = 'all';
+  _tourPositionTip(rect, pos);
+}
+function _tourPositionTip(rect, pos) {
+  var tip = document.getElementById('tour-tip'), tipW = 300, tipH = tip.offsetHeight || 230;
+  var vw = window.innerWidth, vh = window.innerHeight, mg = 16, left, top;
+  if (pos === 'right') { left = Math.min(rect.right + mg + 8, vw - tipW - mg); top = Math.max(mg, Math.min(rect.top + rect.height / 2 - tipH / 2, vh - tipH - mg)); }
+  else if (pos === 'left') { left = Math.max(mg, rect.left - tipW - mg - 8); top = Math.max(mg, Math.min(rect.top + rect.height / 2 - tipH / 2, vh - tipH - mg)); }
+  else { left = vw / 2 - tipW / 2; top = vh / 2 - tipH / 2; }
+  tip.style.left = left + 'px'; tip.style.top = top + 'px'; tip.style.width = tipW + 'px';
+}
+function _tourPositionCenter() {
+  var tip = document.getElementById('tour-tip'), vw = window.innerWidth, vh = window.innerHeight;
+  tip.style.left = (vw / 2 - 150) + 'px'; tip.style.top = (vh / 2 - (tip.offsetHeight || 230) / 2) + 'px'; tip.style.width = '300px';
+}
+window.addEventListener('resize', function() { if (_tourActive) _tourRender(); });
+
 function showOnboarding() { _onbStep = 0; renderOnbSlide(); openM('m-onboard'); }
 function renderOnbSlide() {
   var el = document.getElementById('onb-body'); if (!el) return;
@@ -3872,11 +4183,8 @@ function initPro() {
   <button class="ni" id="ni-busca" onclick="goP('busca',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>Busca Global</button>
   <button class="ni" id="ni-pac-diary" onclick="goP('pac-diary',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 5h-3.17L15 3H9L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 14H4V7h4.05l1.83-2h4.24l1.83 2H20v12zm-8-11c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>Di\u00e1rio Visual<span class="nb nb-y" id="nb-pac-diary" style="display:none">0</span></button>`;
   goP('dash', document.getElementById('ni-dash'));
-  // Show onboarding if first visit
-  if (!localStorage.getItem || !localStorage.getItem('dieton_onboarded')) {
-    setTimeout(showOnboarding, 600);
-    try { localStorage.setItem('dieton_onboarded', '1'); } catch (e) { }
-  }
+  // Tour no primeiro acesso
+  try { if (!localStorage.getItem('dieton_tour_done')) { localStorage.setItem('dieton_tour_done', '1'); setTimeout(showTour, 800); } } catch(e) {}
 }
 
 function initPac() {
@@ -3891,7 +4199,10 @@ function initPac() {
   <button class="ni" id="pi-plan" onclick="goP('pplan',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Meu Plano</button>
   <button class="ni" id="pi-diary" onclick="goP('pdiary',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2z"/></svg>Diário Alimentar</button>
   <button class="ni" id="pi-task" onclick="goP('ptask',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>Tarefas<span class="nb nb-y">${tasks.filter(function (t) { return !t.done }).length}</span></button>
-  <button class="ni" id="pi-ev" onclick="goP('pev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Evolução</button>`;
+  <button class="ni" id="pi-ev" onclick="goP('pev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Evolução</button>
+  <button class="ni" id="ni-r24" onclick="goP('r24',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 010 16zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>Recordatório 24h</button>
+  <button class="ni" id="ni-supl" onclick="goP('supl',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>Suplementação</button>
+  <button class="ni" id="ni-fin" onclick="goP('fin',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>Financeiro</button>`;
   goP('pdash', document.getElementById('pi-dash'));
 }
 
@@ -3911,7 +4222,7 @@ function goP(id, btn) {
   var pages = {
     dash: rDash, pat: rPat, agenda: rAgenda, presc: rPresc, week: rWeek, ev: rEv, micro: rMicro, rec: rRec, ai: rAI, notif: rNotif, tpl: rTpl, 'pac-diary': rPacDiary, 'diary-pro': rDiaryPro,
     anam: rAnam, busca: rBusca,
-    pdash: rPDash, pplan: rPPlan, pdiary: rPDiary, ptask: rPTask, pev: rPEv
+    pdash: rPDash, pplan: rPPlan, pdiary: rPDiary, ptask: rPTask, pev: rPEv, r24: rR24, supl: rSupl, fin: rFin
   };
   var rbts = {
     dash: '<button class="btn btn-s btn-sm" onclick=""><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5z"/></svg> Exportar PDF</button><button class="btn btn-p btn-sm" onclick="openM(\'m-pat\')">+ Novo Paciente</button>',
