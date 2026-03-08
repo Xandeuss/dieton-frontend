@@ -139,11 +139,14 @@ async function doLogin() {
   }
 
   // Modo API
+  const ts = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
+  if (!ts && API_MODE) { showErr('Por favor, complete o desafio de segurança.'); return; }
+
   try {
     const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pw })
+      body: JSON.stringify({ email, password: pw, turnstile_token: ts })
     });
     const data = await res.json();
 
@@ -245,10 +248,13 @@ async function doRegisterPro() {
 
   // Modo API
   try {
+    const ts = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
+    if (!ts) { showUpErr('Por favor, complete o desafio de segurança.'); return; }
+
     const res = await fetch(`${API_BASE_URL}/auth/register/pro`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: nome, email, password: pw, crn })
+      body: JSON.stringify({ name: nome, email, password: pw, crn, turnstile_token: ts })
     });
     const data = await res.json();
 
@@ -292,10 +298,13 @@ async function doRegisterPac() {
 
   // Modo API
   try {
+    const ts = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
+    if (!ts) { showUpErr('Por favor, complete o desafio de segurança.'); return; }
+
     const res = await fetch(`${API_BASE_URL}/auth/register/pac`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: nome, email, password: pw, invite_code: code })
+      body: JSON.stringify({ name: nome, email, password: pw, invite_code: code, turnstile_token: ts })
     });
     const data = await res.json();
 
@@ -313,16 +322,22 @@ async function doRegisterPac() {
 
 // ── Helpers de UI (mantidos por compatibilidade) ──────────────────
 function showErr(msg) {
-  const el = document.getElementById('login-err');
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
+  const el = document.getElementById('err-msg');
+  const box = document.getElementById('err-box');
+  if (el) el.textContent = msg;
+  if (box) box.style.display = 'flex';
 }
 function showUpErr(msg) {
-  const el = document.getElementById('up-err');
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
+  const el = document.getElementById('err-up-msg');
+  const box = document.getElementById('err-up');
+  if (el) el.textContent = msg;
+  if (box) box.style.display = 'flex';
 }
 function showUpOk(msg) {
-  const el = document.getElementById('up-ok');
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
+  const el = document.getElementById('ok-up-msg');
+  const box = document.getElementById('ok-up');
+  if (el) el.textContent = msg;
+  if (box) box.style.display = 'flex';
 }
 
 
