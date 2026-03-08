@@ -224,6 +224,9 @@ async function doLogout() {
   cu = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('login').style.display = 'flex';
+
+  // Recarrega a página para limpar estados globais e reiniciar o Turnstile
+  window.location.reload();
 }
 
 
@@ -345,11 +348,12 @@ function showErr(msg) {
   const box = document.getElementById('err-box');
   if (el) {
     if (typeof msg === 'object') {
-      // Se for erro de validação do FastAPI (422)
       if (Array.isArray(msg)) msg = msg.map(e => e.msg).join(', ');
       else if (msg.detail) msg = Array.isArray(msg.detail) ? msg.detail.map(e => e.msg).join(', ') : msg.detail;
       else msg = JSON.stringify(msg);
     }
+    // Remove prefixos técnicos do FastAPI/Pydantic
+    msg = msg.replace(/^Value error, /i, '').replace(/^Assertion failed, /i, '');
     el.textContent = msg;
   }
   if (box) box.style.display = 'flex';
@@ -363,6 +367,8 @@ function showUpErr(msg) {
       else if (msg.detail) msg = Array.isArray(msg.detail) ? msg.detail.map(e => e.msg).join(', ') : msg.detail;
       else msg = JSON.stringify(msg);
     }
+    // Remove prefixos técnicos do FastAPI/Pydantic
+    msg = msg.replace(/^Value error, /i, '').replace(/^Assertion failed, /i, '');
     el.textContent = msg;
   }
   if (box) box.style.display = 'flex';
