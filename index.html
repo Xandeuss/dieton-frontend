@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://dieton-backend-production.up.railway.app https://cbggsjdstynhgzagubae.supabase.co; frame-ancestors 'none'" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://dieton-backend-production.up.railway.app https://cbggsjdstynhgzagubae.supabase.co; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>DietOn — Plataforma Clínica de Nutrição</title>
@@ -249,183 +250,14 @@
         </div>
 
         <div id="f-in">
-        <div class="err-box" id="err-box">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-          </svg>
-          <span id="err-msg"></span>
-        </div>
-
-        <div class="fi-field">
-          <label class="fi-lbl">E-mail</label>
-          <div class="fi-wrap">
-            <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                <polyline points="22,6 12,13 2,6" />
-              </svg></span>
-            <input type="email" id="inp-em" placeholder="seu&#64;email.com"
-              onkeydown="if(event.key==='Enter')doLogin()" />
-          </div>
-        </div>
-
-        <div class="fi-field">
-          <label class="fi-lbl">Senha</label>
-          <div class="fi-wrap">
-            <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg></span>
-            <input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" />
-          </div>
-        </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-          <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6b7280;cursor:pointer">
-            <input type="checkbox" checked style="accent-color:#05a84e" /> Lembrar de mim
-          </label>
-          <a href="#" onclick="doForgotPassword(); return false;"
-            style="font-size:12px;color:#05a84e;font-weight:700;text-decoration:none">Esqueceu a senha?</a>
-        </div>
-
-        <button class="btn-main" id="login-btn" onclick="doLogin()">Entrar na plataforma →</button>
-
-        <div style="text-align:center;margin-top:18px;font-size:11.5px;color:#9ca3af">
-          Ao entrar, você concorda com os <a href="#" onclick="openTermos(event)" style="color:#05a84e;font-weight:600">Termos de Uso</a>
-        </div>
-        </div>
-
-      <div id="f-up" style="display:none">
-
-        <!-- Sub-tabs Nutricionista / Paciente — padrão .seg-tabs do projeto -->
-        <div class="reg-tabs">
-          <button class="reg-tab on" id="up-tab-pro" onclick="upTab('pro')">
+          <div class="err-box" id="err-box">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
               <path
-                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" />
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
             </svg>
-            Nutricionista
-          </button>
-          <button class="reg-tab" id="up-tab-pac" onclick="upTab('pac')">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
-            Paciente
-          </button>
-        </div>
-
-        <!-- Erro de cadastro -->
-        <div class="err-box" id="err-up">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-          </svg>
-          <span id="err-up-msg"></span>
-        </div>
-
-        <!-- Sucesso de cadastro -->
-        <div class="reg-ok" id="ok-up">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14l-4-4 1.41-1.41L10 13.17l6.59-6.59L18 8l-8 8z" />
-          </svg>
-          <span id="ok-up-msg"></span>
-        </div>
-
-        <!-- ── FORMULÁRIO NUTRICIONISTA ── -->
-        <div id="up-pro">
-          <div class="fi-field">
-            <label class="fi-lbl">Nome completo</label>
-            <div class="fi-wrap">
-              <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg></span>
-              <input type="text" id="up-pro-nome" placeholder="Dra. Ana Paula" />
-            </div>
+            <span id="err-msg"></span>
           </div>
 
-          <div class="fi-field">
-            <label class="fi-lbl">E-mail profissional</label>
-            <div class="fi-wrap">
-              <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
-                </svg></span>
-              <input type="email" id="up-pro-email" placeholder="email&#64;clinica.com.br" />
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div class="fi-field">
-              <label class="fi-lbl">Senha</label>
-              <div class="fi-wrap">
-                <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg></span>
-                <input type="password" id="up-pro-pw" placeholder="Mín. 8 caracteres" autocomplete="new-password" oninput="checkPwStrength(this.value,'pw-strength-pro')" />
-              <div id="pw-strength-pro" style="margin-top:5px;height:4px;border-radius:99px;background:#e5e7eb;overflow:hidden"><div id="pw-strength-pro-bar" style="height:4px;border-radius:99px;width:0;transition:all .3s"></div></div>
-              <div id="pw-strength-pro-txt" style="font-size:10.5px;margin-top:3px;color:#9ca3af"></div>
-              </div>
-            </div>
-            <div class="fi-field">
-              <label class="fi-lbl">Confirmar senha</label>
-              <div class="fi-wrap">
-                <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg></span>
-                <input type="password" id="up-pro-pw2" placeholder="Repita a senha" autocomplete="new-password" />
-              </div>
-            </div>
-          </div>
-          <!-- Cloudflare Turnstile widget -->
-          <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_DEMO_KEY_" data-theme="light"></div>
-          <label class="cf-widget-wrap" for="cf-check-pro">
-            <input type="checkbox" class="cf-check-box" id="cf-check-pro" onchange="cfCheckChange('pro')" />
-            <span class="cf-label">Não sou um robô — verificação de segurança</span>
-            <div class="cf-brand">
-              <div class="cf-brand-name">Protegido por<strong>Cloudflare</strong></div>
-            </div>
-          </label>
-          <button class="btn-main" onclick="doRegisterPro()">Criar conta de nutricionista →</button>
-          <p style="text-align:center;margin-top:13px;font-size:11px;color:#9ca3af;font-family:var(--in)">Grátis por 14
-            dias · Sem cartão de crédito</p>
-        </div>
-
-        <!-- ── FORMULÁRIO PACIENTE ── -->
-        <div id="up-pac" style="display:none">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div class="fi-field">
-              <label class="fi-lbl">Nome completo</label>
-              <div class="fi-wrap">
-                <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg></span>
-                <input type="text" id="up-pac-nome" placeholder="Maria Silva" />
-              </div>
-            </div>
-            <div class="fi-field">
-              <label class="fi-lbl">Data de nascimento</label>
-              <div class="fi-wrap">
-                <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" />
-                    <path d="M16 2v4M8 2v4M3 10h18" />
-                  </svg></span>
-                <input type="date" id="up-pac-nasc" />
-              </div>
-            </div>
-          </div>
           <div class="fi-field">
             <label class="fi-lbl">E-mail</label>
             <div class="fi-wrap">
@@ -434,67 +266,249 @@
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                   <polyline points="22,6 12,13 2,6" />
                 </svg></span>
-              <input type="email" id="up-pac-email" placeholder="seu&#64;email.com" />
+              <input type="email" id="inp-em" placeholder="seu&#64;email.com"
+                onkeydown="if(event.key==='Enter')doLogin()" />
             </div>
           </div>
+
           <div class="fi-field">
-            <label class="fi-lbl">Código do Nutricionista <span style="font-size:9px;color:var(--n4)">(fornecido pelo
-                seu nutricionista)</span></label>
+            <label class="fi-lbl">Senha</label>
             <div class="fi-wrap">
               <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="2">
-                  <path
-                    d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg></span>
-              <input type="text" id="up-pac-code" placeholder="Ex: ANA-4821" style="text-transform:uppercase"
-                oninput="this.value=this.value.toUpperCase()" />
+              <input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password"
+                onkeydown="if(event.key==='Enter')doLogin()" />
             </div>
-            <p class="fi-hint" id="pac-code-hint">Solicite o código ao seu nutricionista responsável.</p>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6b7280;cursor:pointer">
+              <input type="checkbox" checked style="accent-color:#05a84e" /> Lembrar de mim
+            </label>
+            <a href="#" onclick="doForgotPassword(); return false;"
+              style="font-size:12px;color:#05a84e;font-weight:700;text-decoration:none">Esqueceu a senha?</a>
+          </div>
+
+          <button class="btn-main" id="login-btn" onclick="doLogin()">Entrar na plataforma →</button>
+
+          <div style="text-align:center;margin-top:18px;font-size:11.5px;color:#9ca3af">
+            Ao entrar, você concorda com os <a href="#" onclick="openTermos(event)"
+              style="color:#05a84e;font-weight:600">Termos de Uso</a>
+          </div>
+        </div>
+
+        <div id="f-up" style="display:none">
+
+          <!-- Sub-tabs Nutricionista / Paciente — padrão .seg-tabs do projeto -->
+          <div class="reg-tabs">
+            <button class="reg-tab on" id="up-tab-pro" onclick="upTab('pro')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" />
+              </svg>
+              Nutricionista
+            </button>
+            <button class="reg-tab" id="up-tab-pac" onclick="upTab('pac')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+              </svg>
+              Paciente
+            </button>
+          </div>
+
+          <!-- Erro de cadastro -->
+          <div class="err-box" id="err-up">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            <span id="err-up-msg"></span>
+          </div>
+
+          <!-- Sucesso de cadastro -->
+          <div class="reg-ok" id="ok-up">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14l-4-4 1.41-1.41L10 13.17l6.59-6.59L18 8l-8 8z" />
+            </svg>
+            <span id="ok-up-msg"></span>
+          </div>
+
+          <!-- ── FORMULÁRIO NUTRICIONISTA ── -->
+          <div id="up-pro">
             <div class="fi-field">
-              <label class="fi-lbl">Senha</label>
+              <label class="fi-lbl">Nome completo</label>
               <div class="fi-wrap">
                 <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
                   </svg></span>
-                <input type="password" id="up-pac-pw" placeholder="Mín. 6 caracteres" autocomplete="new-password" oninput="checkPwStrength(this.value,'pw-strength-pac')" />
-              <div id="pw-strength-pac" style="margin-top:5px;height:4px;border-radius:99px;background:#e5e7eb;overflow:hidden"><div id="pw-strength-pac-bar" style="height:4px;border-radius:99px;width:0;transition:all .3s"></div></div>
-              <div id="pw-strength-pac-txt" style="font-size:10.5px;margin-top:3px;color:#9ca3af"></div>
+                <input type="text" id="up-pro-nome" placeholder="Dra. Ana Paula" />
               </div>
             </div>
+
             <div class="fi-field">
-              <label class="fi-lbl">Confirmar senha</label>
+              <label class="fi-lbl">E-mail profissional</label>
               <div class="fi-wrap">
                 <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
                   </svg></span>
-                <input type="password" id="up-pac-pw2" placeholder="Repita a senha" autocomplete="new-password" />
+                <input type="email" id="up-pro-email" placeholder="email&#64;clinica.com.br" />
               </div>
             </div>
-          </div>
-          <!-- Cloudflare Turnstile widget -->
-          <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_DEMO_KEY_" data-theme="light"></div>
-          <label class="cf-widget-wrap" for="cf-check-pac">
-            <input type="checkbox" class="cf-check-box" id="cf-check-pac" onchange="cfCheckChange('pac')" />
-            <span class="cf-label">Não sou um robô — verificação de segurança</span>
-            <div class="cf-brand">
-              <div class="cf-brand-name">Protegido por<strong>Cloudflare</strong></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="fi-field">
+                <label class="fi-lbl">Senha</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg></span>
+                  <input type="password" id="up-pro-pw" placeholder="Mín. 8 caracteres" autocomplete="new-password"
+                    oninput="checkPwStrength(this.value,'pw-strength-pro')" />
+                  <div id="pw-strength-pro"
+                    style="margin-top:5px;height:4px;border-radius:99px;background:#e5e7eb;overflow:hidden">
+                    <div id="pw-strength-pro-bar" style="height:4px;border-radius:99px;width:0;transition:all .3s">
+                    </div>
+                  </div>
+                  <div id="pw-strength-pro-txt" style="font-size:10.5px;margin-top:3px;color:#9ca3af"></div>
+                </div>
+              </div>
+              <div class="fi-field">
+                <label class="fi-lbl">Confirmar senha</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg></span>
+                  <input type="password" id="up-pro-pw2" placeholder="Repita a senha" autocomplete="new-password" />
+                </div>
+              </div>
             </div>
-          </label>
-          <button class="btn-main" onclick="doRegisterPac()">Criar conta de paciente →</button>
-          <p style="text-align:center;margin-top:13px;font-size:11px;color:#9ca3af;font-family:var(--in)">Acesso
-            gratuito · Vinculado ao seu nutricionista</p>
+            <!-- Cloudflare Turnstile widget -->
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_DEMO_KEY_" data-theme="light"></div>
+            <label class="cf-widget-wrap" for="cf-check-pro">
+              <input type="checkbox" class="cf-check-box" id="cf-check-pro" onchange="cfCheckChange('pro')" />
+              <span class="cf-label">Não sou um robô — verificação de segurança</span>
+              <div class="cf-brand">
+                <div class="cf-brand-name">Protegido por<strong>Cloudflare</strong></div>
+              </div>
+            </label>
+            <button class="btn-main" onclick="doRegisterPro()">Criar conta de nutricionista →</button>
+            <p style="text-align:center;margin-top:13px;font-size:11px;color:#9ca3af;font-family:var(--in)">Grátis por
+              14
+              dias · Sem cartão de crédito</p>
+          </div>
+
+          <!-- ── FORMULÁRIO PACIENTE ── -->
+          <div id="up-pac" style="display:none">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="fi-field">
+                <label class="fi-lbl">Nome completo</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg></span>
+                  <input type="text" id="up-pac-nome" placeholder="Maria Silva" />
+                </div>
+              </div>
+              <div class="fi-field">
+                <label class="fi-lbl">Data de nascimento</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <path d="M16 2v4M8 2v4M3 10h18" />
+                    </svg></span>
+                  <input type="date" id="up-pac-nasc" />
+                </div>
+              </div>
+            </div>
+            <div class="fi-field">
+              <label class="fi-lbl">E-mail</label>
+              <div class="fi-wrap">
+                <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg></span>
+                <input type="email" id="up-pac-email" placeholder="seu&#64;email.com" />
+              </div>
+            </div>
+            <div class="fi-field">
+              <label class="fi-lbl">Código do Nutricionista <span style="font-size:9px;color:var(--n4)">(fornecido pelo
+                  seu nutricionista)</span></label>
+              <div class="fi-wrap">
+                <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path
+                      d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                  </svg></span>
+                <input type="text" id="up-pac-code" placeholder="Ex: ANA-4821" style="text-transform:uppercase"
+                  oninput="this.value=this.value.toUpperCase()" />
+              </div>
+              <p class="fi-hint" id="pac-code-hint">Solicite o código ao seu nutricionista responsável.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="fi-field">
+                <label class="fi-lbl">Senha</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg></span>
+                  <input type="password" id="up-pac-pw" placeholder="Mín. 6 caracteres" autocomplete="new-password"
+                    oninput="checkPwStrength(this.value,'pw-strength-pac')" />
+                  <div id="pw-strength-pac"
+                    style="margin-top:5px;height:4px;border-radius:99px;background:#e5e7eb;overflow:hidden">
+                    <div id="pw-strength-pac-bar" style="height:4px;border-radius:99px;width:0;transition:all .3s">
+                    </div>
+                  </div>
+                  <div id="pw-strength-pac-txt" style="font-size:10.5px;margin-top:3px;color:#9ca3af"></div>
+                </div>
+              </div>
+              <div class="fi-field">
+                <label class="fi-lbl">Confirmar senha</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg></span>
+                  <input type="password" id="up-pac-pw2" placeholder="Repita a senha" autocomplete="new-password" />
+                </div>
+              </div>
+            </div>
+            <!-- Cloudflare Turnstile widget -->
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_DEMO_KEY_" data-theme="light"></div>
+            <label class="cf-widget-wrap" for="cf-check-pac">
+              <input type="checkbox" class="cf-check-box" id="cf-check-pac" onchange="cfCheckChange('pac')" />
+              <span class="cf-label">Não sou um robô — verificação de segurança</span>
+              <div class="cf-brand">
+                <div class="cf-brand-name">Protegido por<strong>Cloudflare</strong></div>
+              </div>
+            </label>
+            <button class="btn-main" onclick="doRegisterPac()">Criar conta de paciente →</button>
+            <p style="text-align:center;margin-top:13px;font-size:11px;color:#9ca3af;font-family:var(--in)">Acesso
+              gratuito · Vinculado ao seu nutricionista</p>
+          </div>
+
         </div>
 
       </div>
-
     </div>
-  </div>
   </div>
 
   <!-- ══ APP ══ -->
@@ -954,108 +968,144 @@
   <script src="dieton.js"></script>
 
 
-<!-- Modal Suplementação -->
-<div id="m-supl-form" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center;padding:20px">
-  <div id="mc-supl"></div>
-</div>
+  <!-- Modal Suplementação -->
+  <div id="m-supl-form"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center;padding:20px">
+    <div id="mc-supl"></div>
+  </div>
 
-<!-- Modal Financeiro -->
-<div id="m-fin-form" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center;padding:20px">
-  <div id="mc-fin"></div>
-</div>
+  <!-- Modal Financeiro -->
+  <div id="m-fin-form"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center;padding:20px">
+    <div id="mc-fin"></div>
+  </div>
 
-<!-- Modal Termos de Uso -->
-<div id="m-termos" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;overflow-y:auto;padding:20px">
-  <div style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.2)">
-    <div style="background:linear-gradient(135deg,#1f0d00,#3d1a00);padding:24px 28px;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-family:'Jakarta',sans-serif;font-size:18px;font-weight:800;color:#fff">Termos de Uso e Política de Privacidade</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">DietOn Plataforma Clínica · Versão 1.0 · Março 2026</div>
+  <!-- Modal Termos de Uso -->
+  <div id="m-termos"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;overflow-y:auto;padding:20px">
+    <div
+      style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.2)">
+      <div
+        style="background:linear-gradient(135deg,#1f0d00,#3d1a00);padding:24px 28px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-family:'Jakarta',sans-serif;font-size:18px;font-weight:800;color:#fff">Termos de Uso e
+            Política de Privacidade</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">DietOn Plataforma Clínica · Versão 1.0 ·
+            Março 2026</div>
+        </div>
+        <button onclick="document.getElementById('m-termos').style.display='none'"
+          style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
       </div>
-      <button onclick="document.getElementById('m-termos').style.display='none'" style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
-    </div>
-    <div style="padding:28px;font-size:13px;color:#374151;line-height:1.85;max-height:70vh;overflow-y:auto">
+      <div style="padding:28px;font-size:13px;color:#374151;line-height:1.85;max-height:70vh;overflow-y:auto">
 
-      <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:0 0 8px">1. Aceitação dos Termos</h3>
-      <p>Ao acessar e utilizar a plataforma DietOn, você concorda com estes Termos de Uso. O uso da plataforma implica em total aceitação das condições aqui descritas. Caso não concorde, interrompa imediatamente o uso.</p>
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:0 0 8px">1. Aceitação dos Termos</h3>
+        <p>Ao acessar e utilizar a plataforma DietOn, você concorda com estes Termos de Uso. O uso da plataforma implica
+          em total aceitação das condições aqui descritas. Caso não concorde, interrompa imediatamente o uso.</p>
 
-      <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">2. Descrição do Serviço</h3>
-      <p>O DietOn é uma plataforma de gestão clínica nutricional destinada exclusivamente a <strong>nutricionistas registrados no CFN</strong> (Conselho Federal de Nutricionistas). A plataforma permite gerenciar pacientes, elaborar planos alimentares, registrar evoluções e utilizar ferramentas de inteligência artificial como suporte à decisão clínica.</p>
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">2. Descrição do Serviço</h3>
+        <p>O DietOn é uma plataforma de gestão clínica nutricional destinada exclusivamente a <strong>nutricionistas
+            registrados no CFN</strong> (Conselho Federal de Nutricionistas). A plataforma permite gerenciar pacientes,
+          elaborar planos alimentares, registrar evoluções e utilizar ferramentas de inteligência artificial como
+          suporte à decisão clínica.</p>
 
-      <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">3. Responsabilidade Profissional</h3>
-      <p>O DietOn é uma ferramenta de <strong>apoio clínico</strong>. Toda prescrição dietética é de responsabilidade exclusiva do nutricionista habilitado. Os cálculos e sugestões gerados pela plataforma, incluindo aqueles produzidos por inteligência artificial, devem ser revisados e validados pelo profissional antes de qualquer aplicação clínica. O DietOn não se responsabiliza por condutas clínicas adotadas com base nas informações geradas pela plataforma.</p>
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">3. Responsabilidade Profissional</h3>
+        <p>O DietOn é uma ferramenta de <strong>apoio clínico</strong>. Toda prescrição dietética é de responsabilidade
+          exclusiva do nutricionista habilitado. Os cálculos e sugestões gerados pela plataforma, incluindo aqueles
+          produzidos por inteligência artificial, devem ser revisados e validados pelo profissional antes de qualquer
+          aplicação clínica. O DietOn não se responsabiliza por condutas clínicas adotadas com base nas informações
+          geradas pela plataforma.</p>
 
-      <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">4. Proteção de Dados — LGPD</h3>
-      <p>Em conformidade com a <strong>Lei Geral de Proteção de Dados (Lei nº 13.709/2018)</strong>:</p>
-      <ul style="padding-left:18px;margin:8px 0">
-        <li style="margin-bottom:6px"><strong>Finalidade:</strong> os dados coletados destinam-se exclusivamente à prestação dos serviços de gestão clínica nutricional.</li>
-        <li style="margin-bottom:6px"><strong>Base legal:</strong> Art. 7º, VIII da LGPD — execução de contrato.</li>
-        <li style="margin-bottom:6px"><strong>Dados dos pacientes:</strong> são de titularidade do nutricionista. O DietOn atua como operador. A responsabilidade pelo consentimento dos pacientes é do nutricionista (controlador).</li>
-        <li style="margin-bottom:6px"><strong>Retenção:</strong> dados mantidos por 5 anos, conforme Resolução CFN nº 600/2018.</li>
-        <li style="margin-bottom:6px"><strong>Direitos:</strong> acesso, retificação, portabilidade e eliminação podem ser solicitados via contato@dieton.com.br.</li>
-        <li style="margin-bottom:6px"><strong>Segurança:</strong> dados armazenados em servidores na região de São Paulo (AWS), com criptografia em trânsito (TLS 1.3) e em repouso.</li>
-      </ul>
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">4. Proteção de Dados — LGPD</h3>
+        <p>Em conformidade com a <strong>Lei Geral de Proteção de Dados (Lei nº 13.709/2018)</strong>:</p>
+        <ul style="padding-left:18px;margin:8px 0">
+          <li style="margin-bottom:6px"><strong>Finalidade:</strong> os dados coletados destinam-se exclusivamente à
+            prestação dos serviços de gestão clínica nutricional.</li>
+          <li style="margin-bottom:6px"><strong>Base legal:</strong> Art. 7º, VIII da LGPD — execução de contrato.</li>
+          <li style="margin-bottom:6px"><strong>Dados dos pacientes:</strong> são de titularidade do nutricionista. O
+            DietOn atua como operador. A responsabilidade pelo consentimento dos pacientes é do nutricionista
+            (controlador).</li>
+          <li style="margin-bottom:6px"><strong>Retenção:</strong> dados mantidos por 5 anos, conforme Resolução CFN nº
+            600/2018.</li>
+          <li style="margin-bottom:6px"><strong>Direitos:</strong> acesso, retificação, portabilidade e eliminação podem
+            ser solicitados via contato@dieton.com.br.</li>
+          <li style="margin-bottom:6px"><strong>Segurança:</strong> dados armazenados em servidores na região de São
+            Paulo (AWS), com criptografia em trânsito (TLS 1.3) e em repouso.</li>
+        </ul>
 
-      <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">5. Conformidade com o CFN</h3>
-      <p>O uso da plataforma deve estar em conformidade com as normas do Conselho Federal de Nutricionistas, especialmente:</p>
-      <ul style="padding-left:18px;margin:8px 0">
-        <li style="margin-bottom:6px">Resolução CFN nº 600/2018 — Código de Ética e de Conduta do Nutricionista</li>
-        <li style="margin-bottom:6px">Resolução CFN nº 304/2003 — Prescrição dietética</li>
-        <li style="margin-bottom:6px">Resolução CFN nº 380/2005 — Atividades do nutricionista</li>
-      </ul>
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">5. Conformidade com o CFN</h3>
+        <p>O uso da plataforma deve estar em conformidade com as normas do Conselho Federal de Nutricionistas,
+          especialmente:</p>
+        <ul style="padding-left:18px;margin:8px 0">
+          <li style="margin-bottom:6px">Resolução CFN nº 600/2018 — Código de Ética e de Conduta do Nutricionista</li>
+          <li style="margin-bottom:6px">Resolução CFN nº 304/2003 — Prescrição dietética</li>
+          <li style="margin-bottom:6px">Resolução CFN nº 380/2005 — Atividades do nutricionista</li>
+        </ul>
 
-      <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">6. Conta e Segurança</h3>
-      <p>O usuário é responsável pela confidencialidade de suas credenciais de acesso. É vedado compartilhar a conta com terceiros não autorizados. O DietOn não solicita senha por e-mail, telefone ou chat. Em caso de suspeita de acesso não autorizado, o usuário deve alterar sua senha imediatamente e notificar o suporte.</p>
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">6. Conta e Segurança</h3>
+        <p>O usuário é responsável pela confidencialidade de suas credenciais de acesso. É vedado compartilhar a conta
+          com terceiros não autorizados. O DietOn não solicita senha por e-mail, telefone ou chat. Em caso de suspeita
+          de acesso não autorizado, o usuário deve alterar sua senha imediatamente e notificar o suporte.</p>
 
-      <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">7. Inteligência Artificial</h3>
-      <p>As funcionalidades de IA do DietOn utilizam modelos de linguagem para geração de sugestões nutricionais. Estas sugestões <strong>não constituem prescrição médica ou nutricional autônoma</strong> e devem sempre ser revisadas pelo profissional responsável antes de uso. O nutricionista assume integral responsabilidade pela aplicação clínica de qualquer plano gerado com suporte de IA.</p>
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">7. Inteligência Artificial</h3>
+        <p>As funcionalidades de IA do DietOn utilizam modelos de linguagem para geração de sugestões nutricionais.
+          Estas sugestões <strong>não constituem prescrição médica ou nutricional autônoma</strong> e devem sempre ser
+          revisadas pelo profissional responsável antes de uso. O nutricionista assume integral responsabilidade pela
+          aplicação clínica de qualquer plano gerado com suporte de IA.</p>
 
-      <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">8. Limitação de Responsabilidade</h3>
-      <p>O DietOn não se responsabiliza por: (a) danos decorrentes do uso inadequado da plataforma; (b) perda de dados por falha do usuário em manter senhas seguras; (c) decisões clínicas tomadas com base nas ferramentas da plataforma sem revisão profissional.</p>
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">8. Limitação de Responsabilidade</h3>
+        <p>O DietOn não se responsabiliza por: (a) danos decorrentes do uso inadequado da plataforma; (b) perda de dados
+          por falha do usuário em manter senhas seguras; (c) decisões clínicas tomadas com base nas ferramentas da
+          plataforma sem revisão profissional.</p>
 
-      <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">9. Alterações nos Termos</h3>
-      <p>O DietOn reserva-se o direito de atualizar estes termos a qualquer momento. Alterações significativas serão comunicadas por e-mail com antecedência de 15 dias. O uso continuado da plataforma após as alterações constitui aceitação dos novos termos.</p>
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">9. Alterações nos Termos</h3>
+        <p>O DietOn reserva-se o direito de atualizar estes termos a qualquer momento. Alterações significativas serão
+          comunicadas por e-mail com antecedência de 15 dias. O uso continuado da plataforma após as alterações
+          constitui aceitação dos novos termos.</p>
 
-      <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">10. Contato e DPO</h3>
-      <p>Encarregado de Proteção de Dados (DPO): <strong>contato@dieton.com.br</strong><br/>
-      Para exercer seus direitos LGPD ou relatar incidentes de segurança, utilize o mesmo endereço.</p>
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">10. Contato e DPO</h3>
+        <p>Encarregado de Proteção de Dados (DPO): <strong>contato@dieton.com.br</strong><br />
+          Para exercer seus direitos LGPD ou relatar incidentes de segurança, utilize o mesmo endereço.</p>
 
-      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 16px;margin-top:20px">
-        <div style="font-size:12px;font-weight:700;color:#9a3412">⚖️ Foro competente</div>
-        <div style="font-size:12px;color:#7c2d12;margin-top:4px">Fica eleito o foro da comarca de São Paulo/SP para dirimir quaisquer controvérsias oriundas destes termos, com renúncia a qualquer outro, por mais privilegiado que seja.</div>
+        <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 16px;margin-top:20px">
+          <div style="font-size:12px;font-weight:700;color:#9a3412">⚖️ Foro competente</div>
+          <div style="font-size:12px;color:#7c2d12;margin-top:4px">Fica eleito o foro da comarca de São Paulo/SP para
+            dirimir quaisquer controvérsias oriundas destes termos, com renúncia a qualquer outro, por mais privilegiado
+            que seja.</div>
+        </div>
       </div>
-    </div>
-    <div style="padding:16px 28px;border-top:1px solid #f3f4f6;display:flex;justify-content:flex-end">
-      <button onclick="document.getElementById('m-termos').style.display='none'" style="background:#e85a0a;color:#fff;border:none;padding:10px 28px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">Entendi e Aceito</button>
+      <div style="padding:16px 28px;border-top:1px solid #f3f4f6;display:flex;justify-content:flex-end">
+        <button onclick="document.getElementById('m-termos').style.display='none'"
+          style="background:#e85a0a;color:#fff;border:none;padding:10px 28px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">Entendi
+          e Aceito</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-function openTermos(e){if(e)e.preventDefault();document.getElementById('m-termos').style.display='block';}
-function checkPwStrength(pw, id){
-  var bar=document.getElementById(id+'-bar');
-  var txt=document.getElementById(id+'-txt');
-  if(!bar||!txt)return;
-  var score=0;
-  if(pw.length>=8)score++;
-  if(pw.length>=12)score++;
-  if(/[A-Z]/.test(pw))score++;
-  if(/[0-9]/.test(pw))score++;
-  if(/[^A-Za-z0-9]/.test(pw))score++;
-  var levels=[
-    {w:'0%',c:'#e5e7eb',t:''},
-    {w:'25%',c:'#ef4444',t:'Muito fraca'},
-    {w:'50%',c:'#f97316',t:'Fraca'},
-    {w:'75%',c:'#eab308',t:'Razoável'},
-    {w:'90%',c:'#22c55e',t:'Boa'},
-    {w:'100%',c:'#16a34a',t:'Forte ✓'}
-  ];
-  var l=levels[Math.min(score,5)];
-  bar.style.width=l.w; bar.style.background=l.c;
-  txt.textContent=l.t; txt.style.color=l.c;
-}
-</script>
+  <script>
+    function openTermos(e) { if (e) e.preventDefault(); document.getElementById('m-termos').style.display = 'block'; }
+    function checkPwStrength(pw, id) {
+      var bar = document.getElementById(id + '-bar');
+      var txt = document.getElementById(id + '-txt');
+      if (!bar || !txt) return;
+      var score = 0;
+      if (pw.length >= 8) score++;
+      if (pw.length >= 12) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+      var levels = [
+        { w: '0%', c: '#e5e7eb', t: '' },
+        { w: '25%', c: '#ef4444', t: 'Muito fraca' },
+        { w: '50%', c: '#f97316', t: 'Fraca' },
+        { w: '75%', c: '#eab308', t: 'Razoável' },
+        { w: '90%', c: '#22c55e', t: 'Boa' },
+        { w: '100%', c: '#16a34a', t: 'Forte ✓' }
+      ];
+      var l = levels[Math.min(score, 5)];
+      bar.style.width = l.w; bar.style.background = l.c;
+      txt.textContent = l.t; txt.style.color = l.c;
+    }
+  </script>
 </body>
 
 </html>
