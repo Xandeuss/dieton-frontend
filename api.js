@@ -10,7 +10,7 @@
 // ── Configuração ──────────────────────────────────────────────────
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://127.0.0.1:8000'
-  : 'https://dieton-backend-production.up.railway.app';
+  : 'https://dieton-backend-production-8126.up.railway.app';
 
 const API_BASE_URL = API_URL + '/api/v1';
 let API_MODE = false; // começa em false, detecta automaticamente
@@ -23,7 +23,7 @@ let _refreshToken = sessionStorage.getItem('dieton_refresh') || null;
 (async function detectBackend() {
   try {
     const res = await fetch(`${API_URL}/health`, {
-      signal: AbortSignal.timeout(2000)
+      signal: AbortSignal.timeout(5000)
     });
     if (res.ok) {
       API_MODE = true;
@@ -316,18 +316,18 @@ function showUpOk(msg) {
 // ── RECORDATÓRIO 24H ──────────────────────────────────────────────
 async function apiGetR24(patientId) {
   if (!API_MODE) {
-    try { return JSON.parse(localStorage.getItem('r24_' + patientId) || 'null'); } catch(e) { return null; }
+    try { return JSON.parse(localStorage.getItem('r24_' + patientId) || 'null'); } catch (e) { return null; }
   }
   try {
     const res = await apiCall(`/api/v1/patients/${patientId}/r24`);
     if (!res || !res.ok) return null;
     return await res.json();
-  } catch(e) { return null; }
+  } catch (e) { return null; }
 }
 
 async function apiSaveR24(patientId, data) {
   if (!API_MODE) {
-    try { localStorage.setItem('r24_' + patientId, JSON.stringify(data)); } catch(e) {}
+    try { localStorage.setItem('r24_' + patientId, JSON.stringify(data)); } catch (e) { }
     return;
   }
   try {
@@ -336,15 +336,15 @@ async function apiSaveR24(patientId, data) {
       meals: data.meals,
       obs: data.obs || null
     });
-  } catch(e) { console.error('Erro ao salvar R24:', e); }
+  } catch (e) { console.error('Erro ao salvar R24:', e); }
 }
 
 async function apiClearR24(patientId) {
   if (!API_MODE) {
-    try { localStorage.removeItem('r24_' + patientId); } catch(e) {}
+    try { localStorage.removeItem('r24_' + patientId); } catch (e) { }
     return;
   }
-  try { await apiCall(`/api/v1/patients/${patientId}/r24`, 'DELETE'); } catch(e) {}
+  try { await apiCall(`/api/v1/patients/${patientId}/r24`, 'DELETE'); } catch (e) { }
 }
 
 
@@ -355,7 +355,7 @@ async function apiGetSupplements(patientId) {
     const res = await apiCall(`/api/v1/patients/${patientId}/supplements`);
     if (!res || !res.ok) return null;
     return await res.json();
-  } catch(e) { return null; }
+  } catch (e) { return null; }
 }
 
 async function apiAddSupplement(patientId, supl) {
@@ -364,17 +364,17 @@ async function apiAddSupplement(patientId, supl) {
     const res = await apiCall(`/api/v1/patients/${patientId}/supplements`, 'POST', supl);
     if (!res || !res.ok) return null;
     return await res.json();
-  } catch(e) { return null; }
+  } catch (e) { return null; }
 }
 
 async function apiUpdateSupplement(patientId, suplId, data) {
   if (!API_MODE) return;
-  try { await apiCall(`/api/v1/patients/${patientId}/supplements/${suplId}`, 'PUT', data); } catch(e) {}
+  try { await apiCall(`/api/v1/patients/${patientId}/supplements/${suplId}`, 'PUT', data); } catch (e) { }
 }
 
 async function apiDeleteSupplement(patientId, suplId) {
   if (!API_MODE) return;
-  try { await apiCall(`/api/v1/patients/${patientId}/supplements/${suplId}`, 'DELETE'); } catch(e) {}
+  try { await apiCall(`/api/v1/patients/${patientId}/supplements/${suplId}`, 'DELETE'); } catch (e) { }
 }
 
 
@@ -387,7 +387,7 @@ async function apiGetFinancial() {
     const res = await apiCall(`/api/v1/financial`);
     if (!res || !res.ok) return [];
     return await res.json();
-  } catch(e) { return []; }
+  } catch (e) { return []; }
 }
 
 async function apiAddFinancial(record) {
@@ -406,15 +406,15 @@ async function apiAddFinancial(record) {
       status: record.status,
       obs: record.obs || null
     });
-  } catch(e) { console.error('Erro ao salvar financeiro:', e); }
+  } catch (e) { console.error('Erro ao salvar financeiro:', e); }
 }
 
 async function apiPayFinancial(recordId) {
   if (!API_MODE) return;
-  try { await apiCall(`/api/v1/financial/${recordId}`, 'PUT', { status: 'pago' }); } catch(e) {}
+  try { await apiCall(`/api/v1/financial/${recordId}`, 'PUT', { status: 'pago' }); } catch (e) { }
 }
 
 async function apiDeleteFinancial(recordId) {
   if (!API_MODE) return;
-  try { await apiCall(`/api/v1/financial/${recordId}`, 'DELETE'); } catch(e) {}
+  try { await apiCall(`/api/v1/financial/${recordId}`, 'DELETE'); } catch (e) { }
 }
