@@ -23,7 +23,7 @@ let _refreshToken = localStorage.getItem('dieton_refresh') || null;
 (async function detectBackend() {
   try {
     const res = await fetch(`${API_URL}/health`, {
-      signal: AbortSignal.timeout(2000)
+      signal: AbortSignal.timeout(5000)
     });
     if (res.ok) {
       API_MODE = true;
