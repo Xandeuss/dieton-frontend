@@ -241,6 +241,8 @@ function lTab(t){
   var eb=document.getElementById('err-up');if(eb)eb.style.display='none';
   var ob=document.getElementById('ok-up');if(ob)ob.style.display='none';
   var hd=document.getElementById('lr-header');if(hd)hd.style.display=t==='in'?'':'none';
+  // Scroll painel direito para o topo ao trocar de aba
+  var lr=document.querySelector('.lr');if(lr)lr.scrollTop=0;
 }
 function upTab(t){
   var isPro=t==='pro';
