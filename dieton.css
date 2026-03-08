@@ -209,6 +209,7 @@ body.dark .seg-tabs{background:#2e2218}
 .textarea:focus{border-color:var(--g4)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.presc-layout{display:grid;grid-template-columns:360px 1fr;gap:14px;align-items:start}
 .row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
 .fsec{font-family:var(--jk);font-size:10px;font-weight:700;color:var(--n4);letter-spacing:.08em;text-transform:uppercase;padding:14px 0 8px;border-top:1px solid var(--n2);margin-top:6px}
 .fsec:first-of-type{padding-top:2px;border-top:none}
@@ -619,6 +620,7 @@ body.dark .reg-ok{background:rgba(22,163,74,.12);border-color:rgba(134,239,172,.
 #sb-overlay.open{opacity:1}
 
 @media(max-width:1024px){
+  .presc-layout{grid-template-columns:1fr!important}
   /* Sidebar deslizante */
   .sb{
     position:fixed;left:0;top:0;bottom:0;z-index:200;
@@ -650,6 +652,8 @@ body.dark .reg-ok{background:rgba(22,163,74,.12);border-color:rgba(134,239,172,.
 }
 
 @media(max-width:640px){
+  .row2,.row3,.row4{grid-template-columns:1fr!important}
+  .presc-layout{grid-template-columns:1fr!important}
   /* KPI 1 coluna */
   .kpi-row{grid-template-columns:1fr 1fr;gap:8px}
   .kpi{padding:14px}

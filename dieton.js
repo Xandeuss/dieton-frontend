@@ -798,7 +798,7 @@ function confirmDeletePat(id){
 // ─── PRESCRIPTION ───
 function rPresc(){
  var p=selPat||pats[0];
- return`<div style="display:grid;grid-template-columns:360px 1fr;gap:14px;align-items:start">
+ return`<div class="presc-layout">
  <div>
   <div class="card" style="margin-bottom:12px">
    <div class="ch"><span class="ct">Paciente</span><button class="btn btn-ghost btn-sm" onclick="goP('pat',document.getElementById('ni-pat'))">Trocar</button></div>
@@ -4175,7 +4175,7 @@ function confirmDeletePat(id){
 // ─── PRESCRIPTION ───
 function rPresc(){
  var p=selPat||pats[0];
- return`<div style="display:grid;grid-template-columns:360px 1fr;gap:14px;align-items:start">
+ return`<div class="presc-layout">
  <div>
   <div class="card" style="margin-bottom:12px">
    <div class="ch"><span class="ct">Paciente</span><button class="btn btn-ghost btn-sm" onclick="goP('pat',document.getElementById('ni-pat'))">Trocar</button></div>
