@@ -10,20 +10,20 @@
 // ── Configuração ──────────────────────────────────────────────────
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://127.0.0.1:8000'
-  : 'https://dieton-backend-production-8126.up.railway.app';
+  : 'https://dieton-backend-production.up.railway.app';
 
 const API_BASE_URL = API_URL + '/api/v1';
 let API_MODE = false; // começa em false, detecta automaticamente
 
 // Tokens em memória (mais seguro que localStorage para tokens)
-let _accessToken = localStorage.getItem('dieton_access') || null;
-let _refreshToken = localStorage.getItem('dieton_refresh') || null;
+let _accessToken = sessionStorage.getItem('dieton_access') || null;
+let _refreshToken = sessionStorage.getItem('dieton_refresh') || null;
 
 // ── Detectar se o backend está rodando ────────────────────────────
 (async function detectBackend() {
   try {
     const res = await fetch(`${API_URL}/health`, {
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(2000)
     });
     if (res.ok) {
       API_MODE = true;
@@ -103,7 +103,7 @@ async function _renewToken() {
     if (res.ok) {
       const data = await res.json();
       _accessToken = data.access_token;
-      localStorage.setItem('dieton_access', _accessToken);
+      sessionStorage.setItem('dieton_access', _accessToken);
       return true;
     }
   } catch (e) { }
@@ -140,8 +140,8 @@ async function doLogin() {
     // Salvar tokens
     _accessToken = data.access_token;
     _refreshToken = data.refresh_token;
-    localStorage.setItem('dieton_access', _accessToken);
-    localStorage.setItem('dieton_refresh', _refreshToken);
+    sessionStorage.setItem('dieton_access', _accessToken);
+    sessionStorage.setItem('dieton_refresh', _refreshToken);
 
     // Montar objeto de usuário no formato que o dieton.js espera
     cu = {
@@ -196,8 +196,8 @@ async function doLogout() {
   // Limpar tokens
   _accessToken = null;
   _refreshToken = null;
-  localStorage.removeItem('dieton_access');
-  localStorage.removeItem('dieton_refresh');
+  sessionStorage.removeItem('dieton_access');
+  sessionStorage.removeItem('dieton_refresh');
 
   cu = null;
   document.getElementById('app').style.display = 'none';
@@ -310,4 +310,111 @@ function showUpErr(msg) {
 function showUpOk(msg) {
   const el = document.getElementById('up-ok');
   if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+
+// ── RECORDATÓRIO 24H ──────────────────────────────────────────────
+async function apiGetR24(patientId) {
+  if (!API_MODE) {
+    try { return JSON.parse(localStorage.getItem('r24_' + patientId) || 'null'); } catch(e) { return null; }
+  }
+  try {
+    const res = await apiCall(`/api/v1/patients/${patientId}/r24`);
+    if (!res || !res.ok) return null;
+    return await res.json();
+  } catch(e) { return null; }
+}
+
+async function apiSaveR24(patientId, data) {
+  if (!API_MODE) {
+    try { localStorage.setItem('r24_' + patientId, JSON.stringify(data)); } catch(e) {}
+    return;
+  }
+  try {
+    await apiCall(`/api/v1/patients/${patientId}/r24`, 'POST', {
+      record_date: data.date,
+      meals: data.meals,
+      obs: data.obs || null
+    });
+  } catch(e) { console.error('Erro ao salvar R24:', e); }
+}
+
+async function apiClearR24(patientId) {
+  if (!API_MODE) {
+    try { localStorage.removeItem('r24_' + patientId); } catch(e) {}
+    return;
+  }
+  try { await apiCall(`/api/v1/patients/${patientId}/r24`, 'DELETE'); } catch(e) {}
+}
+
+
+// ── SUPLEMENTAÇÃO ─────────────────────────────────────────────────
+async function apiGetSupplements(patientId) {
+  if (!API_MODE) return null;
+  try {
+    const res = await apiCall(`/api/v1/patients/${patientId}/supplements`);
+    if (!res || !res.ok) return null;
+    return await res.json();
+  } catch(e) { return null; }
+}
+
+async function apiAddSupplement(patientId, supl) {
+  if (!API_MODE) return null;
+  try {
+    const res = await apiCall(`/api/v1/patients/${patientId}/supplements`, 'POST', supl);
+    if (!res || !res.ok) return null;
+    return await res.json();
+  } catch(e) { return null; }
+}
+
+async function apiUpdateSupplement(patientId, suplId, data) {
+  if (!API_MODE) return;
+  try { await apiCall(`/api/v1/patients/${patientId}/supplements/${suplId}`, 'PUT', data); } catch(e) {}
+}
+
+async function apiDeleteSupplement(patientId, suplId) {
+  if (!API_MODE) return;
+  try { await apiCall(`/api/v1/patients/${patientId}/supplements/${suplId}`, 'DELETE'); } catch(e) {}
+}
+
+
+// ── FINANCEIRO ────────────────────────────────────────────────────
+async function apiGetFinancial() {
+  if (!API_MODE) {
+    return (cu && cu.financeiro) ? cu.financeiro : [];
+  }
+  try {
+    const res = await apiCall(`/api/v1/financial`);
+    if (!res || !res.ok) return [];
+    return await res.json();
+  } catch(e) { return []; }
+}
+
+async function apiAddFinancial(record) {
+  if (!API_MODE) {
+    if (!cu.financeiro) cu.financeiro = [];
+    cu.financeiro.push(record);
+    DB.save();
+    return;
+  }
+  try {
+    await apiCall(`/api/v1/financial`, 'POST', {
+      patient_name: record.paciente,
+      record_date: record.data,
+      tipo: record.tipo,
+      valor: record.valor,
+      status: record.status,
+      obs: record.obs || null
+    });
+  } catch(e) { console.error('Erro ao salvar financeiro:', e); }
+}
+
+async function apiPayFinancial(recordId) {
+  if (!API_MODE) return;
+  try { await apiCall(`/api/v1/financial/${recordId}`, 'PUT', { status: 'pago' }); } catch(e) {}
+}
+
+async function apiDeleteFinancial(recordId) {
+  if (!API_MODE) return;
+  try { await apiCall(`/api/v1/financial/${recordId}`, 'DELETE'); } catch(e) {}
 }
