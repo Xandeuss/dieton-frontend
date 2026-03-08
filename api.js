@@ -509,7 +509,13 @@ async function doRegenInviteCode() {
   }
 
   try {
-    const data = await apiCall('/api/v1/auth/regenerate-invite', 'POST');
+    const res = await apiCall('/api/v1/auth/regenerate-invite', 'POST');
+    if (!res || !res.ok) {
+      showToast('Erro ao gerar código no servidor.', 'e');
+      return;
+    }
+
+    const data = await res.json();
     if (data && data.invite_code) {
       if (cu) cu.invite_code = data.invite_code;
 
