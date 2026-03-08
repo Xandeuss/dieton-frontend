@@ -125,9 +125,9 @@ async function _renewToken() {
 
 // ── LOGIN ─────────────────────────────────────────────────────────
 // Substitui a função doLogin() original do dieton.js
-async function doLogin() {
-  const email = document.getElementById('inp-em').value.trim();
-  const pw = document.getElementById('inp-pw').value;
+async function doLogin(directEmail = null, directPw = null, directTs = null) {
+  const email = directEmail || document.getElementById('inp-em').value.trim();
+  const pw = directPw || document.getElementById('inp-pw').value;
 
   // Modo local (sem backend)
   if (!API_MODE) {
@@ -139,9 +139,9 @@ async function doLogin() {
   }
 
   // Modo API
-  let ts = '';
+  let ts = directTs || '';
   try {
-    if (typeof turnstile !== 'undefined') {
+    if (!ts && typeof turnstile !== 'undefined') {
       // Tenta pegar pelo ID específico do login
       ts = turnstile.getResponse(document.getElementById('ts-login'));
     }
@@ -291,11 +291,11 @@ async function doRegisterPro() {
 
     if (!res.ok) { showUpErr(data.detail || 'Erro ao criar conta.'); return; }
 
-    showUpOk(`Conta criada! Seu código de convite: ${data.invite_code}`);
+    showUpOk('Conta criada! Bem-vindo ao DietOn.');
     // Auto-login após cadastro
     document.getElementById('up-pro-email').value = email;
     document.getElementById('up-pro-pw').value = pw;
-    setTimeout(doLogin, 1500);
+    setTimeout(() => doLogin(email, pw, ts), 1500);
   } catch (e) {
     showUpErr('Erro de conexão. Tente novamente.');
   }
@@ -348,9 +348,8 @@ async function doRegisterPac() {
     if (!res.ok) { showUpErr(data.detail || 'Erro ao criar conta.'); return; }
 
     showUpOk(`Bem-vindo(a)! Nutricionista: ${data.nutritionist}`);
-    document.getElementById('up-pac-email').value = email;
-    document.getElementById('up-pac-pw').value = pw;
-    setTimeout(doLogin, 1500);
+    // Tenta login automático passando os dados diretamente
+    setTimeout(() => doLogin(email, pw, ts), 1500);
   } catch (e) {
     showUpErr('Erro de conexão. Tente novamente.');
   }
