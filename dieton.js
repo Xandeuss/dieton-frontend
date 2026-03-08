@@ -240,6 +240,7 @@ function lTab(t){
   document.getElementById('t-up').classList.toggle('on',t==='up');
   var eb=document.getElementById('err-up');if(eb)eb.style.display='none';
   var ob=document.getElementById('ok-up');if(ob)ob.style.display='none';
+  var hd=document.getElementById('lr-header');if(hd)hd.style.display=t==='in'?'':'none';
 }
 function upTab(t){
   var isPro=t==='pro';
