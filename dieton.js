@@ -531,7 +531,7 @@ function rDash(){
   <div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><span class="kpi-bdg kbd-y">↑ +5%</span></div><div class="kpi-n">87%</div><div class="kpi-l">Taxa de Adesão</div><div class="kpi-ft kft-y"><strong>+5 pts</strong> este mês</div></div>
   <div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">${alerts}</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r"><strong>Ver alertas</strong> →</div></div>
  </div>
- <div style="display:grid;grid-template-columns:1fr 288px;gap:12px;margin-bottom:12px">
+ <div class="dash-row2">
   <div class="card"><div class="ch"><div><div class="ct">Consultas Realizadas</div><div class="cs" style="margin-top:2px">Últimas 8 semanas</div></div><div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n4)"><span style="width:9px;height:9px;border-radius:2px;background:var(--g5);display:inline-block"></span>Consultas</div></div><div class="bchart" id="bchart"></div></div>
   <div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span><span style="font-family:var(--jk);font-size:9px;font-weight:700;color:#16a34a;background:#dcfce7;padding:3px 9px;border-radius:99px">4 consultas</span></div>
    <div class="ag-item"><div class="ag-time">09:00</div><div class="ag-bar" style="background:#22c55e"></div><div style="flex:1;min-width:0"><div class="ag-nm">Fernanda Lima</div><div class="ag-tp">Retorno · 45 min</div></div><span class="tag tg">Concluído</span></div>
@@ -540,7 +540,7 @@ function rDash(){
    <div class="ag-item"><div class="ag-time">15:30</div><div class="ag-bar" style="background:#3b82f6"></div><div style="flex:1;min-width:0"><div class="ag-nm">Pedro Alves</div><div class="ag-tp">Online · 30 min</div></div><span class="tag tb2">Online</span></div>
   </div>
  </div>
- <div style="display:grid;grid-template-columns:1fr 288px;gap:12px">
+ <div class="dash-row2">
   <div class="card"><div class="ch"><span class="ct">Pacientes Recentes</span><button style="font-family:var(--jk);font-size:10.5px;font-weight:700;color:var(--g5);background:none;border:none;cursor:pointer" onclick="goP('pat',document.getElementById('ni-pat'))">Ver todos →</button></div>
    <div id="d-recent"></div></div>
   <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
@@ -2605,7 +2605,12 @@ var _origGoP=window.goP;
 var DB = {
  KEY: 'dieton_v1',
 
+ _keyFor: function(userId){
+  return 'dieton_v1_' + (userId || 'anon');
+ },
+
  save: function(){
+  if(!cu) return;
   try{
    var snapshot={
     pats: pats,
@@ -2615,13 +2620,14 @@ var DB = {
     userProfiles: userProfiles,
     savedAt: Date.now()
    };
-   localStorage.setItem(DB.KEY, JSON.stringify(snapshot));
+   localStorage.setItem(DB._keyFor(cu.id||cu.email), JSON.stringify(snapshot));
   }catch(e){console.warn('DietOn: falha ao salvar dados',e);}
  },
 
  load: function(){
+  if(!cu) return false;
   try{
-   var raw=localStorage.getItem(DB.KEY);
+   var raw=localStorage.getItem(DB._keyFor(cu.id||cu.email));
    if(!raw)return false;
    var data=JSON.parse(raw);
    if(data.pats&&data.pats.length){pats=data.pats;}
@@ -2634,7 +2640,8 @@ var DB = {
  },
 
  clear: function(){
-  try{localStorage.removeItem(DB.KEY);}catch(e){}
+  if(!cu) return;
+  try{localStorage.removeItem(DB._keyFor(cu.id||cu.email));}catch(e){}
  },
 
  // Exportar backup JSON — caminho para futura migração para backend
@@ -3806,7 +3813,7 @@ function rDash(){
   <div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><span class="kpi-bdg kbd-y">↑ +5%</span></div><div class="kpi-n">87%</div><div class="kpi-l">Taxa de Adesão</div><div class="kpi-ft kft-y"><strong>+5 pts</strong> este mês</div></div>
   <div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">${alerts}</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r"><strong>Ver alertas</strong> →</div></div>
  </div>
- <div style="display:grid;grid-template-columns:1fr 288px;gap:12px;margin-bottom:12px">
+ <div class="dash-row2">
   <div class="card"><div class="ch"><div><div class="ct">Consultas Realizadas</div><div class="cs" style="margin-top:2px">Últimas 8 semanas</div></div><div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n4)"><span style="width:9px;height:9px;border-radius:2px;background:var(--g5);display:inline-block"></span>Consultas</div></div><div class="bchart" id="bchart"></div></div>
   <div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span><span style="font-family:var(--jk);font-size:9px;font-weight:700;color:#c4420a;background:#fdd0a8;padding:3px 9px;border-radius:99px">4 consultas</span></div>
    <div class="ag-item"><div class="ag-time">09:00</div><div class="ag-bar" style="background:#e85a0a"></div><div style="flex:1;min-width:0"><div class="ag-nm">Fernanda Lima</div><div class="ag-tp">Retorno · 45 min</div></div><span class="tag tg">Concluído</span></div>
@@ -3815,7 +3822,7 @@ function rDash(){
    <div class="ag-item"><div class="ag-time">15:30</div><div class="ag-bar" style="background:#3b82f6"></div><div style="flex:1;min-width:0"><div class="ag-nm">Pedro Alves</div><div class="ag-tp">Online · 30 min</div></div><span class="tag tb2">Online</span></div>
   </div>
  </div>
- <div style="display:grid;grid-template-columns:1fr 288px;gap:12px">
+ <div class="dash-row2">
   <div class="card"><div class="ch"><span class="ct">Pacientes Recentes</span><button style="font-family:var(--jk);font-size:10.5px;font-weight:700;color:var(--g5);background:none;border:none;cursor:pointer" onclick="goP('pat',document.getElementById('ni-pat'))">Ver todos →</button></div>
    <div id="d-recent"></div></div>
   <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">

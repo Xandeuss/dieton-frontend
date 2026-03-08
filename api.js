@@ -161,8 +161,17 @@ async function doLogin() {
 
 // Parte final do login (igual nos dois modos)
 function _finishLogin() {
-  DB.load();
-  if (!notifs.length) {
+  // Resetar antes de carregar — evita herdar dados de outro usuário
+  if (typeof pats !== 'undefined') pats = [];
+  if (typeof tasks !== 'undefined') tasks = [];
+  if (typeof notifs !== 'undefined') notifs = [];
+  if (typeof templates !== 'undefined') templates = [];
+
+  var hadData = DB.load();
+
+  // Notificações demo apenas para o admin de demonstração
+  var isDemoAdmin = cu && cu.email === 'admin@dieton.com.br';
+  if (!hadData && isDemoAdmin) {
     notifs = [
       { id: 1, txt: 'Pedro Alves não registra consulta há 53 dias', type: 'w' },
       { id: 2, txt: 'Maria Santos: Vitamina D crítica (18 ng/mL)', type: 'r' },
