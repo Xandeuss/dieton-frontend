@@ -139,7 +139,14 @@ async function doLogin() {
   }
 
   // Modo API
-  const ts = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
+  let ts = '';
+  try {
+    if (typeof turnstile !== 'undefined') {
+      // Tenta pegar pelo ID específico do login
+      ts = turnstile.getResponse(document.getElementById('ts-login'));
+    }
+  } catch (e) { ts = ''; }
+
   if (!ts && API_MODE) { showErr('Por favor, complete o desafio de segurança.'); return; }
 
   try {
@@ -248,7 +255,13 @@ async function doRegisterPro() {
 
   // Modo API
   try {
-    const ts = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
+    let ts = '';
+    try {
+      if (typeof turnstile !== 'undefined') {
+        ts = turnstile.getResponse(document.getElementById('ts-reg-pro'));
+      }
+    } catch (e) { ts = ''; }
+
     if (!ts) { showUpErr('Por favor, complete o desafio de segurança.'); return; }
 
     const res = await fetch(`${API_BASE_URL}/auth/register/pro`, {
@@ -298,7 +311,13 @@ async function doRegisterPac() {
 
   // Modo API
   try {
-    const ts = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
+    let ts = '';
+    try {
+      if (typeof turnstile !== 'undefined') {
+        ts = turnstile.getResponse(document.getElementById('ts-reg-pac'));
+      }
+    } catch (e) { ts = ''; }
+
     if (!ts) { showUpErr('Por favor, complete o desafio de segurança.'); return; }
 
     const res = await fetch(`${API_BASE_URL}/auth/register/pac`, {
