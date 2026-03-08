@@ -28,12 +28,24 @@ let _refreshToken = sessionStorage.getItem('dieton_refresh') || null;
     if (res.ok) {
       API_MODE = true;
       console.log('✅ Backend detectado — modo API ativo');
+      // alert('Site Atualizado: Conexão com Servidor OK');
     }
   } catch (e) {
     API_MODE = false;
     console.log('ℹ️ Backend não encontrado — modo local (localStorage)');
   }
 })();
+
+function showErr(msg) {
+  const box = document.getElementById('err-box');
+  const txt = document.getElementById('err-msg');
+  if (box && txt) {
+    txt.textContent = msg;
+    box.style.display = 'flex';
+  } else {
+    alert(msg); // fallback para mobile se o DOM falhar
+  }
+}
 
 // ── RECUPERAÇÃO DE SENHA ──────────────────────────────────────────
 async function doForgotPassword() {
