@@ -240,6 +240,11 @@ function lTab(t){
   document.getElementById('t-up').classList.toggle('on',t==='up');
   var eb=document.getElementById('err-up');if(eb)eb.style.display='none';
   var ob=document.getElementById('ok-up');if(ob)ob.style.display='none';
+  // Mobile: scroll para o formulário ao trocar de aba
+  if(window.innerWidth<=768){
+    var lr=document.querySelector('.lr');
+    if(lr)setTimeout(function(){lr.scrollIntoView({behavior:'smooth',block:'start'});},50);
+  }
 }
 function upTab(t){
   var isPro=t==='pro';
