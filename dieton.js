@@ -2681,26 +2681,90 @@ function dbSave(){DB.save();}
 // ─── ONBOARDING ───
 var _onbStep=0;
 var _onbSlides=[
- {icon:'🥗',title:'Bem-vindo ao DietOn',body:'Plataforma clínica completa de nutrição. Gerencie pacientes, prescreva planos, acompanhe evolução e use IA para economizar tempo.'},
- {icon:'👥',title:'Gerencie seus pacientes',body:'Cadastre com anamnese completa: dados antropométricos, exames, hábitos e conduta clínica. Alertas gerados automaticamente.'},
- {icon:'📋',title:'Prescrição inteligente',body:'Monte planos com banco TACO de 597 alimentos, calcule TMB/GET, distribua macros e exporte receituários em PDF com CRN.'},
- {icon:'🤖',title:'IA Nutricional',body:'Gere planos completos em segundos com 8 objetivos clínicos, lista de compras e orientações específicas.'},
- {icon:'✅',title:'Tudo pronto!',body:'Explore todos os módulos pelo menu lateral. Comece pelo Dashboard ou cadastre seu primeiro paciente.'}
+ {
+  icon:'🍊',color:'#e85a0a',bg:'linear-gradient(135deg,#fff7ed,#ffedd5)',
+  title:'Bem-vindo ao DietOn!',subtitle:'Sua clínica de nutrição completa',
+  body:'Você está a poucos passos de transformar sua prática clínica. Este guia rápido vai mostrar tudo que você pode fazer aqui.',
+  tips:[],action:'Começar tour →'
+ },
+ {
+  icon:'👥',color:'#16a34a',bg:'linear-gradient(135deg,#f0fdf4,#dcfce7)',
+  title:'1. Cadastre seus pacientes',subtitle:'Anamnese completa em minutos',
+  body:'Clique em <strong>+ Novo Paciente</strong> no topo da tela para cadastrar com anamnese completa.',
+  tips:['📏 Peso, altura, % gordura e circunferências','🩺 Exames laboratoriais e histórico clínico','🍽️ Hábitos alimentares e restrições','⚠️ Alertas automáticos para casos críticos'],
+  action:'Próximo →'
+ },
+ {
+  icon:'📋',color:'#1d4ed8',bg:'linear-gradient(135deg,#eff6ff,#dbeafe)',
+  title:'2. Prescreva planos alimentares',subtitle:'597 alimentos com tabela TACO',
+  body:'No perfil do paciente, abra a aba <strong>Prescrição</strong> para montar planos personalizados.',
+  tips:['🔢 TMB e GET calculados automaticamente','🥩 Busca inteligente no banco TACO completo','📊 Distribuição de macros em tempo real','📄 Exportação em PDF com seu CRN'],
+  action:'Próximo →'
+ },
+ {
+  icon:'🤖',color:'#7c3aed',bg:'linear-gradient(135deg,#f5f3ff,#ede9fe)',
+  title:'3. Use a IA Nutricional',subtitle:'Planos completos em segundos',
+  body:'No menu lateral, clique em <strong>IA Nutricional</strong> para gerar planos com inteligência artificial.',
+  tips:['🎯 8 objetivos clínicos disponíveis','🛒 Lista de compras gerada automaticamente','⚡ Plano completo em menos de 30 segundos','✏️ Edite e adapte antes de salvar'],
+  action:'Próximo →'
+ },
+ {
+  icon:'📈',color:'#0891b2',bg:'linear-gradient(135deg,#ecfeff,#cffafe)',
+  title:'4. Acompanhe a evolução',subtitle:'Gráficos e histórico completo',
+  body:'Na aba <strong>Evolução</strong> do paciente, registre consultas e veja o progresso ao longo do tempo.',
+  tips:['📉 Gráficos de peso, IMC e composição corporal','📔 Diário alimentar do paciente','📸 Fotos de progresso','🔔 Alertas de adesão ao plano'],
+  action:'Próximo →'
+ },
+ {
+  icon:'✅',color:'#e85a0a',bg:'linear-gradient(135deg,#fff7f3,#ffe4d6)',
+  title:'Tudo pronto!',subtitle:'Comece agora mesmo',
+  body:'Explore o menu lateral para acessar todos os módulos. O botão <strong>?</strong> no topo sempre traz este guia de volta.',
+  tips:['💡 Comece cadastrando seu primeiro paciente','🔑 Gere seu código de convite em Perfil','🌙 Modo escuro disponível no menu lateral','💾 Seus dados são salvos automaticamente'],
+  action:'Começar agora 🚀'
+ }
 ];
 function showOnboarding(){_onbStep=0;renderOnbSlide();openM('m-onboard');}
 function renderOnbSlide(){
  var el=document.getElementById('onb-body');if(!el)return;
  var s=_onbSlides[_onbStep];
- var dots=_onbSlides.map(function(_,i){return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(i===_onbStep?'var(--g4)':'var(--n2)')+';margin:0 3px"></span>';}).join('');
- var prev=_onbStep>0?'<button class="btn btn-ghost btn-sm" style="margin-right:8px" onclick="_onbStep--;renderOnbSlide()">← Anterior</button>':'';
- var nxtAct=_onbStep<_onbSlides.length-1?'_onbStep++;renderOnbSlide()':'closeM(\'m-onboard\')';
- var nxtLbl=_onbStep<_onbSlides.length-1?'Próximo →':'Começar agora';
- el.innerHTML='<div style="text-align:center;padding:10px 0 20px">'
-  +'<div style="font-size:48px;margin-bottom:14px">'+s.icon+'</div>'
-  +'<div style="font-family:var(--jk);font-size:17px;font-weight:800;color:var(--n9);margin-bottom:10px">'+s.title+'</div>'
-  +'<div style="font-size:13px;color:var(--n5);line-height:1.8;max-width:360px;margin:0 auto 20px">'+s.body+'</div>'
-  +'<div style="margin-bottom:20px">'+dots+'</div>'
-  +prev+'<button class="btn btn-p btn-lg" style="min-width:160px" onclick="'+nxtAct+'">'+nxtLbl+'</button>'
+ var total=_onbSlides.length;
+ var pct=Math.round((_onbStep/(total-1))*100);
+
+ var progressBar='<div style="background:var(--n2);border-radius:99px;height:4px;margin-bottom:20px;overflow:hidden">'
+  +'<div style="height:4px;border-radius:99px;background:'+s.color+';width:'+pct+'%;transition:width .3s ease"></div>'
+  +'</div>';
+
+ var tipsList='';
+ if(s.tips&&s.tips.length){
+  tipsList='<div style="background:#fff;border-radius:12px;border:1px solid var(--n2);padding:4px 14px;margin:14px 0;text-align:left">'
+   +s.tips.map(function(t){return '<div style="font-size:12.5px;color:var(--n7);padding:8px 0;border-bottom:1px solid var(--n1);line-height:1.5">'+t+'</div>';}).join('')
+   +'</div>';
+ }
+
+ var dots='<div style="margin-bottom:18px">'
+  +_onbSlides.map(function(_,i){
+   return '<span style="display:inline-block;width:'+(i===_onbStep?'20px':'7px')+';height:7px;border-radius:99px;'
+    +'background:'+(i===_onbStep?s.color:'var(--n2)')+';margin:0 2px;transition:all .25s ease"></span>';
+  }).join('')
+  +'</div>';
+
+ var prev=_onbStep>0
+  ?'<button class="btn btn-ghost btn-sm" onclick="_onbStep--;renderOnbSlide()" style="margin-right:8px">← Voltar</button>'
+  :'';
+ var nxtAct=_onbStep<total-1?'_onbStep++;renderOnbSlide()':'closeM(\'m-onboard\')';
+
+ el.innerHTML=progressBar
+  +'<div style="background:'+s.bg+';border-radius:14px;padding:20px;text-align:center">'
+  +'<div style="font-size:44px;margin-bottom:10px">'+s.icon+'</div>'
+  +'<div style="font-family:var(--jk);font-size:17px;font-weight:800;color:var(--n9);margin-bottom:4px">'+s.title+'</div>'
+  +'<div style="font-size:11px;font-weight:700;color:'+s.color+';font-family:var(--jk);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px">'+s.subtitle+'</div>'
+  +'<div style="font-size:13px;color:var(--n6);line-height:1.7">'+s.body+'</div>'
+  +'</div>'
+  +tipsList
+  +dots
+  +'<div style="display:flex;align-items:center;justify-content:center">'
+  +prev
+  +'<button class="btn btn-p btn-lg" style="min-width:160px;background:'+s.color+';border-color:'+s.color+'" onclick="'+nxtAct+'">'+s.action+'</button>'
   +'</div>';
 }
 

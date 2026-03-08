@@ -161,15 +161,11 @@ async function doLogin() {
 
 // Parte final do login (igual nos dois modos)
 function _finishLogin() {
-  // Resetar antes de carregar — evita herdar dados de outro usuário
   if (typeof pats !== 'undefined') pats = [];
   if (typeof tasks !== 'undefined') tasks = [];
   if (typeof notifs !== 'undefined') notifs = [];
   if (typeof templates !== 'undefined') templates = [];
-
   var hadData = DB.load();
-
-  // Notificações demo apenas para o admin de demonstração
   var isDemoAdmin = cu && cu.email === 'admin@dieton.com.br';
   if (!hadData && isDemoAdmin) {
     notifs = [

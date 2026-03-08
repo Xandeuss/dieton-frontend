@@ -624,9 +624,7 @@ body.dark .reg-ok{background:rgba(22,163,74,.12);border-color:rgba(134,239,172,.
 #sb-overlay.open{opacity:1}
 
 @media(max-width:1024px){
-  /* Dashboard rows → 1 coluna */
   .dash-row2{grid-template-columns:1fr!important;margin-bottom:10px}
-
   /* Sidebar deslizante */
   .sb{
     position:fixed;left:0;top:0;bottom:0;z-index:200;
@@ -654,9 +652,7 @@ body.dark .reg-ok{background:rgba(22,163,74,.12);border-color:rgba(134,239,172,.
 }
 
 @media(max-width:640px){
-  /* Dashboard */
   .dash-row2{grid-template-columns:1fr!important}
-
   /* KPI 1 coluna */
   .kpi-row{grid-template-columns:1fr 1fr;gap:8px}
   .kpi{padding:14px}
