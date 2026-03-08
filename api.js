@@ -50,7 +50,7 @@ async function doForgotPassword() {
   }
 
   try {
-    const res = await fetch(`${API_URL}/auth/forgot-password`, {
+    const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email })
@@ -128,7 +128,7 @@ async function doLogin() {
 
   // Modo API
   try {
-    const res = await fetch(`${API_URL}/auth/login`, {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password: pw })
@@ -232,7 +232,7 @@ async function doRegisterPro() {
 
   // Modo API
   try {
-    const res = await fetch(`${API_URL}/auth/register/pro`, {
+    const res = await fetch(`${API_BASE_URL}/auth/register/pro`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: nome, email, password: pw, crn })
@@ -279,7 +279,7 @@ async function doRegisterPac() {
 
   // Modo API
   try {
-    const res = await fetch(`${API_URL}/auth/register/pac`, {
+    const res = await fetch(`${API_BASE_URL}/auth/register/pac`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: nome, email, password: pw, invite_code: code })
