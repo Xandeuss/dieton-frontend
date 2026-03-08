@@ -604,10 +604,11 @@ body.dark .reg-ok{background:rgba(22,163,74,.12);border-color:rgba(134,239,172,.
   display:none;
   align-items:center;justify-content:center;
   width:36px;height:36px;border-radius:9px;border:none;
-  background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);
-  cursor:pointer;flex-shrink:0;transition:background .15s
+  background:#e85a0a;color:#fff;
+  cursor:pointer;flex-shrink:0;transition:background .15s;
+  box-shadow:0 2px 8px rgba(232,90,10,.35)
 }
-#mob-menu-btn:hover{background:rgba(255,255,255,.14)}
+#mob-menu-btn:hover{background:#c4420a}
 #mob-menu-btn svg{width:18px;height:18px}
 
 /* Overlay da sidebar no mobile */
