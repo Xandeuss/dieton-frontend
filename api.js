@@ -343,13 +343,28 @@ async function doRegisterPac() {
 function showErr(msg) {
   const el = document.getElementById('err-msg');
   const box = document.getElementById('err-box');
-  if (el) el.textContent = msg;
+  if (el) {
+    if (typeof msg === 'object') {
+      // Se for erro de validação do FastAPI (422)
+      if (Array.isArray(msg)) msg = msg.map(e => e.msg).join(', ');
+      else if (msg.detail) msg = Array.isArray(msg.detail) ? msg.detail.map(e => e.msg).join(', ') : msg.detail;
+      else msg = JSON.stringify(msg);
+    }
+    el.textContent = msg;
+  }
   if (box) box.style.display = 'flex';
 }
 function showUpErr(msg) {
   const el = document.getElementById('err-up-msg');
   const box = document.getElementById('err-up');
-  if (el) el.textContent = msg;
+  if (el) {
+    if (typeof msg === 'object') {
+      if (Array.isArray(msg)) msg = msg.map(e => e.msg).join(', ');
+      else if (msg.detail) msg = Array.isArray(msg.detail) ? msg.detail.map(e => e.msg).join(', ') : msg.detail;
+      else msg = JSON.stringify(msg);
+    }
+    el.textContent = msg;
+  }
   if (box) box.style.display = 'flex';
 }
 function showUpOk(msg) {
