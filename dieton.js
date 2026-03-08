@@ -3083,9 +3083,8 @@ function _r24Share(patId) {
     if (foods.length) { lines.push('*' + m + '*'); foods.forEach(function (f) { lines.push('  • ' + f); }); lines.push(''); }
   });
   if (_r24Data.obs) lines.push('📝 Obs: ' + _r24Data.obs);
-  var msg = encodeURIComponent(lines.join('
-'));
- window.open('https://wa.me/?text=' + msg, '_blank');
+  var msg = encodeURIComponent(lines.join('\n'));
+  window.open('https://wa.me/?text=' + msg, '_blank');
 }
 
 // ─── SUPLEMENTAÇÃO ─────────────────────────────────────────
@@ -3127,7 +3126,7 @@ function rSupl() {
     + '<div style="display:flex;flex-wrap:wrap;gap:6px">'
     + sugestoes.slice(0, 6).map(function (s) {
       var nome = s.replace(/^⚠️ /, '').split(' ').slice(0, 2).join(' ');
-      return '<button class="btn btn-ghost btn-sm" onclick="_suplQuick(''+s+'')" style="font-size:11.5px">' + s + '</button>';
+      return '<button class="btn btn-ghost btn-sm" onclick="_suplQuick(\'' + s + '\')" style="font-size:11.5px">' + s + '</button>';
     }).join('')
     + '</div></div>'
     + '<div id="m-supl-add" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px">'
@@ -3152,7 +3151,7 @@ function openSuplAdd() {
   openM('m-supl-form');
   var mc = document.getElementById('mc-supl');
   if (!mc) return;
-  mc.innerHTML = '<div class="modal"><div class="mh"><div class="mt">Novo Suplemento</div><button class="mc" onclick="closeM('m - supl - form')">×</button></div>'
+  mc.innerHTML = '<div class="modal"><div class="mh"><div class="mt">Novo Suplemento</div><button class="mc" onclick="closeM(\'m-supl-form\')">×</button></div>'
     + '<div style="padding:0 20px 20px">'
     + '<div class="fld"><label class="lbl">Nome do suplemento *</label><input class="inp" id="s-nome" placeholder="Ex: Vitamina D 2000 UI" /></div>'
     + '<div class="row2">'
@@ -3166,8 +3165,8 @@ function openSuplAdd() {
     + '<div class="fld"><label class="lbl">Observações</label><input class="inp" id="s-obs" placeholder="Tomar com vitamina C para melhor absorção…" /></div>'
     + '<div style="margin-top:14px;display:flex;gap:8px">'
     + '<button class="btn btn-p" onclick="_suplSave()">💾 Salvar</button>'
-    + '<button class="btn btn-ghost" onclick="closeM('m - supl - form')">Cancelar</button>'
-      + '</div></div></div>';
+    + '<button class="btn btn-ghost" onclick="closeM(\'m-supl-form\')">Cancelar</button>'
+    + '</div></div></div>';
 }
 function _suplSave() {
   var p = selPat || pats[0]; if (!p || !p.suplementos) return;
@@ -3239,7 +3238,7 @@ function openFinAdd() {
   var mc = document.getElementById('mc-fin');
   if (!mc) return;
   var pOpts = pats.map(function (p) { return '<option>' + escHtml(p.n) + '</option>'; }).join('');
-  mc.innerHTML = '<div class="modal"><div class="mh"><div class="mt">Nova Cobrança</div><button class="mc" onclick="closeM('m - fin - form')">×</button></div>'
+  mc.innerHTML = '<div class="modal"><div class="mh"><div class="mt">Nova Cobrança</div><button class="mc" onclick="closeM(\'m-fin-form\')">×</button></div>'
     + '<div style="padding:0 20px 20px">'
     + '<div class="row2">'
     + '<div class="fld"><label class="lbl">Paciente *</label><select class="sel" id="f-pac"><option value="">Selecionar…</option>' + pOpts + '</select></div>'
@@ -3253,8 +3252,8 @@ function openFinAdd() {
     + '<div class="fld"><label class="lbl">Observações</label><input class="inp" id="f-obs" placeholder="Forma de pagamento, notas…" /></div>'
     + '<div style="margin-top:14px;display:flex;gap:8px">'
     + '<button class="btn btn-p" onclick="_finSave()">💾 Salvar</button>'
-    + '<button class="btn btn-ghost" onclick="closeM('m - fin - form')">Cancelar</button>'
-      + '</div></div></div>';
+    + '<button class="btn btn-ghost" onclick="closeM(\'m-fin-form\')">Cancelar</button>'
+    + '</div></div></div>';
   openM('m-fin-form');
 }
 function _finSave() {
