@@ -571,8 +571,8 @@ body.dark .reg-ok{background:rgba(22,163,74,.12);border-color:rgba(134,239,172,.
 
 /* ══ LOGIN PAGE ══ */
 @media(max-width:768px){
-  #login{flex-direction:column;height:100vh;overflow:hidden}
-  .ll{width:100%;min-height:auto;padding:28px 24px 24px;flex-shrink:0;overflow-y:auto;max-height:42vh}
+  #login{flex-direction:column;height:auto;min-height:100vh;overflow-y:auto}
+  .ll{width:100%;min-height:auto;padding:28px 24px 24px;flex-shrink:0}
   .ll-hero h1{font-size:28px}
   .ll-hero p{font-size:12px;max-width:100%}
   .ll-stats{grid-template-columns:repeat(3,1fr);gap:7px;margin-top:16px}
@@ -580,12 +580,12 @@ body.dark .reg-ok{background:rgba(22,163,74,.12);border-color:rgba(134,239,172,.
   .ll-stat-n{font-size:20px}
   .ll-pills{margin-top:12px}
   .ll-badge{margin-bottom:14px}
-  .lr{padding:28px 20px 40px;align-items:flex-start;flex:1;overflow-y:auto;height:0}
+  .lr{padding:28px 20px 40px;align-items:flex-start}
   .lr-box{max-width:100%}
   html,body{height:auto;overflow:auto}
 }
 @media(max-width:480px){
-  .ll{padding:20px 16px 20px;max-height:38vh}
+  .ll{padding:20px 16px 20px}
   .ll-hero h1{font-size:24px;margin-bottom:12px}
   .ll-hero{padding:20px 0 16px}
   .ll-stats{gap:5px}
