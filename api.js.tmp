@@ -1,0 +1,30 @@
+
+// ... (resto do api.js anterior) ...
+
+async function doRegenInviteCode() {
+  if (!API_MODE) {
+    // Modo local: apenas avisa
+    showToast('Recurso disponível apenas no servidor.', 'w');
+    return;
+  }
+
+  try {
+    const res = await apiCall('/api/v1/auth/regenerate-invite', 'POST');
+    if (res && res.invite_code) {
+      // Atualizar dados locais
+      if (cu) cu.invite_code = res.invite_code;
+      if (typeof userProfiles !== 'undefined' && userProfiles[cu.id]) {
+        userProfiles[cu.id].inviteCode = res.invite_code;
+      }
+      
+      // Atualizar UI (se o modal estiver aberto)
+      const el = document.getElementById('prof-invite-code');
+      if (el) el.textContent = res.invite_code;
+      
+      showToast('Novo código gerado e salvo!', 's');
+    }
+  } catch (e) {
+    console.error('Erro ao gerar código:', e);
+    showToast('Falha ao gerar novo código.', 'e');
+  }
+}

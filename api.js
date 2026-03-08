@@ -171,8 +171,15 @@ async function doLogin() {
       name: data.name,
       email: email,
       role: data.role,
+      invite_code: data.invite_code,
       pw: pw   // mantido para compatibilidade local
     };
+
+    // Sincronizar com o objeto de perfis do dieton.js
+    if (typeof userProfiles !== 'undefined') {
+      if (!userProfiles[cu.id]) userProfiles[cu.id] = { photo: null, bio: '', inviteCode: null };
+      userProfiles[cu.id].inviteCode = data.invite_code;
+    }
 
     _finishLogin();
   } catch (e) {
@@ -485,4 +492,31 @@ async function apiPayFinancial(recordId) {
 async function apiDeleteFinancial(recordId) {
   if (!API_MODE) return;
   try { await apiCall(`/api/v1/financial/${recordId}`, 'DELETE'); } catch (e) { }
+}
+
+async function doRegenInviteCode() {
+  if (!API_MODE) {
+    showToast('Recurso disponível apenas no servidor.', 'w');
+    return;
+  }
+
+  try {
+    const data = await apiCall('/api/v1/auth/regenerate-invite', 'POST');
+    if (data && data.invite_code) {
+      // Atualizar dados locais
+      if (cu) cu.invite_code = data.invite_code;
+      if (typeof userProfiles !== 'undefined' && userProfiles[cu.id]) {
+        userProfiles[cu.id].inviteCode = data.invite_code;
+      }
+
+      // Atualizar UI (se o modal estiver aberto)
+      const el = document.getElementById('prof-invite-code');
+      if (el) el.textContent = data.invite_code;
+
+      showToast('Novo código gerado e salvo!', 's');
+    }
+  } catch (e) {
+    console.error('Erro ao gerar código:', e);
+    showToast('Falha ao gerar novo código.', 'e');
+  }
 }
