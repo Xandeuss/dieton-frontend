@@ -201,7 +201,7 @@ async function doLogout() {
   // Revogar token no backend
   if (API_MODE && _refreshToken) {
     try {
-      await apiCall('/auth/logout', 'POST', { refresh_token: _refreshToken });
+      await apiCall('/api/v1/auth/logout', 'POST', { refresh_token: _refreshToken });
     } catch (e) { }
   }
 
@@ -223,7 +223,8 @@ async function doRegisterPro() {
   const email = document.getElementById('up-pro-email').value.trim();
   const pw = document.getElementById('up-pro-pw').value;
   const pw2 = document.getElementById('up-pro-pw2').value;
-  const crn = document.getElementById('up-pro-crn').value.trim();
+  const elCrn = document.getElementById('up-pro-crn');
+  const crn = elCrn ? elCrn.value.trim() : '';
 
   if (!nome || !email || !pw) { showUpErr('Preencha todos os campos.'); return; }
   if (pw !== pw2) { showUpErr('As senhas não coincidem.'); return; }
