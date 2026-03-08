@@ -175,10 +175,18 @@ async function doLogin() {
       pw: pw   // mantido para compatibilidade local
     };
 
-    // Sincronizar com o objeto de perfis do dieton.js
-    if (typeof userProfiles !== 'undefined') {
-      if (!userProfiles[cu.id]) userProfiles[cu.id] = { photo: null, bio: '', inviteCode: null };
-      userProfiles[cu.id].inviteCode = data.invite_code;
+    // Sincronizar com o objeto de perfis e localStorage do dieton.js
+    if (data.invite_code) {
+      try {
+        let inv = JSON.parse(localStorage.getItem('dieton_invites') || '{}');
+        inv[cu.id] = data.invite_code;
+        localStorage.setItem('dieton_invites', JSON.stringify(inv));
+      } catch (e) { }
+
+      if (typeof userProfiles !== 'undefined') {
+        if (!userProfiles[cu.id]) userProfiles[cu.id] = { photo: null, bio: '', inviteCode: null };
+        userProfiles[cu.id].inviteCode = data.invite_code;
+      }
     }
 
     _finishLogin();
@@ -503,8 +511,15 @@ async function doRegenInviteCode() {
   try {
     const data = await apiCall('/api/v1/auth/regenerate-invite', 'POST');
     if (data && data.invite_code) {
-      // Atualizar dados locais
       if (cu) cu.invite_code = data.invite_code;
+
+      // Sincronizar localStorage
+      try {
+        let inv = JSON.parse(localStorage.getItem('dieton_invites') || '{}');
+        inv[cu.id] = data.invite_code;
+        localStorage.setItem('dieton_invites', JSON.stringify(inv));
+      } catch (e) { }
+
       if (typeof userProfiles !== 'undefined' && userProfiles[cu.id]) {
         userProfiles[cu.id].inviteCode = data.invite_code;
       }

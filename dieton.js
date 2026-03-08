@@ -2312,11 +2312,9 @@ function openProfile() {
   if (cu.role === 'pro') {
     invSec.style.display = 'block';
 
-    // PRIORIDADE: Primeiro o que veio do banco (cu.invite_code), 
-    // depois o que está no perfil local, por último calcula um novo.
-    if (!prof.inviteCode) {
-      prof.inviteCode = cu.invite_code || _getInviteCode(cu.id, cu.name);
-    }
+    // PRIORIDADE: Primeiro o que veio do banco (cu.invite_code)
+    // Se não tiver, aí sim olha o cache ou calcula.
+    prof.inviteCode = cu.invite_code || _getInviteCode(cu.id, cu.name);
 
     document.getElementById('prof-invite-code').textContent = prof.inviteCode;
   } else {
