@@ -485,6 +485,7 @@ function initPro() {
   <button class="ni" id="ni-presc" onclick="goP('presc',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Prescrição</button>
   <button class="ni" id="ni-week" onclick="goP('week',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z"/></svg>Plano Semanal</button>
   <button class="ni" id="ni-ev" onclick="goP('ev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Acompanhamento</button>
+  <button class="ni" id="ni-supl" onclick="goP('supl',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.5 10h-2v5h2v-5zm4 0h-2v5h2v-5zm8.5 7H4v2h15v-2zm-4.5-7h-2v5h2v-5zM11.5 1L2 6v2h19V6l-9.5-5z"/></svg>Suplementação</button>
   <div class="sb-sec">Ferramentas</div>
   <button class="ni" id="ni-micro" onclick="goP('micro',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>Micronutrientes</button>
   <button class="ni" id="ni-rec" onclick="goP('rec',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 010 16zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>Recordatório 24h</button>
@@ -539,7 +540,7 @@ function goP(id, btn) {
     ev: '<button class="btn btn-s btn-sm" onclick="openM(\'m-meas\')">+ Medidas</button><button class="btn btn-p btn-sm" onclick="rptMensal()">📊 Relatório PDF</button>',
     pdiary: '<button class="btn btn-p btn-sm" onclick="openDiaryAdd()">+ Registrar Refeição</button>'
   };
-  ri.innerHTML = rbts[id] || '';
+  ri.innerHTML = '<button class="btn btn-ghost btn-sm" onclick="showTour()" style="font-size:11px;gap:5px;display:flex;align-items:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Tutorial</button>' + (rbts[id] || '');
   if (pages[id]) { pg.innerHTML = pages[id](); setTimeout(function () { afterRender(id); }, 50); }
 }
 
@@ -698,7 +699,7 @@ function openPatDetail(id) {
   if (p.exams.fer && p.exams.fer < 20) alerts.push({ t: 'Ferritina baixa — risco de anemia (' + p.exams.fer + ' ng/mL)', c: 'r' });
   var hist = p.historico || [];
   var modal = document.createElement('div'); modal.className = 'ov'; modal.id = 'm-pd';
-  modal.innerHTML = '<div class="modal modal-xl"><div class="mh"><div><div class="mt">' + p.n + '</div><div style="font-size:12px;color:var(--n4);margin-top:3px">' + p.age + ' anos · ' + (p.sex === 'F' ? 'Feminino' : 'Masculino') + ' · ' + p.goal + ' · Última: ' + p.last + '</div></div><div style="display:flex;gap:7px"><button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id===' + p.id + '});closeM(\'m-pd\');goP(\'presc\',document.getElementById(\'ni-presc\'))">Prescrever</button><button class="btn btn-p btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'ev\',document.getElementById(\'ni-ev\'))">Acompanhamento</button><button class="mc" onclick="closeM(\'m-pd\')">×</button></div></div>'
+  modal.innerHTML = '<div class="modal modal-xl"><div class="mh"><div><div class="mt">' + p.n + '</div><div style="font-size:12px;color:var(--n4);margin-top:3px">' + p.age + ' anos · ' + (p.sex === 'F' ? 'Feminino' : 'Masculino') + ' · ' + p.goal + ' · Última: ' + p.last + '</div></div><div style="display:flex;gap:7px"><button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id===' + p.id + '});closeM(\'m-pd\');goP(\'presc\',document.getElementById(\'ni-presc\'))">Prescrever</button><button class="btn btn-p btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'ev\',document.getElementById(\'ni-ev\'))">Acompanhamento</button><button class="btn btn-ghost btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'supl\',document.getElementById(\'ni-supl\'))">💊 Suplementação</button><button class="mc" onclick="closeM(\'m-pd\')">×</button></div></div>'
     + (alerts.length ? '<div style="margin-bottom:12px">' + alerts.map(function (a) { return '<div class="alert alert-' + a.c + '"><span>⚠ ' + a.t + '</span></div>'; }).join('') + '</div>' : '')
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
     + '<div><div class="ct" style="margin-bottom:10px;font-family:var(--jk)">Dados Clínicos</div>'
@@ -1590,6 +1591,43 @@ function _generateSmartAlerts() {
   return al;
 }
 
+
+function showTour() {
+  var steps = [
+    { title: 'Bem-vindo ao DietOn! 🎉', body: 'Este tutorial rápido vai mostrar as principais funcionalidades da plataforma.' },
+    { title: 'Dashboard', body: 'Aqui você acompanha em tempo real: pacientes ativos, consultas da semana, taxa de adesão e alertas clínicos — todos calculados dos seus dados reais.' },
+    { title: 'Agenda', body: 'Gerencie suas consultas, visualize o calendário mensal e acompanhe os agendamentos de cada paciente.' },
+    { title: 'Financeiro', body: 'Registre cobranças, marque pagamentos como recebidos e acompanhe o resumo financeiro do seu consultório.' },
+    { title: 'Pacientes', body: 'Cadastre e gerencie seus pacientes. Clique em "Ver" para acessar o perfil completo com dados clínicos, exames e histórico.' },
+    { title: 'Prescrição', body: 'Monte planos alimentares personalizados com cálculo automático de macros e calorias por refeição.' },
+    { title: 'Suplementação', body: 'Acesse o perfil do paciente e prescreva suplementos. O paciente verá a lista no próprio app.' },
+    { title: 'IA Nutricional', body: 'Use inteligência artificial para gerar sugestões de planos, analisar exames e obter recomendações clínicas baseadas nos dados do paciente.' },
+    { title: 'Pronto! ✅', body: 'Você já pode usar o DietOn. Clique no botão "Tutorial" a qualquer momento para rever este guia.' },
+  ];
+  var step = 0;
+  var ov = document.createElement('div');
+  ov.id = 'm-tour';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s';
+  function render() {
+    var s = steps[step];
+    var dots = steps.map(function(_,i){ return '<div style="width:7px;height:7px;border-radius:50%;background:'+(i===step?'var(--g5)':'var(--n3)')+';transition:background .2s"></div>'; }).join('');
+    ov.innerHTML = '<div style="background:#fff;border-radius:20px;padding:32px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);position:relative">'
+      + '<button onclick="document.body.removeChild(document.getElementById(\'m-tour\'))" style="position:absolute;top:16px;right:16px;background:var(--n1);border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--n5);display:flex;align-items:center;justify-content:center">×</button>'
+      + '<div style="font-size:11px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Passo '+(step+1)+' de '+steps.length+'</div>'
+      + '<div style="font-size:18px;font-weight:800;color:var(--n9);margin-bottom:12px;line-height:1.3">'+s.title+'</div>'
+      + '<div style="font-size:13.5px;color:var(--n6);line-height:1.7;margin-bottom:24px">'+s.body+'</div>'
+      + '<div style="display:flex;gap:5px;justify-content:center;margin-bottom:20px">'+dots+'</div>'
+      + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+      + (step > 0 ? '<button onclick="window._tourStep('+step+'-1)" class="btn btn-ghost btn-sm">← Anterior</button>' : '')
+      + (step < steps.length-1
+          ? '<button onclick="window._tourStep('+step+'+1)" class="btn btn-p btn-sm">Próximo →</button>'
+          : '<button onclick="document.body.removeChild(document.getElementById(\'m-tour\'))" class="btn btn-p btn-sm">Concluir ✓</button>')
+      + '</div></div>';
+  }
+  window._tourStep = function(s) { step = s; render(); };
+  document.body.appendChild(ov);
+  render();
+}
 function _clearAllNotifs() { notifs = []; updateNotifBadge(); if (typeof DB !== "undefined") DB.save(); goP("notif", null); showToast("Todas as notificações limpas", "s"); }
 function _clearNotifs() { notifs = []; updateNotifBadge(); if (typeof DB !== 'undefined') DB.save(); goP('notif', null); showToast('Alertas limpos', 's'); }
 function _removeNotif(idx) { notifs.splice(idx, 1); updateNotifBadge(); if (typeof DB !== 'undefined') DB.save(); goP('notif', null); }
@@ -4114,6 +4152,7 @@ function initPro() {
   <button class="ni" id="ni-presc" onclick="goP('presc',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Prescrição</button>
   <button class="ni" id="ni-week" onclick="goP('week',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z"/></svg>Plano Semanal</button>
   <button class="ni" id="ni-ev" onclick="goP('ev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Acompanhamento</button>
+  <button class="ni" id="ni-supl" onclick="goP('supl',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.5 10h-2v5h2v-5zm4 0h-2v5h2v-5zm8.5 7H4v2h15v-2zm-4.5-7h-2v5h2v-5zM11.5 1L2 6v2h19V6l-9.5-5z"/></svg>Suplementação</button>
   <div class="sb-sec">Ferramentas</div>
   <button class="ni" id="ni-micro" onclick="goP('micro',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>Micronutrientes</button>
   <button class="ni" id="ni-rec" onclick="goP('rec',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 010 16zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>Recordatório 24h</button>
@@ -4175,7 +4214,7 @@ function goP(id, btn) {
     anam: '<button class="btn btn-ghost btn-sm" onclick="exportAnamPDF()">📄 Exportar Anamnese PDF</button>',
     busca: ''
   };
-  ri.innerHTML = rbts[id] || '';
+  ri.innerHTML = '<button class="btn btn-ghost btn-sm" onclick="showTour()" style="font-size:11px;gap:5px;display:flex;align-items:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Tutorial</button>' + (rbts[id] || '');
   if (pages[id]) { pg.innerHTML = pages[id](); setTimeout(function () { afterRender(id); }, 50); }
 }
 
@@ -4364,7 +4403,7 @@ function openPatDetail(id) {
   if (p.exams.fer && p.exams.fer < 20) alerts.push({ t: 'Ferritina baixa — risco de anemia (' + p.exams.fer + ' ng/mL)', c: 'r' });
   var hist = p.historico || [];
   var modal = document.createElement('div'); modal.className = 'ov'; modal.id = 'm-pd';
-  modal.innerHTML = '<div class="modal modal-xl"><div class="mh"><div><div class="mt">' + p.n + '</div><div style="font-size:12px;color:var(--n4);margin-top:3px">' + p.age + ' anos · ' + (p.sex === 'F' ? 'Feminino' : 'Masculino') + ' · ' + p.goal + ' · Última: ' + p.last + '</div></div><div style="display:flex;gap:7px"><button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id===' + p.id + '});closeM(\'m-pd\');goP(\'presc\',document.getElementById(\'ni-presc\'))">Prescrever</button><button class="btn btn-p btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'ev\',document.getElementById(\'ni-ev\'))">Acompanhamento</button><button class="mc" onclick="closeM(\'m-pd\')">×</button></div></div>'
+  modal.innerHTML = '<div class="modal modal-xl"><div class="mh"><div><div class="mt">' + p.n + '</div><div style="font-size:12px;color:var(--n4);margin-top:3px">' + p.age + ' anos · ' + (p.sex === 'F' ? 'Feminino' : 'Masculino') + ' · ' + p.goal + ' · Última: ' + p.last + '</div></div><div style="display:flex;gap:7px"><button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id===' + p.id + '});closeM(\'m-pd\');goP(\'presc\',document.getElementById(\'ni-presc\'))">Prescrever</button><button class="btn btn-p btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'ev\',document.getElementById(\'ni-ev\'))">Acompanhamento</button><button class="btn btn-ghost btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'supl\',document.getElementById(\'ni-supl\'))">💊 Suplementação</button><button class="mc" onclick="closeM(\'m-pd\')">×</button></div></div>'
     + (alerts.length ? '<div style="margin-bottom:12px">' + alerts.map(function (a) { return '<div class="alert alert-' + a.c + '"><span>⚠ ' + a.t + '</span></div>'; }).join('') + '</div>' : '')
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
     + '<div><div class="ct" style="margin-bottom:10px;font-family:var(--jk)">Dados Clínicos</div>'
