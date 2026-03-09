@@ -540,7 +540,7 @@ function goP(id, btn) {
     ev: '<button class="btn btn-s btn-sm" onclick="openM(\'m-meas\')">+ Medidas</button><button class="btn btn-p btn-sm" onclick="rptMensal()">📊 Relatório PDF</button>',
     pdiary: '<button class="btn btn-p btn-sm" onclick="openDiaryAdd()">+ Registrar Refeição</button>'
   };
-  ri.innerHTML = '<button class="btn btn-ghost btn-sm" onclick="showTour()" style="font-size:11px;gap:5px;display:flex;align-items:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Tutorial</button>' + (rbts[id] || '');
+  ri.innerHTML = '' + (rbts[id] || '');
   if (pages[id]) { pg.innerHTML = pages[id](); setTimeout(function () { afterRender(id); }, 50); }
 }
 
@@ -688,6 +688,20 @@ function filterPats(q) {
   var r = pats.filter(function (p) { return (p.n.toLowerCase().includes(q.toLowerCase())) && (!gf || p.goal === gf) && (!sf || p.st === sf) });
   document.getElementById('pat-grid').innerHTML = buildPatGrid(r);
 }
+
+function openPatSupl(id) {
+  selPat = pats.find(function(x){ return x.id == id; });
+  closeM('m-pd');
+  // ni-supl exists only in patient-profile sidebar — navigate there first
+  var btn = document.getElementById('ni-ev');
+  if (btn) {
+    goP('ev', btn); // load patient profile sidebar
+    setTimeout(function() {
+      var suplBtn = document.getElementById('ni-supl');
+      if (suplBtn) goP('supl', suplBtn);
+    }, 50);
+  }
+}
 function openPatDetail(id) {
   var p = pats.find(function (x) { return x.id == id }); if (!p) return;
   selPat = p;
@@ -699,7 +713,7 @@ function openPatDetail(id) {
   if (p.exams.fer && p.exams.fer < 20) alerts.push({ t: 'Ferritina baixa — risco de anemia (' + p.exams.fer + ' ng/mL)', c: 'r' });
   var hist = p.historico || [];
   var modal = document.createElement('div'); modal.className = 'ov'; modal.id = 'm-pd';
-  modal.innerHTML = '<div class="modal modal-xl"><div class="mh"><div><div class="mt">' + p.n + '</div><div style="font-size:12px;color:var(--n4);margin-top:3px">' + p.age + ' anos · ' + (p.sex === 'F' ? 'Feminino' : 'Masculino') + ' · ' + p.goal + ' · Última: ' + p.last + '</div></div><div style="display:flex;gap:7px"><button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id===' + p.id + '});closeM(\'m-pd\');goP(\'presc\',document.getElementById(\'ni-presc\'))">Prescrever</button><button class="btn btn-p btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'ev\',document.getElementById(\'ni-ev\'))">Acompanhamento</button><button class="btn btn-ghost btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'supl\',document.getElementById(\'ni-supl\'))">💊 Suplementação</button><button class="mc" onclick="closeM(\'m-pd\')">×</button></div></div>'
+  modal.innerHTML = '<div class="modal modal-xl"><div class="mh"><div><div class="mt">' + p.n + '</div><div style="font-size:12px;color:var(--n4);margin-top:3px">' + p.age + ' anos · ' + (p.sex === 'F' ? 'Feminino' : 'Masculino') + ' · ' + p.goal + ' · Última: ' + p.last + '</div></div><div style="display:flex;gap:7px"><button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id===' + p.id + '});closeM(\'m-pd\');goP(\'presc\',document.getElementById(\'ni-presc\'))">Prescrever</button><button class="btn btn-p btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'ev\',document.getElementById(\'ni-ev\'))">Acompanhamento</button><button class="btn btn-ghost btn-sm" onclick="openPatSupl(' + p.id + ')">💊 Suplementação</button><button class="mc" onclick="closeM(\'m-pd\')">×</button></div></div>'
     + (alerts.length ? '<div style="margin-bottom:12px">' + alerts.map(function (a) { return '<div class="alert alert-' + a.c + '"><span>⚠ ' + a.t + '</span></div>'; }).join('') + '</div>' : '')
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
     + '<div><div class="ct" style="margin-bottom:10px;font-family:var(--jk)">Dados Clínicos</div>'
@@ -4214,7 +4228,7 @@ function goP(id, btn) {
     anam: '<button class="btn btn-ghost btn-sm" onclick="exportAnamPDF()">📄 Exportar Anamnese PDF</button>',
     busca: ''
   };
-  ri.innerHTML = '<button class="btn btn-ghost btn-sm" onclick="showTour()" style="font-size:11px;gap:5px;display:flex;align-items:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Tutorial</button>' + (rbts[id] || '');
+  ri.innerHTML = '' + (rbts[id] || '');
   if (pages[id]) { pg.innerHTML = pages[id](); setTimeout(function () { afterRender(id); }, 50); }
 }
 
@@ -4403,7 +4417,7 @@ function openPatDetail(id) {
   if (p.exams.fer && p.exams.fer < 20) alerts.push({ t: 'Ferritina baixa — risco de anemia (' + p.exams.fer + ' ng/mL)', c: 'r' });
   var hist = p.historico || [];
   var modal = document.createElement('div'); modal.className = 'ov'; modal.id = 'm-pd';
-  modal.innerHTML = '<div class="modal modal-xl"><div class="mh"><div><div class="mt">' + p.n + '</div><div style="font-size:12px;color:var(--n4);margin-top:3px">' + p.age + ' anos · ' + (p.sex === 'F' ? 'Feminino' : 'Masculino') + ' · ' + p.goal + ' · Última: ' + p.last + '</div></div><div style="display:flex;gap:7px"><button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id===' + p.id + '});closeM(\'m-pd\');goP(\'presc\',document.getElementById(\'ni-presc\'))">Prescrever</button><button class="btn btn-p btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'ev\',document.getElementById(\'ni-ev\'))">Acompanhamento</button><button class="btn btn-ghost btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'supl\',document.getElementById(\'ni-supl\'))">💊 Suplementação</button><button class="mc" onclick="closeM(\'m-pd\')">×</button></div></div>'
+  modal.innerHTML = '<div class="modal modal-xl"><div class="mh"><div><div class="mt">' + p.n + '</div><div style="font-size:12px;color:var(--n4);margin-top:3px">' + p.age + ' anos · ' + (p.sex === 'F' ? 'Feminino' : 'Masculino') + ' · ' + p.goal + ' · Última: ' + p.last + '</div></div><div style="display:flex;gap:7px"><button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id===' + p.id + '});closeM(\'m-pd\');goP(\'presc\',document.getElementById(\'ni-presc\'))">Prescrever</button><button class="btn btn-p btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id===' + p.id + '});goP(\'ev\',document.getElementById(\'ni-ev\'))">Acompanhamento</button><button class="btn btn-ghost btn-sm" onclick="openPatSupl(' + p.id + ')">💊 Suplementação</button><button class="mc" onclick="closeM(\'m-pd\')">×</button></div></div>'
     + (alerts.length ? '<div style="margin-bottom:12px">' + alerts.map(function (a) { return '<div class="alert alert-' + a.c + '"><span>⚠ ' + a.t + '</span></div>'; }).join('') + '</div>' : '')
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
     + '<div><div class="ct" style="margin-bottom:10px;font-family:var(--jk)">Dados Clínicos</div>'
