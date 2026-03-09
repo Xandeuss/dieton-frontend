@@ -36,16 +36,7 @@ let _refreshToken = sessionStorage.getItem('dieton_refresh') || null;
   }
 })();
 
-function showErr(msg) {
-  const box = document.getElementById('err-box');
-  const txt = document.getElementById('err-msg');
-  if (box && txt) {
-    txt.textContent = msg;
-    box.style.display = 'flex';
-  } else {
-    alert(msg); // fallback para mobile se o DOM falhar
-  }
-}
+
 
 // ── RECUPERAÇÃO DE SENHA ──────────────────────────────────────────
 async function doForgotPassword() {
