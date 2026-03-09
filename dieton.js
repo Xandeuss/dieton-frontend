@@ -527,7 +527,7 @@ function goP(id, btn) {
   var days = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
   var months = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
   sub.textContent = days[now.getDay()] + ', ' + now.getDate() + ' de ' + months[now.getMonth()] + ' de ' + now.getFullYear();
-  var t = { dash: 'Dashboard', pat: 'Pacientes', presc: 'Prescrição Nutricional', week: 'Plano Semanal', ev: 'Acompanhamento', micro: 'Micronutrientes', rec: 'Recordatório 24h', ai: 'IA Nutricional', notif: 'Notificações', tpl: 'Templates de Plano', anam: 'Anamnese Clínica', busca: 'Busca Global', 'diary-pro': 'Diário Visual', pdash: 'Início', pplan: 'Meu Plano Alimentar', pdiary: 'Diário Alimentar', ptask: 'Tarefas', pev: 'Minha Evolução' };
+  var t = { dash: 'Dashboard', pat: 'Pacientes', presc: 'Prescrição Nutricional', week: 'Plano Semanal', ev: 'Acompanhamento', micro: 'Micronutrientes', rec: 'Recordatório 24h', ai: 'IA Nutricional', notif: 'Notificações', tpl: 'Templates de Plano', anam: 'Anamnese Clínica', busca: 'Busca Global', 'diary-pro': 'Diário Visual', pdash: 'Início', pplan: 'Meu Plano Alimentar', pdiary: 'Diário Alimentar', ptask: 'Tarefas', pev: 'Minha Evolução', supl: 'Suplementação', psupl: 'Minha Suplementação', fin: 'Financeiro', agenda: 'Agenda' };
   document.getElementById('tb-title').textContent = t[id] || id;
   var pages = {
     dash: rDash, pat: rPat, agenda: rAgenda, presc: rPresc, week: rWeek, ev: rEv, micro: rMicro, rec: rRec, ai: rAI, notif: rNotif, tpl: rTpl, 'pac-diary': rPacDiary, anam: rAnam, busca: rBusca, 'diary-pro': rDiaryPro,
@@ -692,15 +692,11 @@ function filterPats(q) {
 function openPatSupl(id) {
   selPat = pats.find(function(x){ return x.id == id; });
   closeM('m-pd');
-  // ni-supl exists only in patient-profile sidebar — navigate there first
-  var btn = document.getElementById('ni-ev');
-  if (btn) {
-    goP('ev', btn); // load patient profile sidebar
-    setTimeout(function() {
-      var suplBtn = document.getElementById('ni-supl');
-      if (suplBtn) goP('supl', suplBtn);
-    }, 50);
-  }
+  // Navigate directly to supl page — ni-supl is always in the sidebar DOM
+  setTimeout(function() {
+    var suplBtn = document.getElementById('ni-supl');
+    goP('supl', suplBtn || null);
+  }, 80);
 }
 function openPatDetail(id) {
   var p = pats.find(function (x) { return x.id == id }); if (!p) return;
@@ -4212,7 +4208,7 @@ function goP(id, btn) {
   var days = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
   var months = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
   sub.textContent = days[now.getDay()] + ', ' + now.getDate() + ' de ' + months[now.getMonth()] + ' de ' + now.getFullYear();
-  var t = { dash: 'Dashboard', pat: 'Pacientes', presc: 'Prescrição Nutricional', week: 'Plano Semanal', ev: 'Acompanhamento', micro: 'Micronutrientes', rec: 'Recordatório 24h', ai: 'IA Nutricional', notif: 'Notificações', tpl: 'Templates de Plano', anam: 'Anamnese Nutricional', busca: 'Busca Global', 'diary-pro': 'Diário Visual', pdash: 'Início', pplan: 'Meu Plano Alimentar', pdiary: 'Diário Alimentar', ptask: 'Tarefas', pev: 'Minha Evolução' };
+  var t = { dash: 'Dashboard', pat: 'Pacientes', presc: 'Prescrição Nutricional', week: 'Plano Semanal', ev: 'Acompanhamento', micro: 'Micronutrientes', rec: 'Recordatório 24h', ai: 'IA Nutricional', notif: 'Notificações', tpl: 'Templates de Plano', anam: 'Anamnese Clínica', busca: 'Busca Global', 'diary-pro': 'Diário Visual', pdash: 'Início', pplan: 'Meu Plano Alimentar', pdiary: 'Diário Alimentar', ptask: 'Tarefas', pev: 'Minha Evolução', supl: 'Suplementação', psupl: 'Minha Suplementação', fin: 'Financeiro', agenda: 'Agenda' };
   document.getElementById('tb-title').textContent = t[id] || id;
   var pages = {
     dash: rDash, pat: rPat, agenda: rAgenda, presc: rPresc, week: rWeek, ev: rEv, micro: rMicro, rec: rRec, ai: rAI, notif: rNotif, tpl: rTpl, 'pac-diary': rPacDiary, 'diary-pro': rDiaryPro,
