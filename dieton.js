@@ -550,152 +550,76 @@ function afterRender(id) {
 
 // ─── DASHBOARD ───
 function rDash() {
-  var now = new Date();
-  var todayStr = now.toISOString().slice(0, 10);
-
-  // ── KPIs calculados dos dados reais ──────────────────────────
-  var totalPats = pats.length;
-  var alerts = pats.filter(function(p) {
-    return p.st === 'tr' || (p.exams && (p.exams.vitd < 25 || p.exams.gli > 120));
-  }).length;
-
-  // Todas as consultas (appointments) de todos os pacientes
-  var allAppts = [];
-  pats.forEach(function(p) {
-    (p.appointments || []).forEach(function(a) {
-      allAppts.push(Object.assign({}, a, { patName: p.n, patId: p.id, patAv: p.av, patInit: p.i, av: p.av }));
-    });
-  });
-
-  // Consultas desta semana (seg-dom)
-  var dayOfWeek = now.getDay(); // 0=dom, 1=seg...
-  var startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  var endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
-  var startW = startOfWeek.toISOString().slice(0,10);
-  var endW = endOfWeek.toISOString().slice(0,10);
-  var weekAppts = allAppts.filter(function(a) { return a.isoDate >= startW && a.isoDate <= endW; });
-
-  // Semana passada (para comparação)
-  var startPrevW = new Date(startOfWeek); startPrevW.setDate(startPrevW.getDate() - 7);
-  var endPrevW = new Date(startPrevW); endPrevW.setDate(startPrevW.getDate() + 6);
-  var prevWeekAppts = allAppts.filter(function(a) {
-    return a.isoDate >= startPrevW.toISOString().slice(0,10) && a.isoDate <= endPrevW.toISOString().slice(0,10);
-  });
-  var weekDiff = weekAppts.length - prevWeekAppts.length;
-  var weekTrend = weekDiff >= 0 ? '↑ +' + weekDiff : '↓ ' + weekDiff;
-  var weekTrendClass = weekDiff >= 0 ? 'kbd-b' : 'kbd-r';
-
-  // Taxa de adesão média
-  var avgAdesao = totalPats ? Math.round(pats.reduce(function(s,p){ return s + (p.prog || 0); }, 0) / totalPats) : 0;
-
-  // Novos pacientes este mês
-  var thisMo = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-  var newThisMo = pats.filter(function(p) { return p.last && p.last.length >= 7; }).length; // approximation
-
-  // Agenda de HOJE — real
-  var todayAppts = allAppts.filter(function(a) { return a.isoDate && a.isoDate.slice(0,10) === todayStr; })
-    .sort(function(a,b) { return (a.time||'').localeCompare(b.time||''); });
-
-  var todayHtml = todayAppts.length
-    ? todayAppts.map(function(a) {
-        var isPast = a.isoDate < todayStr || (a.isoDate === todayStr && a.time && a.time < (String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')));
-        var typeColors = { retorno: '#f59e0b', inicial: '#e85a0a', online: '#3b82f6', consulta: '#e85a0a' };
-        var barColor = typeColors[a.type] || '#e85a0a';
-        var statusTxt = a.status === 'concluido' ? 'Concluído' : isPast ? 'Pendente' : 'Agendado';
-        var statusCls = a.status === 'concluido' ? 'tg' : isPast ? 'ty' : 'tb2';
-        var typeTxt = a.type === 'retorno' ? 'Retorno' : a.type === 'online' ? 'Online' : '1ª Consulta';
-        return '<div class="ag-item" onclick="selPat=pats.find(function(x){return x.id=='+a.patId+'});goP('ev',document.getElementById('ni-ev'))" style="cursor:pointer">'
-          + '<div class="ag-time">' + (a.time||'--:--') + '</div>'
-          + '<div class="ag-bar" style="background:' + barColor + '"></div>'
-          + '<div style="flex:1;min-width:0"><div class="ag-nm">' + a.patName + '</div><div class="ag-tp">' + typeTxt + (a.duration ? ' · ' + a.duration + ' min' : '') + '</div></div>'
-          + '<span class="tag ' + statusCls + '">' + statusTxt + '</span>'
-          + '</div>';
-      }).join('')
-    : '<div style="text-align:center;padding:24px 0;color:var(--n4);font-size:12.5px">Sem consultas agendadas para hoje.<br><button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="goP('agenda',document.getElementById('ni-agenda'))">Abrir agenda →</button></div>';
-
-  // Gráfico — últimas 8 semanas
-  var weeklyData = [];
-  for (var w = 7; w >= 0; w--) {
-    var ws = new Date(startOfWeek); ws.setDate(ws.getDate() - w * 7);
-    var we = new Date(ws); we.setDate(ws.getDate() + 6);
-    var wsStr = ws.toISOString().slice(0,10), weStr = we.toISOString().slice(0,10);
-    weeklyData.push(allAppts.filter(function(a){ return a.isoDate >= wsStr && a.isoDate <= weStr; }).length);
-  }
-
-  // Meta de consultas (meta mensal padrão = 20, pode ser configurável)
-  var metaConsultas = (cu && cu.metaConsultas) || 20;
-  var mesAtual = now.getMonth(), anoAtual = now.getFullYear();
-  var consultasMes = allAppts.filter(function(a) {
-    return a.isoDate && a.isoDate.slice(0,7) === (anoAtual + '-' + String(mesAtual+1).padStart(2,'0'));
-  }).length;
-
-  return ('<div class="kpi-row">'
-    + '<div class="kpi kpi-g"><div class="kpi-top"><div class="kpi-ico ki-g"><svg viewBox="0 0 24 24" fill="#16a34a"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><span class="kpi-bdg kbd-g">↑ ativos</span></div><div class="kpi-n">' + totalPats + '</div><div class="kpi-l">Pacientes Ativos</div><div class="kpi-ft kft-g" onclick="goP('pat',document.getElementById('ni-pat'))" style="cursor:pointer"><strong>Ver todos</strong> →</div></div>'
-    + '<div class="kpi kpi-b"><div class="kpi-top"><div class="kpi-ico ki-b"><svg viewBox="0 0 24 24" fill="#1d4ed8"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div><span class="kpi-bdg ' + weekTrendClass + '">' + weekTrend + '</span></div><div class="kpi-n">' + weekAppts.length + '</div><div class="kpi-l">Consultas esta semana</div><div class="kpi-ft kft-b">' + (weekDiff >= 0 ? '<strong>+' + weekDiff + '</strong> vs sem. anterior' : '<strong>' + weekDiff + '</strong> vs sem. anterior') + '</div></div>'
-    + '<div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><span class="kpi-bdg kbd-y">↑ média</span></div><div class="kpi-n">' + avgAdesao + '%</div><div class="kpi-l">Taxa de Adesão</div><div class="kpi-ft kft-y">Média de <strong>' + totalPats + '</strong> pacientes</div></div>'
-    + '<div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">' + alerts + '</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r" onclick="goP('notif',document.getElementById('ni-notif'))" style="cursor:pointer"><strong>Ver alertas</strong> →</div></div>'
-    + '</div>'
-    + '<div class="dash-row2">'
-    + '<div class="card"><div class="ch"><div><div class="ct">Consultas Realizadas</div><div class="cs" style="margin-top:2px">Últimas 8 semanas</div></div><div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n4)"><span style="width:9px;height:9px;border-radius:2px;background:var(--g5);display:inline-block"></span>Consultas</div></div><div class="bchart" id="bchart"></div></div>'
-    + '<div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span><span style="font-family:var(--jk);font-size:9px;font-weight:700;color:#16a34a;background:#dcfce7;padding:3px 9px;border-radius:99px">' + todayAppts.length + ' consulta' + (todayAppts.length !== 1 ? 's' : '') + '</span></div>'
-    + todayHtml
-    + '</div>'
-    + '</div>'
-    + '<div class="dash-row2">'
-    + '<div class="card"><div class="ch"><span class="ct">Pacientes Recentes</span><button style="font-family:var(--jk);font-size:10.5px;font-weight:700;color:var(--g5);background:none;border:none;cursor:pointer" onclick="goP('pat',document.getElementById('ni-pat'))">Ver todos →</button></div>'
-    + '<div id="d-recent"></div></div>'
-    + '<div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">'
-    + '<div style="font-family:var(--jk);font-size:9px;font-weight:700;color:var(--n4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">Meta Mensal de Consultas</div>'
-    + '<div style="position:relative;width:114px;height:114px;margin-bottom:12px">'
-    + '<svg width="114" height="114" viewBox="0 0 114 114"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#86efac"/></linearGradient></defs><circle cx="57" cy="57" r="46" class="ring-track"/><circle id="dash-ring" cx="57" cy="57" r="46" class="ring-fill" stroke-dasharray="289" stroke-dashoffset="289" transform="rotate(-90 57 57)"/></svg>'
-    + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-family:var(--in);font-size:24px;font-weight:800;color:var(--n9);letter-spacing:-1px;line-height:1" id="ring-pct">0%</div><div style="font-size:10px;color:var(--n4);margin-top:1px">da meta</div></div>'
-    + '</div>'
-    + '<div style="font-size:12px;font-weight:600;color:var(--n7)" id="ring-sub"></div>'
-    + '<div style="font-size:11px;color:var(--n4);margin-top:4px">Faltam <strong style="color:var(--g5)" id="ring-rem"></strong></div>'
-    + '</div>'
-    + '</div>'
-    + _buildSmartAlerts()
-    + _buildAdhCard()
-    + '<script>setTimeout(function(){ buildBChart(' + JSON.stringify([]) + '); animRing(' + consultasMes + ',' + metaConsultas + '); }, 50);</' + 'script>');
+  var alerts = pats.filter(function (p) { return p.st === 'tr' || (p.exams && (p.exams.vitd < 25 || p.exams.gli > 120)); }).length;
+  // Consultas desta semana
+  var now = new Date(), dow = now.getDay();
+  var startW = new Date(now); startW.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
+  var endW = new Date(startW); endW.setDate(startW.getDate() + 6);
+  var sW = startW.toISOString().slice(0,10), eW = endW.toISOString().slice(0,10);
+  var startPW = new Date(startW); startPW.setDate(startPW.getDate() - 7);
+  var ePW = new Date(startPW); ePW.setDate(startPW.getDate() + 6);
+  var sPWs = startPW.toISOString().slice(0,10), ePWs = ePW.toISOString().slice(0,10);
+  var allAppts = []; pats.forEach(function(p){ (p.appointments||[]).forEach(function(a){ allAppts.push(Object.assign({},a,{patName:p.n,patId:p.id,av:p.av,i:p.i})); }); });
+  var weekCt = allAppts.filter(function(a){ return a.isoDate >= sW && a.isoDate <= eW; }).length;
+  var prevCt = allAppts.filter(function(a){ return a.isoDate >= sPWs && a.isoDate <= ePWs; }).length;
+  var diff = weekCt - prevCt;
+  var weekTrendHtml = diff >= 0 ? '<strong>+' + diff + '</strong> vs sem. anterior' : '<strong>' + diff + '</strong> vs sem. anterior';
+  var avgAdesao = pats.length ? Math.round(pats.reduce(function(s,p){ return s+(p.prog||0); },0)/pats.length) : 0;
+  return `
+ <div class="kpi-row">
+  <div class="kpi kpi-g"><div class="kpi-top"><div class="kpi-ico ki-g"><svg viewBox="0 0 24 24" fill="#16a34a"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><span class="kpi-bdg kbd-g">↑ +2</span></div><div class="kpi-n">${pats.length}</div><div class="kpi-l">Pacientes Ativos</div><div class="kpi-ft kft-g"><strong>+2 novos</strong> em março</div></div>
+  <div class="kpi kpi-b"><div class="kpi-top"><div class="kpi-ico ki-b"><svg viewBox="0 0 24 24" fill="#1d4ed8"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div><span class="kpi-bdg kbd-b">↑ +15%</span></div><div class="kpi-n">${weekCt}</div><div class="kpi-l">Consultas esta semana</div><div class="kpi-ft kft-b">${weekTrendHtml}</div></div>
+  <div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><span class="kpi-bdg kbd-y">↑ +5%</span></div><div class="kpi-n">${avgAdesao}%</div><div class="kpi-l">Taxa de Adesão</div><div class="kpi-ft kft-y">Média de ${pats.length} pacientes</div></div>
+  <div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">${alerts}</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r"><strong>Ver alertas</strong> →</div></div>
+ </div>
+ <div class="dash-row2">
+  <div class="card"><div class="ch"><div><div class="ct">Consultas Realizadas</div><div class="cs" style="margin-top:2px">Últimas 8 semanas</div></div><div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n4)"><span style="width:9px;height:9px;border-radius:2px;background:var(--g5);display:inline-block"></span>Consultas</div></div><div class="bchart" id="bchart"></div></div>
+  <div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span><span style="font-family:var(--jk);font-size:9px;font-weight:700;color:#16a34a;background:#dcfce7;padding:3px 9px;border-radius:99px">${_todayAgendaCount()} consulta(s)</span></div>
+   ${_buildTodayAgenda()}
+  </div>
+ </div>
+ <div class="dash-row2">
+  <div class="card"><div class="ch"><span class="ct">Pacientes Recentes</span><button style="font-family:var(--jk);font-size:10.5px;font-weight:700;color:var(--g5);background:none;border:none;cursor:pointer" onclick="goP('pat',document.getElementById('ni-pat'))">Ver todos →</button></div>
+   <div id="d-recent"></div></div>
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+   <div style="font-family:var(--jk);font-size:9px;font-weight:700;color:var(--n4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">Meta Mensal de Consultas</div>
+   <div style="position:relative;width:114px;height:114px;margin-bottom:12px">
+    <svg width="114" height="114" viewBox="0 0 114 114"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#86efac"/></linearGradient></defs><circle cx="57" cy="57" r="46" class="ring-track"/><circle id="dash-ring" cx="57" cy="57" r="46" class="ring-fill" stroke-dasharray="289" stroke-dashoffset="289" transform="rotate(-90 57 57)"/></svg>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-family:var(--in);font-size:24px;font-weight:800;color:var(--n9);letter-spacing:-1px;line-height:1" id="ring-pct">0%</div><div style="font-size:10px;color:var(--n4);margin-top:1px">da meta</div></div>
+   </div>
+   <div style="font-size:12px;font-weight:600;color:var(--n7)" id="ring-sub"></div>
+   <div style="font-size:11px;color:var(--n4);margin-top:4px">Faltam <strong style="color:var(--g5)" id="ring-rem"></strong></div>
+  </div>
+ </div>
+ ${_buildSmartAlerts()}
+ ${_buildAdhCard()}`;
 }
-
-
-function buildBChart(weeklyOverride) {
-  var now = new Date();
-  var dayOfWeek = now.getDay();
-  var startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  var allAppts = [];
-  pats.forEach(function(p) { (p.appointments || []).forEach(function(a) { allAppts.push(a); }); });
-
-  var data = [];
-  var labels = [];
-  for (var w = 7; w >= 0; w--) {
-    var ws = new Date(startOfWeek); ws.setDate(ws.getDate() - w * 7);
-    var we = new Date(ws); we.setDate(ws.getDate() + 6);
-    var wsStr = ws.toISOString().slice(0,10), weStr = we.toISOString().slice(0,10);
-    data.push(allAppts.filter(function(a){ return a.isoDate >= wsStr && a.isoDate <= weStr; }).length);
-    labels.push('S' + (8 - w));
+function buildBChart() {
+  var now = new Date(), dow = now.getDay();
+  var startW = new Date(now); startW.setDate(now.getDate() - (dow===0?6:dow-1));
+  var allAppts = []; pats.forEach(function(p){ (p.appointments||[]).forEach(function(a){ allAppts.push(a); }); });
+  var data = [], labels = [];
+  for(var w=7;w>=0;w--){
+    var ws=new Date(startW); ws.setDate(ws.getDate()-w*7);
+    var we=new Date(ws); we.setDate(ws.getDate()+6);
+    data.push(allAppts.filter(function(a){ return a.isoDate>=ws.toISOString().slice(0,10)&&a.isoDate<=we.toISOString().slice(0,10); }).length);
+    labels.push('S'+(8-w));
   }
-
-  var mx = Math.max.apply(null, data) || 1;
+  var mx = Math.max.apply(null,data)||1, labels = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'], mx = Math.max.apply(null, data);
   var el = document.getElementById('bchart'); if (!el) return;
-  el.innerHTML = data.map(function(v, i) {
-    var cls = i === 7 ? 'bc-a' : v < 3 ? 'bc-l' : 'bc-n';
-    return '<div class="bcc"><div class="bct"><div class="bcb ' + cls + '" style="height:' + Math.max(4, Math.round(v / mx * 100)) + '%" data-v="' + v + ' consulta' + (v !== 1 ? 's' : '') + '"></div></div><span class="bcl">' + labels[i] + '</span></div>';
+  el.innerHTML = data.map(function (v, i) {
+    var cls = i === 7 ? 'bc-a' : v < 10 ? 'bc-l' : 'bc-n';
+    return '<div class="bcc"><div class="bct"><div class="bcb ' + cls + '" style="height:' + Math.round(v / mx * 100) + '%" data-v="' + v + ' consultas"></div></div><span class="bcl">' + labels[i] + '</span></div>';
   }).join('');
-
-  // Pacientes recentes
+  // recent pats
   var el2 = document.getElementById('d-recent'); if (!el2) return;
-  if (!pats.length) { el2.innerHTML = '<div style="text-align:center;padding:20px;color:var(--n4);font-size:12px">Nenhum paciente cadastrado ainda.</div>'; return; }
-  el2.innerHTML = pats.slice(0, 5).map(function(p) {
-    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:var(--r);cursor:pointer;transition:background .13s" onmouseover="this.style.background='var(--n0)'" onmouseout="this.style.background='transparent'" onclick="selPat=pats.find(function(x){return x.id=='+p.id+'});goP('ev',document.getElementById('ni-ev'))">'
+  el2.innerHTML = pats.slice(0, 5).map(function (p) {
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:var(--r);cursor:pointer;transition:background .13s" onmouseover="this.style.background=\'var(--n0)\'" onmouseout="this.style.background=\'transparent\'" onclick="selPat=pats.find(function(x){return x.id===\'+p.id+\'});goP(\'ev\',document.getElementById(\'ni-ev\'))">'
       + '<div class="pac-av ' + p.av + '" style="width:34px;height:34px;border-radius:50%;font-size:11px">' + p.i + '</div>'
       + '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--n8)">' + p.n + '</div><div style="font-size:10.5px;color:var(--n4);margin-top:1px">' + p.goal + ' · ' + p.last + '</div></div>'
       + '<span class="tag ' + p.st + '">' + p.stxt + '</span></div>';
   }).join('');
 }
-
-
 function animRing(v, t) {
   var c = 289, off = c * (1 - v / t);
   var el = document.getElementById('dash-ring');
@@ -2861,22 +2785,50 @@ var _onbSlides = [
   }
 ];
 
-// ══════════════════════════════════════════════════════════════════
-// FINANCEIRO
-// ══════════════════════════════════════════════════════════════════
+// ═══ FINANCEIRO ═════════════════════════════════════════════════
+
+function _todayAgendaCount() {
+  var today = new Date().toISOString().slice(0,10);
+  var ct = 0; pats.forEach(function(p){ (p.appointments||[]).forEach(function(a){ if(a.isoDate&&a.isoDate.slice(0,10)===today) ct++; }); });
+  return ct + ' consulta' + (ct!==1?'s':'');
+}
+function _buildTodayAgenda() {
+  var today = new Date().toISOString().slice(0,10);
+  var now = new Date();
+  var nowStr = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  var appts = [];
+  pats.forEach(function(p){ (p.appointments||[]).forEach(function(a){ if(a.isoDate&&a.isoDate.slice(0,10)===today) appts.push(Object.assign({},a,{patName:p.n,patId:p.id})); }); });
+  appts.sort(function(a,b){ return (a.time||'').localeCompare(b.time||''); });
+  if(!appts.length) return '<div style="text-align:center;padding:20px;color:var(--n4);font-size:12px">Sem consultas hoje.</div>';
+  return appts.map(function(a){
+    var isPast = a.status==='concluido' || (a.time && a.time < nowStr);
+    var barClr = a.type==='retorno'?'#f59e0b':a.type==='online'?'#3b82f6':'#e85a0a';
+    var tagCls = a.status==='concluido'?'tg':isPast?'ty':'tb2';
+    var tagTxt = a.status==='concluido'?'Concluído':isPast?'Pendente':'Agendado';
+    var typeTxt = a.type==='retorno'?'Retorno':a.type==='online'?'Online':'1ª Consulta';
+    return '<div class="ag-item">'
+      +'<div class="ag-time">'+(a.time||'--:--')+'</div>'
+      +'<div class="ag-bar" style="background:'+barClr+'"></div>'
+      +'<div style="flex:1;min-width:0"><div class="ag-nm">'+a.patName+'</div>'
+      +'<div class="ag-tp">'+typeTxt+(a.duration?' · '+a.duration+' min':'')+'</div></div>'
+      +'<span class="tag '+tagCls+'">'+tagTxt+'</span>'
+      +'</div>';
+  }).join('');
+}
 function rFin() {
   if (!cu.financeiro) cu.financeiro = [];
   apiGetFinancial().then(function(list) {
     if (list && list.length) {
-      cu.financeiro = list.map(function(f) { return { id: f.id, paciente: f.patient_name || f.paciente, data: f.record_date || f.data, tipo: f.tipo, valor: f.valor || f.value, status: f.status, obs: f.obs }; });
-      DB.save(); var btn = document.getElementById('ni-fin'); if (btn) goP('fin', btn);
+      cu.financeiro = list.map(function(f) {
+        return { id: f.id, paciente: f.patient_name || f.paciente, data: f.record_date || f.data, tipo: f.tipo, valor: f.valor || f.value, status: f.status, obs: f.obs };
+      });
+      DB.save();
+      var btn = document.getElementById('ni-fin'); if (btn && btn.classList.contains('on')) goP('fin', btn);
     }
   }).catch(function() {});
-
   var fin = cu.financeiro;
   var pago = fin.filter(function(f) { return f.status === 'pago'; }).reduce(function(s, f) { return s + (f.valor || 0); }, 0);
-  var pendente = fin.filter(function(f) { return f.status !== 'pago'; }).reduce(function(s, f) { return s + (f.valor || 0); }, 0);
-
+  var pend = fin.filter(function(f) { return f.status !== 'pago'; }).reduce(function(s, f) { return s + (f.valor || 0); }, 0);
   var list = fin.length
     ? fin.map(function(f, i) {
         var pg = f.status === 'pago';
@@ -2887,21 +2839,19 @@ function rFin() {
           + '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:10px">'
           + '<div style="text-align:right"><div style="font-weight:800;font-size:15px;color:' + (pg ? '#16a34a' : '#d97706') + '">R$ ' + Number(f.valor || 0).toFixed(2) + '</div>'
           + '<div style="font-size:10px;font-weight:700;color:' + (pg ? '#16a34a' : '#d97706') + '">' + (pg ? 'PAGO' : 'PENDENTE') + '</div></div>'
-          + (!pg ? '<button class="btn btn-s btn-sm" onclick="finPagar(' + i + ')" style="font-size:11px;white-space:nowrap">✓ Pago</button>' : '')
-          + '<button class="btn btn-ghost btn-sm" onclick="finDel(' + i + ')" style="padding:4px 8px;font-size:11px;color:#dc2626">✕</button>'
+          + (!pg ? '<button class="btn btn-s btn-sm" onclick="finPagar(' + i + ')">✓ Pago</button>' : '')
+          + '<button class="btn btn-ghost btn-sm" onclick="finDel(' + i + ')" style="color:#dc2626">✕</button>'
           + '</div></div>';
       }).join('')
     : '<div style="text-align:center;padding:30px;color:var(--n4);font-size:13px">Nenhuma cobrança registrada.</div>';
-
   return '<div class="ch"><span class="ct">💰 Financeiro</span>'
-    + '<button class="btn btn-p btn-sm" onclick="openM('m-fin-form')">+ Nova Cobrança</button></div>'
+    + '<button class="btn btn-p btn-sm" onclick="openM(\'m-fin-form\')">+ Nova Cobrança</button></div>'
     + '<div style="display:flex;gap:10px;margin-bottom:16px">'
-    + '<div style="flex:1;background:#f0fdf4;border-radius:10px;padding:12px 14px"><div style="font-size:10px;font-weight:700;color:#16a34a;letter-spacing:.06em;text-transform:uppercase">Recebido</div><div style="font-size:18px;font-weight:800;color:#16a34a">R$ ' + pago.toFixed(2) + '</div></div>'
-    + '<div style="flex:1;background:#fffbeb;border-radius:10px;padding:12px 14px"><div style="font-size:10px;font-weight:700;color:#d97706;letter-spacing:.06em;text-transform:uppercase">Pendente</div><div style="font-size:18px;font-weight:800;color:#d97706">R$ ' + pendente.toFixed(2) + '</div></div>'
-    + '</div>'
-    + list
+    + '<div style="flex:1;background:#f0fdf4;border-radius:10px;padding:12px 14px"><div style="font-size:10px;font-weight:700;color:#16a34a;text-transform:uppercase">Recebido</div><div style="font-size:18px;font-weight:800;color:#16a34a">R$ ' + pago.toFixed(2) + '</div></div>'
+    + '<div style="flex:1;background:#fffbeb;border-radius:10px;padding:12px 14px"><div style="font-size:10px;font-weight:700;color:#d97706;text-transform:uppercase">Pendente</div><div style="font-size:18px;font-weight:800;color:#d97706">R$ ' + pend.toFixed(2) + '</div></div>'
+    + '</div>' + list
     + '<div class="ov" id="m-fin-form" style="display:none"><div class="modal" style="max-width:400px">'
-    + '<div class="mh"><div class="mt">💰 Nova Cobrança</div><button class="mc" onclick="closeM('m-fin-form')">×</button></div>'
+    + '<div class="mh"><div class="mt">💰 Nova Cobrança</div><button class="mc" onclick="closeM(\'m-fin-form\')">×</button></div>'
     + '<div style="padding:16px;display:flex;flex-direction:column;gap:10px">'
     + '<input class="inp" id="f-pac" placeholder="Nome do paciente *">'
     + '<input class="inp" id="f-data" type="date" value="' + new Date().toISOString().slice(0,10) + '">'
@@ -2926,22 +2876,23 @@ function finAdd() {
   apiAddFinancial(rec);
   cu.financeiro.push(rec); DB.save();
   closeM('m-fin-form'); showToast('Cobrança registrada ✅', 's');
-  var btn = document.getElementById('ni-fin'); if(btn) goP('fin', btn);
+  var btn = document.getElementById('ni-fin'); if (btn) goP('fin', btn);
 }
 function finPagar(idx) {
-  if (!cu || !cu.financeiro) return;
-  var item = cu.financeiro[idx]; item.status = 'pago';
+  var item = cu.financeiro[idx]; if (!item) return;
+  item.status = 'pago';
   if (item.id) apiPayFinancial(item.id);
   DB.save(); showToast('Pagamento registrado ✅', 's');
-  var btn = document.getElementById('ni-fin'); if(btn) goP('fin', btn);
+  var btn = document.getElementById('ni-fin'); if (btn) goP('fin', btn);
 }
 function finDel(idx) {
   if (!confirm('Remover cobrança?')) return;
   var rem = cu.financeiro.splice(idx, 1)[0];
   if (rem && rem.id) apiDeleteFinancial(rem.id);
   DB.save(); showToast('Cobrança removida', 'i');
-  var btn = document.getElementById('ni-fin'); if(btn) goP('fin', btn);
+  var btn = document.getElementById('ni-fin'); if (btn) goP('fin', btn);
 }
+
 function showOnboarding() { _onbStep = 0; renderOnbSlide(); openM('m-onboard'); }
 function renderOnbSlide() {
   var el = document.getElementById('onb-body'); if (!el) return;
@@ -4118,152 +4069,74 @@ function afterRender(id) {
 
 // ─── DASHBOARD ───
 function rDash() {
-  var now = new Date();
-  var todayStr = now.toISOString().slice(0, 10);
-
-  // ── KPIs calculados dos dados reais ──────────────────────────
-  var totalPats = pats.length;
-  var alerts = pats.filter(function(p) {
-    return p.st === 'tr' || (p.exams && (p.exams.vitd < 25 || p.exams.gli > 120));
-  }).length;
-
-  // Todas as consultas (appointments) de todos os pacientes
-  var allAppts = [];
-  pats.forEach(function(p) {
-    (p.appointments || []).forEach(function(a) {
-      allAppts.push(Object.assign({}, a, { patName: p.n, patId: p.id, patAv: p.av, patInit: p.i, av: p.av }));
-    });
-  });
-
-  // Consultas desta semana (seg-dom)
-  var dayOfWeek = now.getDay(); // 0=dom, 1=seg...
-  var startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  var endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
-  var startW = startOfWeek.toISOString().slice(0,10);
-  var endW = endOfWeek.toISOString().slice(0,10);
-  var weekAppts = allAppts.filter(function(a) { return a.isoDate >= startW && a.isoDate <= endW; });
-
-  // Semana passada (para comparação)
-  var startPrevW = new Date(startOfWeek); startPrevW.setDate(startPrevW.getDate() - 7);
-  var endPrevW = new Date(startPrevW); endPrevW.setDate(startPrevW.getDate() + 6);
-  var prevWeekAppts = allAppts.filter(function(a) {
-    return a.isoDate >= startPrevW.toISOString().slice(0,10) && a.isoDate <= endPrevW.toISOString().slice(0,10);
-  });
-  var weekDiff = weekAppts.length - prevWeekAppts.length;
-  var weekTrend = weekDiff >= 0 ? '↑ +' + weekDiff : '↓ ' + weekDiff;
-  var weekTrendClass = weekDiff >= 0 ? 'kbd-b' : 'kbd-r';
-
-  // Taxa de adesão média
-  var avgAdesao = totalPats ? Math.round(pats.reduce(function(s,p){ return s + (p.prog || 0); }, 0) / totalPats) : 0;
-
-  // Novos pacientes este mês
-  var thisMo = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-  var newThisMo = pats.filter(function(p) { return p.last && p.last.length >= 7; }).length; // approximation
-
-  // Agenda de HOJE — real
-  var todayAppts = allAppts.filter(function(a) { return a.isoDate && a.isoDate.slice(0,10) === todayStr; })
-    .sort(function(a,b) { return (a.time||'').localeCompare(b.time||''); });
-
-  var todayHtml = todayAppts.length
-    ? todayAppts.map(function(a) {
-        var isPast = a.isoDate < todayStr || (a.isoDate === todayStr && a.time && a.time < (String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')));
-        var typeColors = { retorno: '#f59e0b', inicial: '#e85a0a', online: '#3b82f6', consulta: '#e85a0a' };
-        var barColor = typeColors[a.type] || '#e85a0a';
-        var statusTxt = a.status === 'concluido' ? 'Concluído' : isPast ? 'Pendente' : 'Agendado';
-        var statusCls = a.status === 'concluido' ? 'tg' : isPast ? 'ty' : 'tb2';
-        var typeTxt = a.type === 'retorno' ? 'Retorno' : a.type === 'online' ? 'Online' : '1ª Consulta';
-        return '<div class="ag-item" onclick="selPat=pats.find(function(x){return x.id=='+a.patId+'});goP('ev',document.getElementById('ni-ev'))" style="cursor:pointer">'
-          + '<div class="ag-time">' + (a.time||'--:--') + '</div>'
-          + '<div class="ag-bar" style="background:' + barColor + '"></div>'
-          + '<div style="flex:1;min-width:0"><div class="ag-nm">' + a.patName + '</div><div class="ag-tp">' + typeTxt + (a.duration ? ' · ' + a.duration + ' min' : '') + '</div></div>'
-          + '<span class="tag ' + statusCls + '">' + statusTxt + '</span>'
-          + '</div>';
-      }).join('')
-    : '<div style="text-align:center;padding:24px 0;color:var(--n4);font-size:12.5px">Sem consultas agendadas para hoje.<br><button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="goP('agenda',document.getElementById('ni-agenda'))">Abrir agenda →</button></div>';
-
-  // Gráfico — últimas 8 semanas
-  var weeklyData = [];
-  for (var w = 7; w >= 0; w--) {
-    var ws = new Date(startOfWeek); ws.setDate(ws.getDate() - w * 7);
-    var we = new Date(ws); we.setDate(ws.getDate() + 6);
-    var wsStr = ws.toISOString().slice(0,10), weStr = we.toISOString().slice(0,10);
-    weeklyData.push(allAppts.filter(function(a){ return a.isoDate >= wsStr && a.isoDate <= weStr; }).length);
-  }
-
-  // Meta de consultas (meta mensal padrão = 20, pode ser configurável)
-  var metaConsultas = (cu && cu.metaConsultas) || 20;
-  var mesAtual = now.getMonth(), anoAtual = now.getFullYear();
-  var consultasMes = allAppts.filter(function(a) {
-    return a.isoDate && a.isoDate.slice(0,7) === (anoAtual + '-' + String(mesAtual+1).padStart(2,'0'));
-  }).length;
-
-  return ('<div class="kpi-row">'
-    + '<div class="kpi kpi-g"><div class="kpi-top"><div class="kpi-ico ki-g"><svg viewBox="0 0 24 24" fill="#16a34a"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><span class="kpi-bdg kbd-g">↑ ativos</span></div><div class="kpi-n">' + totalPats + '</div><div class="kpi-l">Pacientes Ativos</div><div class="kpi-ft kft-g" onclick="goP('pat',document.getElementById('ni-pat'))" style="cursor:pointer"><strong>Ver todos</strong> →</div></div>'
-    + '<div class="kpi kpi-b"><div class="kpi-top"><div class="kpi-ico ki-b"><svg viewBox="0 0 24 24" fill="#1d4ed8"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div><span class="kpi-bdg ' + weekTrendClass + '">' + weekTrend + '</span></div><div class="kpi-n">' + weekAppts.length + '</div><div class="kpi-l">Consultas esta semana</div><div class="kpi-ft kft-b">' + (weekDiff >= 0 ? '<strong>+' + weekDiff + '</strong> vs sem. anterior' : '<strong>' + weekDiff + '</strong> vs sem. anterior') + '</div></div>'
-    + '<div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><span class="kpi-bdg kbd-y">↑ média</span></div><div class="kpi-n">' + avgAdesao + '%</div><div class="kpi-l">Taxa de Adesão</div><div class="kpi-ft kft-y">Média de <strong>' + totalPats + '</strong> pacientes</div></div>'
-    + '<div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">' + alerts + '</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r" onclick="goP('notif',document.getElementById('ni-notif'))" style="cursor:pointer"><strong>Ver alertas</strong> →</div></div>'
-    + '</div>'
-    + '<div class="dash-row2">'
-    + '<div class="card"><div class="ch"><div><div class="ct">Consultas Realizadas</div><div class="cs" style="margin-top:2px">Últimas 8 semanas</div></div><div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n4)"><span style="width:9px;height:9px;border-radius:2px;background:var(--g5);display:inline-block"></span>Consultas</div></div><div class="bchart" id="bchart"></div></div>'
-    + '<div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span><span style="font-family:var(--jk);font-size:9px;font-weight:700;color:#16a34a;background:#dcfce7;padding:3px 9px;border-radius:99px">' + todayAppts.length + ' consulta' + (todayAppts.length !== 1 ? 's' : '') + '</span></div>'
-    + todayHtml
-    + '</div>'
-    + '</div>'
-    + '<div class="dash-row2">'
-    + '<div class="card"><div class="ch"><span class="ct">Pacientes Recentes</span><button style="font-family:var(--jk);font-size:10.5px;font-weight:700;color:var(--g5);background:none;border:none;cursor:pointer" onclick="goP('pat',document.getElementById('ni-pat'))">Ver todos →</button></div>'
-    + '<div id="d-recent"></div></div>'
-    + '<div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">'
-    + '<div style="font-family:var(--jk);font-size:9px;font-weight:700;color:var(--n4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">Meta Mensal de Consultas</div>'
-    + '<div style="position:relative;width:114px;height:114px;margin-bottom:12px">'
-    + '<svg width="114" height="114" viewBox="0 0 114 114"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#86efac"/></linearGradient></defs><circle cx="57" cy="57" r="46" class="ring-track"/><circle id="dash-ring" cx="57" cy="57" r="46" class="ring-fill" stroke-dasharray="289" stroke-dashoffset="289" transform="rotate(-90 57 57)"/></svg>'
-    + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-family:var(--in);font-size:24px;font-weight:800;color:var(--n9);letter-spacing:-1px;line-height:1" id="ring-pct">0%</div><div style="font-size:10px;color:var(--n4);margin-top:1px">da meta</div></div>'
-    + '</div>'
-    + '<div style="font-size:12px;font-weight:600;color:var(--n7)" id="ring-sub"></div>'
-    + '<div style="font-size:11px;color:var(--n4);margin-top:4px">Faltam <strong style="color:var(--g5)" id="ring-rem"></strong></div>'
-    + '</div>'
-    + '</div>'
-    + _buildSmartAlerts()
-    + _buildAdhCard()
-    + '<script>setTimeout(function(){ buildBChart(' + JSON.stringify([]) + '); animRing(' + consultasMes + ',' + metaConsultas + '); }, 50);</' + 'script>');
+  var alerts = pats.filter(function (p) { return p.st === 'tr' || (p.exams && (p.exams.vitd < 25 || p.exams.gli > 120)); }).length;
+  // Consultas desta semana
+  var now = new Date(), dow = now.getDay();
+  var startW = new Date(now); startW.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
+  var endW = new Date(startW); endW.setDate(startW.getDate() + 6);
+  var sW = startW.toISOString().slice(0,10), eW = endW.toISOString().slice(0,10);
+  var startPW = new Date(startW); startPW.setDate(startPW.getDate() - 7);
+  var ePW = new Date(startPW); ePW.setDate(startPW.getDate() + 6);
+  var sPWs = startPW.toISOString().slice(0,10), ePWs = ePW.toISOString().slice(0,10);
+  var allAppts = []; pats.forEach(function(p){ (p.appointments||[]).forEach(function(a){ allAppts.push(Object.assign({},a,{patName:p.n,patId:p.id,av:p.av,i:p.i})); }); });
+  var weekCt = allAppts.filter(function(a){ return a.isoDate >= sW && a.isoDate <= eW; }).length;
+  var prevCt = allAppts.filter(function(a){ return a.isoDate >= sPWs && a.isoDate <= ePWs; }).length;
+  var diff = weekCt - prevCt;
+  var weekTrendHtml = diff >= 0 ? '<strong>+' + diff + '</strong> vs sem. anterior' : '<strong>' + diff + '</strong> vs sem. anterior';
+  var avgAdesao = pats.length ? Math.round(pats.reduce(function(s,p){ return s+(p.prog||0); },0)/pats.length) : 0;
+  return `
+ <div class="kpi-row">
+  <div class="kpi kpi-g"><div class="kpi-top"><div class="kpi-ico ki-g"><svg viewBox="0 0 24 24" fill="#16a34a"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><span class="kpi-bdg kbd-g">↑ +2</span></div><div class="kpi-n">${pats.length}</div><div class="kpi-l">Pacientes Ativos</div><div class="kpi-ft kft-g"><strong>+2 novos</strong> em março</div></div>
+  <div class="kpi kpi-b"><div class="kpi-top"><div class="kpi-ico ki-b"><svg viewBox="0 0 24 24" fill="#1d4ed8"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div><span class="kpi-bdg kbd-b">↑ +15%</span></div><div class="kpi-n">${weekCt}</div><div class="kpi-l">Consultas esta semana</div><div class="kpi-ft kft-b">${weekTrendHtml}</div></div>
+  <div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><span class="kpi-bdg kbd-y">↑ +5%</span></div><div class="kpi-n">${avgAdesao}%</div><div class="kpi-l">Taxa de Adesão</div><div class="kpi-ft kft-y">Média de ${pats.length} pacientes</div></div>
+  <div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">${alerts}</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r"><strong>Ver alertas</strong> →</div></div>
+ </div>
+ <div class="dash-row2">
+  <div class="card"><div class="ch"><div><div class="ct">Consultas Realizadas</div><div class="cs" style="margin-top:2px">Últimas 8 semanas</div></div><div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n4)"><span style="width:9px;height:9px;border-radius:2px;background:var(--g5);display:inline-block"></span>Consultas</div></div><div class="bchart" id="bchart"></div></div>
+  <div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span><span style="font-family:var(--jk);font-size:9px;font-weight:700;color:#c4420a;background:#fdd0a8;padding:3px 9px;border-radius:99px">${_todayAgendaCount()} consulta(s)</span></div>
+   ${_buildTodayAgenda()}
+  </div>
+ </div>
+ <div class="dash-row2">
+  <div class="card"><div class="ch"><span class="ct">Pacientes Recentes</span><button style="font-family:var(--jk);font-size:10.5px;font-weight:700;color:var(--g5);background:none;border:none;cursor:pointer" onclick="goP('pat',document.getElementById('ni-pat'))">Ver todos →</button></div>
+   <div id="d-recent"></div></div>
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+   <div style="font-family:var(--jk);font-size:9px;font-weight:700;color:var(--n4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">Meta Mensal de Consultas</div>
+   <div style="position:relative;width:114px;height:114px;margin-bottom:12px">
+    <svg width="114" height="114" viewBox="0 0 114 114"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#e85a0a"/><stop offset="100%" stop-color="#f9a868"/></linearGradient></defs><circle cx="57" cy="57" r="46" class="ring-track"/><circle id="dash-ring" cx="57" cy="57" r="46" class="ring-fill" stroke-dasharray="289" stroke-dashoffset="289" transform="rotate(-90 57 57)"/></svg>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-family:var(--in);font-size:24px;font-weight:800;color:var(--n9);letter-spacing:-1px;line-height:1" id="ring-pct">0%</div><div style="font-size:10px;color:var(--n4);margin-top:1px">da meta</div></div>
+   </div>
+   <div style="font-size:12px;font-weight:600;color:var(--n7)" id="ring-sub"></div>
+   <div style="font-size:11px;color:var(--n4);margin-top:4px">Faltam <strong style="color:var(--g5)" id="ring-rem"></strong></div>
+  </div>
+ </div>`;
 }
-
-
-function buildBChart(weeklyOverride) {
-  var now = new Date();
-  var dayOfWeek = now.getDay();
-  var startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  var allAppts = [];
-  pats.forEach(function(p) { (p.appointments || []).forEach(function(a) { allAppts.push(a); }); });
-
-  var data = [];
-  var labels = [];
-  for (var w = 7; w >= 0; w--) {
-    var ws = new Date(startOfWeek); ws.setDate(ws.getDate() - w * 7);
-    var we = new Date(ws); we.setDate(ws.getDate() + 6);
-    var wsStr = ws.toISOString().slice(0,10), weStr = we.toISOString().slice(0,10);
-    data.push(allAppts.filter(function(a){ return a.isoDate >= wsStr && a.isoDate <= weStr; }).length);
-    labels.push('S' + (8 - w));
+function buildBChart() {
+  var now = new Date(), dow = now.getDay();
+  var startW = new Date(now); startW.setDate(now.getDate() - (dow===0?6:dow-1));
+  var allAppts = []; pats.forEach(function(p){ (p.appointments||[]).forEach(function(a){ allAppts.push(a); }); });
+  var data = [], labels = [];
+  for(var w=7;w>=0;w--){
+    var ws=new Date(startW); ws.setDate(ws.getDate()-w*7);
+    var we=new Date(ws); we.setDate(ws.getDate()+6);
+    data.push(allAppts.filter(function(a){ return a.isoDate>=ws.toISOString().slice(0,10)&&a.isoDate<=we.toISOString().slice(0,10); }).length);
+    labels.push('S'+(8-w));
   }
-
-  var mx = Math.max.apply(null, data) || 1;
+  var mx = Math.max.apply(null,data)||1, labels = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'], mx = Math.max.apply(null, data);
   var el = document.getElementById('bchart'); if (!el) return;
-  el.innerHTML = data.map(function(v, i) {
-    var cls = i === 7 ? 'bc-a' : v < 3 ? 'bc-l' : 'bc-n';
-    return '<div class="bcc"><div class="bct"><div class="bcb ' + cls + '" style="height:' + Math.max(4, Math.round(v / mx * 100)) + '%" data-v="' + v + ' consulta' + (v !== 1 ? 's' : '') + '"></div></div><span class="bcl">' + labels[i] + '</span></div>';
+  el.innerHTML = data.map(function (v, i) {
+    var cls = i === 7 ? 'bc-a' : v < 10 ? 'bc-l' : 'bc-n';
+    return '<div class="bcc"><div class="bct"><div class="bcb ' + cls + '" style="height:' + Math.round(v / mx * 100) + '%" data-v="' + v + ' consultas"></div></div><span class="bcl">' + labels[i] + '</span></div>';
   }).join('');
-
-  // Pacientes recentes
+  // recent pats
   var el2 = document.getElementById('d-recent'); if (!el2) return;
-  if (!pats.length) { el2.innerHTML = '<div style="text-align:center;padding:20px;color:var(--n4);font-size:12px">Nenhum paciente cadastrado ainda.</div>'; return; }
-  el2.innerHTML = pats.slice(0, 5).map(function(p) {
-    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:var(--r);cursor:pointer;transition:background .13s" onmouseover="this.style.background='var(--n0)'" onmouseout="this.style.background='transparent'" onclick="selPat=pats.find(function(x){return x.id=='+p.id+'});goP('ev',document.getElementById('ni-ev'))">'
+  el2.innerHTML = pats.slice(0, 5).map(function (p) {
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:var(--r);cursor:pointer;transition:background .13s" onmouseover="this.style.background=\'var(--n0)\'" onmouseout="this.style.background=\'transparent\'" onclick="selPat=pats.find(function(x){return x.id===\'+p.id+\'});goP(\'ev\',document.getElementById(\'ni-ev\'))">'
       + '<div class="pac-av ' + p.av + '" style="width:34px;height:34px;border-radius:50%;font-size:11px">' + p.i + '</div>'
       + '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--n8)">' + p.n + '</div><div style="font-size:10.5px;color:var(--n4);margin-top:1px">' + p.goal + ' · ' + p.last + '</div></div>'
       + '<span class="tag ' + p.st + '">' + p.stxt + '</span></div>';
   }).join('');
 }
-
-
 function animRing(v, t) {
   var c = 289, off = c * (1 - v / t);
   var el = document.getElementById('dash-ring');
