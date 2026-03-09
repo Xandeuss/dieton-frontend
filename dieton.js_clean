@@ -8,6 +8,12 @@ const SUPABASE_ANON = 'sb_publishable_Vtx6rfVuWbrA8qAl6ljXqQ_OwS2Ikkp';
 // const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 // Cole o conteúdo de 02_supabase_client.js abaixo desta linha
 // para ativar a integração completa com o banco de dados.
+
+function fillDemo(e, p) {
+  document.getElementById('inp-em').value = e;
+  document.getElementById('inp-pw').value = p;
+}
+
 // ═══════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════
@@ -233,11 +239,234 @@ var tasks = [
   { id: 4, text: 'Registrar diário alimentar', cat: 'g', done: true },
   { id: 5, text: 'Praticar caminhada 30min', cat: 's', done: false }
 ];
+function initMeals(src) {
+  if (src) {
+    meals = src.map(function (m) { return { name: m.name, em: m.em || '🍽️', items: m.items.map(function (it) { var f = FOOD_DB.find(function (x) { return x.id === it.fid }); if (!f) return null; var factor = it.qty / 100; return { food: f, qty: it.qty, k: Math.round(f.k * factor), p: +(f.p * factor).toFixed(1), c: +(f.c * factor).toFixed(1), g: +(f.g * factor).toFixed(1) }; }).filter(Boolean) }; });
+  } else {
+    meals = [
+      { name: 'Café da manhã', em: '☀️', items: [] },
+      { name: 'Almoço', em: '🍽️', items: [] },
+      { name: 'Lanche da tarde', em: '🥛', items: [] },
+      { name: 'Jantar', em: '🌙', items: [] },
+      { name: 'Ceia', em: '🌙', items: [] }
+    ];
+  }
+}
 initMeals();
 
 // ─── AUTH ───
+function lTab(t) {
+  document.getElementById('f-in').style.display = t === 'in' ? 'block' : 'none';
+  document.getElementById('f-up').style.display = t === 'up' ? 'block' : 'none';
+  document.getElementById('t-in').classList.toggle('on', t === 'in');
+  document.getElementById('t-up').classList.toggle('on', t === 'up');
+  var eb = document.getElementById('err-up'); if (eb) eb.style.display = 'none';
+  var ob = document.getElementById('ok-up'); if (ob) ob.style.display = 'none';
+}
+function upTab(t) {
+  var isPro = t === 'pro';
+  document.getElementById('up-pro').style.display = isPro ? 'block' : 'none';
+  document.getElementById('up-pac').style.display = isPro ? 'none' : 'block';
+  var btnPro = document.getElementById('up-tab-pro');
+  var btnPac = document.getElementById('up-tab-pac');
+  btnPro.classList.toggle('on', isPro);
+  btnPac.classList.toggle('on', !isPro);
+  var eb = document.getElementById('err-up'); if (eb) eb.style.display = 'none';
+  var ob = document.getElementById('ok-up'); if (ob) ob.style.display = 'none';
+}
 var _cfPassed = { pro: false, pac: false };
+function cfCheckChange(who) { var cb = document.getElementById('cf-check-' + who); _cfPassed[who] = cb && cb.checked; }
 var _crnVerified = false;
+function resetCrnStatus() {
+  _crnVerified = false;
+  var s = document.getElementById('crn-status'); if (s) s.textContent = '';
+  var d = document.getElementById('crn-detail'); if (d) d.textContent = '';
+}
+function verifyCRN() {
+  var raw = (document.getElementById('up-pro-crn') || {}).value || '';
+  var match = raw.replace(/\s+/g, '').toUpperCase().match(/CRN-?(\d{1,2})\s*([A-Z]?\d+)/);
+  if (!match) { showUpErr('Formato inválido. Use: CRN-3 12345'); return; }
+  var regional = match[1], numero = match[2];
+  var btn = document.getElementById('crn-btn');
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+  var s = document.getElementById('crn-status'); if (s) { s.style.color = '#6b7280'; s.textContent = 'Consultando CFN…'; }
+  var url = 'https://www.cfn.org.br/wp-json/regulacao/v1/profissionais?crn=' + regional + '&registro=' + numero;
+  fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(8000) })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (btn) { btn.textContent = 'Verificar'; btn.disabled = false; }
+      var prof = Array.isArray(data) && data.length ? data[0] : (data && (data.nome || data.NM_PROFISSIONAL) ? data : null);
+      if (prof && (prof.nome || prof.name || prof.NM_PROFISSIONAL)) {
+        var nome = prof.nome || prof.name || prof.NM_PROFISSIONAL || '';
+        var situacao = prof.situacao || prof.status || prof.DS_SITUACAO || 'Ativo';
+        var ativo = situacao.toLowerCase().includes('ativo') || situacao.toLowerCase().includes('regular');
+        if (ativo) {
+          _crnVerified = true;
+          var s2 = document.getElementById('crn-status'); if (s2) { s2.style.color = '#16a34a'; s2.textContent = '✅ Verificado'; }
+          var d = document.getElementById('crn-detail'); if (d) { d.style.color = '#16a34a'; d.innerHTML = '<strong>' + nome + '</strong> · CRN-' + regional + ' ' + numero + ' · ' + situacao; }
+          var ni = document.getElementById('up-pro-nome'); if (ni && !ni.value.trim() && nome) ni.value = nome;
+          var eb = document.getElementById('err-up'); if (eb) eb.style.display = 'none';
+        } else {
+          _crnVerified = false;
+          var s3 = document.getElementById('crn-status'); if (s3) { s3.style.color = '#dc2626'; s3.textContent = '⚠ Irregular'; }
+          var d2 = document.getElementById('crn-detail'); if (d2) { d2.style.color = '#dc2626'; d2.innerHTML = 'Situação: <strong>' + situacao + '</strong>. Regularize seu cadastro no CFN.'; }
+        }
+      } else {
+        _crnVerified = false;
+        var s4 = document.getElementById('crn-status'); if (s4) { s4.style.color = '#dc2626'; s4.textContent = '❌ Não encontrado'; }
+        var d3 = document.getElementById('crn-detail'); if (d3) { d3.style.color = '#dc2626'; d3.textContent = 'CRN-' + regional + ' ' + numero + ' não localizado no CFN.'; }
+      }
+    })
+    .catch(function () {
+      if (btn) { btn.textContent = 'Verificar'; btn.disabled = false; }
+      _crnVerified = true;
+      var s5 = document.getElementById('crn-status'); if (s5) { s5.style.color = '#d97706'; s5.textContent = '⚠ Aceito (offline)'; }
+      var d4 = document.getElementById('crn-detail'); if (d4) { d4.style.color = '#d97706'; d4.textContent = 'Sistema do CFN indisponível. CRN aceito provisoriamente — revisão manual necessária.'; }
+    });
+}
+function showUpErr(m) {
+  var b = document.getElementById('err-up'); if (b) b.style.display = 'flex';
+  var s = document.getElementById('err-up-msg'); if (s) s.textContent = m;
+  var o = document.getElementById('ok-up'); if (o) o.style.display = 'none';
+}
+function showUpOk(m) {
+  var o = document.getElementById('ok-up'); if (o) o.style.display = 'flex';
+  var s = document.getElementById('ok-up-msg'); if (s) s.textContent = m;
+  var b = document.getElementById('err-up'); if (b) b.style.display = 'none';
+}
+function doRegisterPro() {
+  var nome = (document.getElementById('up-pro-nome') || {}).value || '';
+  var email = (document.getElementById('up-pro-email') || {}).value || '';
+  var pw = (document.getElementById('up-pro-pw') || {}).value || '';
+  var pw2 = (document.getElementById('up-pro-pw2') || {}).value || '';
+  if (!nome.trim()) { showUpErr('Informe seu nome completo.'); return; }
+
+  if (!email.trim() || !email.includes('@')) { showUpErr('Informe um e-mail válido.'); return; }
+  if (pw.length < 8) { showUpErr('A senha deve ter no mínimo 8 caracteres.'); return; }
+  if (pw !== pw2) { showUpErr('As senhas não coincidem.'); return; }
+  if (!_cfPassed.pro) { showUpErr('Confirme que você não é um robô marcando a caixa de segurança.'); return; }
+  if (USERS.find(function (u) { return u.email === email; })) { showUpErr('Este e-mail já está cadastrado.'); return; }
+  var ini = nome.trim().split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w[0].toUpperCase(); }).join('');
+  var avOpts = ['a1', 'a2', 'a3', 'a5', 'a6'];
+  USERS.push({ id: USERS.length + 1, name: nome.trim(), email: email.trim(), pw: pw, role: 'pro', crn: '', av: avOpts[Math.floor(Math.random() * avOpts.length)], init: ini });
+  showUpOk('Conta criada com sucesso! Redirecionando para o acesso…');
+  setTimeout(function () {
+    lTab('in');
+    document.getElementById('inp-em').value = email.trim();
+    document.getElementById('inp-pw').value = pw;
+    var eb = document.getElementById('err-box'); if (eb) eb.style.display = 'none';
+    showToast('Bem-vindo(a), ' + nome.trim().split(' ')[0] + '! 🎉', 's');
+    setTimeout(doLogin, 700);
+  }, 1800);
+}
+function doRegisterPac() {
+  var nome = (document.getElementById('up-pac-nome') || {}).value || '';
+  var email = (document.getElementById('up-pac-email') || {}).value || '';
+  var invCode = (document.getElementById('up-pac-code') || {}).value || '';
+  var pw = (document.getElementById('up-pac-pw') || {}).value || '';
+  var pw2 = (document.getElementById('up-pac-pw2') || {}).value || '';
+  if (!nome.trim()) { showUpErr('Informe seu nome completo.'); return; }
+  if (!email.trim() || !email.includes('@')) { showUpErr('Informe um e-mail válido.'); return; }
+  if (pw.length < 6) { showUpErr('A senha deve ter pelo menos 6 caracteres.'); return; }
+  if (pw !== pw2) { showUpErr('As senhas não conferem.'); return; }
+  if (USERS.find(function (x) { return x.email === email.trim(); })) { showUpErr('Este e-mail já está cadastrado.'); return; }
+
+  // Validar código de convite se fornecido
+  var linkedNutriId = null;
+  if (invCode.trim()) {
+    var nutri = USERS.find(function (u) {
+      if (u.role !== 'pro') return false;
+      var prof = userProfiles[u.id];
+      return prof && prof.inviteCode && prof.inviteCode.toUpperCase() === invCode.trim().toUpperCase();
+    });
+    // Also check persistent invites store
+    if (!nutri) {
+      try {
+        var inv = JSON.parse(localStorage.getItem('dieton_invites') || '{}');
+        nutri = USERS.find(function (u) {
+          return u.role === 'pro' && inv[u.id] && inv[u.id].toUpperCase() === invCode.trim().toUpperCase();
+        });
+      } catch (e) { }
+    }
+    if (!nutri) { showUpErr('Código de convite inválido. Verifique com seu nutricionista.'); return; }
+    linkedNutriId = nutri.id;
+  }
+
+  var init = nome.trim().split(' ').filter(function (w) { return w.length > 0; }).slice(0, 2).map(function (w) { return w[0].toUpperCase(); }).join('');
+  var avColors = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8'];
+  var newUser = {
+    id: Date.now(), name: nome.trim(), email: email.trim(), pw: pw, role: 'pac',
+    av: avColors[Math.floor(Math.random() * avColors.length)], init: init, linkedNutriId: linkedNutriId
+  };
+  USERS.push(newUser);
+  // Auto-criar paciente vinculado
+  var newPat = {
+    id: newUser.id, n: nome.trim(), age: 0, sex: 'F', w: 0, h: 0, bmi: 0, fat: 0, wStart: 0,
+    goal: 'Saúde geral', cond: '', alerg: '', agua: 2, prog: 0, last: '—', av: newUser.av, i: init,
+    st: 'tg', stxt: 'Novo', linkedUserId: newUser.id,
+    exams: { gli: 0, col: 0, vitd: 0, hem: 0, fer: 0, tgo: 0, tgp: 0, tsh: 0 },
+    historico: [], diary: [], plans: [], appointments: [], notas: []
+  };
+  pats.push(newPat);
+  DB.save();
+  showUpOk('Conta criada com sucesso!' + (linkedNutriId ? ' Vinculado à sua nutricionista.' : ' Complete seu perfil após o login.'));
+  setTimeout(function () {
+    cu = newUser;
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    initPac();
+    setTimeout(updateNotifBadge, 100); setTimeout(updatePatBadge, 100);
+  }, 1200);
+}
+function showErr(m) { var b = document.getElementById('err-box'); b.style.display = 'flex'; document.getElementById('err-msg').textContent = m; }
+function doLogin() {
+  var e = document.getElementById('inp-em').value.trim(), p = document.getElementById('inp-pw').value;
+  var u = USERS.find(function (x) { return x.email === e && x.pw === p; });
+  if (!u) { showErr('E-mail ou senha incorretos.'); return; }
+  cu = u;
+
+  // Carregar dados salvos — se não houver, manter os dados demo
+  DB.load();
+
+  // Notificações padrão só se não houver salvas
+  if (!notifs.length) {
+    notifs = [{ id: 1, txt: 'Pedro Alves não registra consulta há 53 dias', type: 'w' }, { id: 2, txt: 'Maria Santos: Vitamina D crítica (18 ng/mL)', type: 'r' }, { id: 3, txt: '5 pacientes com retorno esta semana', type: 'i' }];
+  }
+
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  if (cu.role === 'pro') initPro(); else initPac();
+  setTimeout(updateNotifBadge, 100); setTimeout(updatePatBadge, 100);
+}
+function doLogout() {
+  DB.save();
+  if (window._autoSaveInterval) clearInterval(window._autoSaveInterval);
+  cu = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+}
+
+
+function updatePatBadge() {
+  var b = document.getElementById('pat-count-badge');
+  if (b) b.textContent = pats.length;
+}
+function updateNotifBadge() {
+  var badge = document.getElementById('notif-badge');
+  var dot = document.getElementById('notif-dot');
+  // Count manual + smart alerts
+  var smartCount = 0;
+  try { smartCount = _generateSmartAlerts().length; } catch (e) { }
+  var count = notifs.length + smartCount;
+  if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? '' : 'none';
+  }
+  if (dot) {
+    dot.style.display = count > 0 ? '' : 'none';
+  }
+}
+
 function initPro() {
   // Auto-save a cada 60 segundos
   if (window._autoSaveInterval) clearInterval(window._autoSaveInterval);
@@ -311,8 +540,7 @@ function goP(id, btn) {
     ev: '<button class="btn btn-s btn-sm" onclick="openM(\'m-meas\')">+ Medidas</button><button class="btn btn-p btn-sm" onclick="rptMensal()">📊 Relatório PDF</button>',
     pdiary: '<button class="btn btn-p btn-sm" onclick="openDiaryAdd()">+ Registrar Refeição</button>'
   };
-  var helpBtn = '<button class="btn btn-ghost btn-sm" onclick="showTour()" style="font-size:11px;gap:5px;display:flex;align-items:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Tutorial</button>';
-  ri.innerHTML = helpBtn + (rbts[id] || '');
+  ri.innerHTML = '' + (rbts[id] || '');
   if (pages[id]) { pg.innerHTML = pages[id](); setTimeout(function () { afterRender(id); }, 50); }
 }
 
@@ -597,7 +825,6 @@ function saveEditPat(id) {
 
   DB.save();
   closeM('m-pat');
-  if (typeof apiUpdatePatient === 'function') { apiUpdatePatient(p._backendId || p.id, p).catch(function(){}); }
   showToast('Dados de "' + p.n + '" atualizados!', 's');
   goP('pat', document.getElementById('ni-pat'));
 }
@@ -630,16 +857,9 @@ function deletePat(id) {
 function confirmDeletePat(id) {
   var p = pats.find(function (x) { return x.id == id });
   var nome = p ? p.n : 'paciente';
-  var delPat = pats.find(function(x){ return x.id == id; });
   pats = pats.filter(function (x) { return x.id != id });
   if (selPat && selPat.id === id) selPat = pats[0] || null;
   DB.save();
-  if (delPat && typeof apiDeletePatient === 'function') {
-    var backendId = delPat._backendId || delPat.id;
-    if (backendId && isNaN(Number(String(backendId).substring(0,4)))) {
-      apiDeletePatient(backendId).catch(function(){});
-    }
-  }
   closeM('m-del-pat');
   updatePatBadge(); showToast('"' + nome + '" removido da lista.', 'i');
   goP('pat', document.getElementById('ni-pat'));
@@ -2025,12 +2245,6 @@ function savePat() {
 
   pats.push(newPat);
   DB.save(); // persistir novo paciente
-  // Sincronizar com backend
-  if (typeof apiCreatePatient === 'function') {
-    apiCreatePatient(newPat).then(function(res) {
-      if (res && res.id) { newPat._backendId = res.id; DB.save(); }
-    }).catch(function(){});
-  }
 
   // Limpar campos do modal
   ['np-nome', 'np-nasc', 'np-tel', 'np-email', 'np-peso', 'np-alt', 'np-fat', 'np-mm', 'np-cin', 'np-quad', 'np-pesc',
@@ -2702,62 +2916,60 @@ function rPSupl() {
     + list;
 }
 
-// ═══ SUPLEMENTAÇÃO (visão do nutricionista) ═══
+// ═══ SUPLEMENTAÇÃO (visão do nutricionista — dentro do perfil do paciente) ═══
 function rSupl() {
   var p = selPat;
-  if (!p) return '<div style="padding:28px;text-align:center;color:var(--n4)">Selecione um paciente primeiro.</div>';
+  if (!p) return '<div style="padding:20px;color:var(--n4)">Selecione um paciente.</div>';
   if (!p.suplementos) p.suplementos = [];
+
+  apiGetSupplements(p.id).then(function(list) {
+    if (list && list.length) {
+      p.suplementos = list.map(function(s) {
+        return { id: s.id, nome: s.name||s.nome, dose: s.dose, frequencia: s.frequency||s.frequencia, obs: s.obs||s.notes };
+      });
+      DB.save();
+      var btn = document.getElementById('ni-supl');
+      if (btn && btn.classList.contains('on')) goP('supl', btn);
+    }
+  }).catch(function(){});
+
   var list = p.suplementos.length
     ? p.suplementos.map(function(s, i) {
         return '<div style="background:#fff;border-radius:12px;border:1px solid var(--n2);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
           + '<div style="width:40px;height:40px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💊</div>'
-          + '<div style="flex:1">'
-          + '<div style="font-weight:700;font-size:13px;color:var(--n9)">' + escHtml(s.nome||s.name||'') + '</div>'
-          + '<div style="font-size:11.5px;color:var(--n5);margin-top:2px">' + escHtml(s.dose||'') + (s.frequencia||s.frequency ? ' · ' + escHtml(s.frequencia||s.frequency) : '') + '</div>'
-          + (s.obs ? '<div style="font-size:11px;color:var(--n4);margin-top:2px">' + escHtml(s.obs) + '</div>' : '')
-          + '</div>'
+          + '<div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--n9)">' + escHtml(s.nome||'') + '</div>'
+          + '<div style="font-size:11.5px;color:var(--n5);margin-top:2px">' + escHtml(s.dose||'') + (s.frequencia ? ' · ' + escHtml(s.frequencia) : '') + '</div>'
+          + (s.obs ? '<div style="font-size:11px;color:var(--n4);margin-top:2px">' + escHtml(s.obs) + '</div>' : '') + '</div>'
           + '<button class="btn btn-danger btn-sm" onclick="suplDel(' + p.id + ',' + i + ')" style="padding:4px 10px;font-size:11px">✕</button>'
           + '</div>';
       }).join('')
-    : '<div style="text-align:center;padding:40px 0">'
-      + '<div style="font-size:40px;margin-bottom:12px">💊</div>'
-      + '<div style="font-weight:700;font-size:14px;color:var(--n7);margin-bottom:6px">Nenhum suplemento prescrito</div>'
-      + '<div style="font-size:12px;color:var(--n4)">Clique em "+ Adicionar" para prescrever suplementos para ' + escHtml(p.n) + '.</div>'
-      + '</div>';
-  return '<div class="card">'
-    + '<div class="ch"><span class="ct">💊 Suplementação — ' + escHtml(p.n) + '</span>'
-    + '<button class="btn btn-p btn-sm" onclick="document.getElementById(\'supl-form\').style.display=document.getElementById(\'supl-form\').style.display===\'none\'?\'\':(\'none\')">+ Adicionar</button></div>'
-    + '<div id="supl-form" style="display:none;background:var(--g0);border-radius:10px;padding:14px;margin-bottom:14px;display:none">'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
-    + '<input class="inp" id="sl-nome" placeholder="Nome do suplemento *">'
-    + '<input class="inp" id="sl-dose" placeholder="Dose (ex: 1 cápsula)">'
-    + '<input class="inp" id="sl-freq" placeholder="Frequência (ex: 1x ao dia)">'
-    + '<input class="inp" id="sl-obs" placeholder="Observações (opcional)">'
-    + '</div>'
-    + '<button class="btn btn-p" onclick="suplAdd()">💊 Prescrever suplemento</button>'
-    + '</div>'
+    : '<div style="text-align:center;padding:28px 0;color:var(--n4);font-size:12px">Nenhum suplemento prescrito ainda.</div>';
+
+  return '<div class="ch"><span class="ct">💊 Suplementação — ' + escHtml(p.n) + '</span>'
+    + '<button class="btn btn-p btn-sm" onclick="openM(\'m-supl-add\')">+ Adicionar</button></div>'
     + list
-    + '</div>';
+    + '<div class="ov" id="m-supl-add" style="display:none"><div class="modal" style="max-width:380px">'
+    + '<div class="mh"><div class="mt">💊 Novo Suplemento</div><button class="mc" onclick="closeM(\'m-supl-add\')">×</button></div>'
+    + '<div style="padding:16px;display:flex;flex-direction:column;gap:10px">'
+    + '<input class="inp" id="sl-nome" placeholder="Nome do suplemento *">'
+    + '<input class="inp" id="sl-dose" placeholder="Dose (ex: 1 cápsula, 10ml)">'
+    + '<input class="inp" id="sl-freq" placeholder="Frequência (ex: 1x ao dia, com almoço)">'
+    + '<input class="inp" id="sl-obs" placeholder="Observações (opcional)">'
+    + '<button class="btn btn-p" onclick="suplAdd()">Prescrever</button>'
+    + '</div></div></div>';
 }
 function suplAdd() {
   var p = selPat; if (!p) return;
-  var nome = (document.getElementById('sl-nome')||{}).value||''; nome = nome.trim();
+  var nome = document.getElementById('sl-nome').value.trim();
   if (!nome) { showToast('Informe o nome do suplemento', 'w'); return; }
   if (!p.suplementos) p.suplementos = [];
-  var s = {
-    nome: nome,
-    dose: (document.getElementById('sl-dose')||{}).value||'',
-    frequencia: (document.getElementById('sl-freq')||{}).value||'',
-    obs: (document.getElementById('sl-obs')||{}).value||''
-  };
-  p.suplementos.push(s);
-  DB.save();
-  showToast('Suplemento adicionado ✅', 's');
-  var btn = document.getElementById('ni-supl');
-  goP('supl', btn || null);
-  if (typeof apiAddSupplement === 'function') {
-    apiAddSupplement({ patient_id: p.id, name: s.nome, dose: s.dose, frequency: s.frequencia, notes: s.obs });
-  }
+  var s = { nome: nome, dose: document.getElementById('sl-dose').value.trim(),
+    frequencia: document.getElementById('sl-freq').value.trim(),
+    obs: document.getElementById('sl-obs').value.trim() };
+  apiAddSupplement(Object.assign({ patient_id: p.id, name: s.nome, frequency: s.frequencia, notes: s.obs }, s));
+  p.suplementos.push(s); DB.save();
+  closeM('m-supl-add'); showToast('Suplemento adicionado ✅', 's');
+  var btn = document.getElementById('ni-supl'); if (btn) goP('supl', btn);
 }
 function suplDel(patId, idx) {
   var p = pats.find(function(x){ return x.id == patId; }); if (!p || !p.suplementos) return;
@@ -3485,429 +3697,6 @@ function _dvUpdateBadges(patId) {
     var unseen = Object.entries(photos).filter(function (e) { return e[0].indexOf('ph_' + patId + '_') === 0 && e[1] && e[1].reactions && Object.keys(e[1].reactions).length && !e[1].seenByPac; }).length;
     var bpac = document.getElementById('nb-pac-diary');
     if (bpac) { bpac.textContent = unseen; bpac.style.display = unseen ? 'inline-flex' : 'none'; }
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════════════
-var USERS = [
-  { id: 1, name: 'Dra. Admin Nutriplan', email: 'admin' + '@' + 'dieton.com.br', pw: '123456', role: 'pro', crn: 'CRN-3 54321', av: 'a1', init: 'DA' },
-  { id: 2, name: 'Fernanda Lima', email: 'fernanda' + '@' + 'paciente.com', pw: '654321', role: 'pac', av: 'a4', init: 'FL' }
-];
-
-// TACO — amostra representativa de 80 alimentos (agrupados por categoria)
-var FOOD_DB = [
-  // Carnes
-  { id: 1, n: 'Frango grelhado (peito)', e: '🍗', cat: 'Carnes', p: 31.5, c: 0, g: 3.6, k: 165, fe: 1.0, ca: 11, vc: 0, va: 18, zn: 1.0, b12: 0.3, fb: 0 },
-  { id: 2, n: 'Carne bovina (patinho)', e: '🥩', cat: 'Carnes', p: 28, c: 0, g: 5, k: 163, fe: 2.5, ca: 5, vc: 0, va: 0, zn: 4.2, b12: 2.0, fb: 0 },
-  { id: 3, n: 'Salmão grelhado', e: '🐟', cat: 'Peixes', p: 25, c: 0, g: 12, k: 208, fe: 0.8, ca: 12, vc: 0, va: 50, zn: 0.7, b12: 3.2, fb: 0 },
-  { id: 4, n: 'Atum em água (lata)', e: '🐟', cat: 'Peixes', p: 26, c: 0, g: 1, k: 117, fe: 1.3, ca: 8, vc: 0, va: 0, zn: 0.6, b12: 2.5, fb: 0 },
-  { id: 5, n: 'Tilápia grelhada', e: '🐠', cat: 'Peixes', p: 26, c: 0, g: 2.7, k: 129, fe: 0.6, ca: 13, vc: 0, va: 10, zn: 0.5, b12: 1.8, fb: 0 },
-  { id: 6, n: 'Ovo inteiro cozido', e: '🥚', cat: 'Ovos', p: 13, c: 1.1, g: 9.5, k: 143, fe: 1.8, ca: 50, vc: 0, va: 160, zn: 1.1, b12: 1.1, fb: 0 },
-  { id: 7, n: 'Clara de ovo', e: '🥚', cat: 'Ovos', p: 11, c: 0.7, g: 0.2, k: 48, fe: 0.1, ca: 7, vc: 0, va: 0, zn: 0.03, b12: 0.1, fb: 0 },
-  { id: 8, n: 'Carne suína (lombo)', e: '🥩', cat: 'Carnes', p: 26, c: 0, g: 7, k: 171, fe: 1.0, ca: 10, vc: 0.6, va: 0, zn: 2.0, b12: 0.8, fb: 0 },
-  { id: 9, n: 'Frango (coxa/sobrecoxa)', e: '🍗', cat: 'Carnes', p: 24, c: 0, g: 10, k: 190, fe: 1.2, ca: 15, vc: 0, va: 30, zn: 1.4, b12: 0.3, fb: 0 },
-  { id: 10, n: 'Sardinha em óleo', e: '🐟', cat: 'Peixes', p: 20, c: 0, g: 14, k: 208, fe: 3.1, ca: 350, vc: 0, va: 40, zn: 1.3, b12: 8.0, fb: 0 },
-  // Grãos e cereais
-  { id: 11, n: 'Arroz branco cozido', e: '🍚', cat: 'Cereais', p: 2.5, c: 28, g: 0.2, k: 128, fe: 0.3, ca: 5, vc: 0, va: 0, zn: 0.4, b12: 0, fb: 0.4 },
-  { id: 12, n: 'Arroz integral cozido', e: '🍚', cat: 'Cereais', p: 2.6, c: 26, g: 0.9, k: 124, fe: 0.5, ca: 10, vc: 0, va: 0, zn: 0.6, b12: 0, fb: 1.8 },
-  { id: 13, n: 'Feijão preto cozido', e: '🫘', cat: 'Leguminosas', p: 6.8, c: 14, g: 0.5, k: 77, fe: 1.7, ca: 23, vc: 0, va: 0, zn: 0.8, b12: 0, fb: 6.5 },
-  { id: 14, n: 'Feijão carioca cozido', e: '🫘', cat: 'Leguminosas', p: 5.4, c: 13.6, g: 0.4, k: 77, fe: 2.0, ca: 27, vc: 0, va: 0, zn: 0.7, b12: 0, fb: 6.1 },
-  { id: 15, n: 'Lentilha cozida', e: '🫘', cat: 'Leguminosas', p: 9, c: 20, g: 0.4, k: 116, fe: 3.3, ca: 19, vc: 1.5, va: 8, zn: 1.3, b12: 0, fb: 7.9 },
-  { id: 16, n: 'Grão-de-bico cozido', e: '🫘', cat: 'Leguminosas', p: 8.9, c: 27, g: 2.6, k: 164, fe: 2.9, ca: 49, vc: 1.3, va: 4, zn: 1.5, b12: 0, fb: 7.6 },
-  { id: 17, n: 'Aveia em flocos', e: '🌾', cat: 'Cereais', p: 13, c: 66, g: 7, k: 394, fe: 4.7, ca: 54, vc: 0, va: 0, zn: 3.1, b12: 0, fb: 9.1 },
-  { id: 18, n: 'Quinoa cozida', e: '🌾', cat: 'Cereais', p: 4.4, c: 21, g: 1.9, k: 120, fe: 1.5, ca: 17, vc: 0, va: 1, zn: 1.1, b12: 0, fb: 2.8 },
-  { id: 19, n: 'Macarrão integral cozido', e: '🍝', cat: 'Cereais', p: 4.7, c: 26, g: 0.5, k: 124, fe: 1.1, ca: 14, vc: 0, va: 0, zn: 0.9, b12: 0, fb: 2.5 },
-  { id: 20, n: 'Pão integral', e: '🍞', cat: 'Cereais', p: 8, c: 45, g: 3, k: 247, fe: 2.5, ca: 70, vc: 0, va: 0, zn: 1.4, b12: 0, fb: 5.6 },
-  { id: 21, n: 'Tapioca (goma)', e: '🫓', cat: 'Cereais', p: 0.3, c: 86, g: 0.1, k: 345, fe: 0.4, ca: 16, vc: 0, va: 0, zn: 0.2, b12: 0, fb: 0 },
-  { id: 22, n: 'Batata-doce cozida', e: '🍠', cat: 'Tubérculos', p: 1.4, c: 26, g: 0.1, k: 110, fe: 0.6, ca: 30, vc: 19, va: 961, zn: 0.3, b12: 0, fb: 3.3 },
-  { id: 23, n: 'Batata inglesa cozida', e: '🥔', cat: 'Tubérculos', p: 2, c: 17, g: 0.1, k: 77, fe: 0.3, ca: 5, vc: 13, va: 0, zn: 0.3, b12: 0, fb: 1.8 },
-  { id: 24, n: 'Mandioca cozida', e: '🧆', cat: 'Tubérculos', p: 0.7, c: 30, g: 0.2, k: 125, fe: 0.3, ca: 18, vc: 13, va: 1, zn: 0.3, b12: 0, fb: 1.8 },
-  // Laticínios
-  { id: 25, n: 'Leite integral (copo)', e: '🥛', cat: 'Laticínios', p: 3.1, c: 4.8, g: 3.2, k: 61, fe: 0.1, ca: 113, vc: 0.9, va: 46, zn: 0.4, b12: 0.4, fb: 0 },
-  { id: 26, n: 'Leite desnatado (copo)', e: '🥛', cat: 'Laticínios', p: 3.4, c: 4.9, g: 0.2, k: 35, fe: 0.1, ca: 120, vc: 0.9, va: 50, zn: 0.4, b12: 0.4, fb: 0 },
-  { id: 27, n: 'Iogurte natural integral', e: '🫙', cat: 'Laticínios', p: 3.5, c: 4.7, g: 3, k: 61, fe: 0.1, ca: 121, vc: 0.6, va: 29, zn: 0.5, b12: 0.4, fb: 0 },
-  { id: 28, n: 'Iogurte grego integral', e: '🫙', cat: 'Laticínios', p: 9, c: 4, g: 5, k: 97, fe: 0.1, ca: 110, vc: 0, va: 20, zn: 0.5, b12: 0.5, fb: 0 },
-  { id: 29, n: 'Queijo cottage', e: '🧀', cat: 'Laticínios', p: 11, c: 3.4, g: 4.3, k: 98, fe: 0.1, ca: 60, vc: 0, va: 45, zn: 0.5, b12: 0.4, fb: 0 },
-  { id: 30, n: 'Queijo mussarela', e: '🧀', cat: 'Laticínios', p: 22, c: 2.2, g: 17, k: 253, fe: 0.2, ca: 505, vc: 0, va: 180, zn: 2.9, b12: 0.8, fb: 0 },
-  { id: 31, n: 'Queijo ricota', e: '🧀', cat: 'Laticínios', p: 11.3, c: 3, g: 9.5, k: 143, fe: 0.4, ca: 207, vc: 0, va: 120, zn: 1.2, b12: 0.3, fb: 0 },
-  { id: 32, n: 'Whey protein (scoop)', e: '💪', cat: 'Suplementos', p: 24, c: 3, g: 1.5, k: 122, fe: 0.2, ca: 100, vc: 0, va: 0, zn: 0.8, b12: 0.5, fb: 0 },
-  // Vegetais
-  { id: 33, n: 'Brócolis cozido', e: '🥦', cat: 'Vegetais', p: 2.8, c: 4.5, g: 0.4, k: 34, fe: 1.0, ca: 41, vc: 64, va: 96, zn: 0.4, b12: 0, fb: 2.6 },
-  { id: 34, n: 'Espinafre cozido', e: '🥬', cat: 'Vegetais', p: 2.9, c: 3.6, g: 0.3, k: 23, fe: 3.6, ca: 136, vc: 17, va: 942, zn: 0.8, b12: 0, fb: 2.4 },
-  { id: 35, n: 'Cenoura crua', e: '🥕', cat: 'Vegetais', p: 0.9, c: 9.6, g: 0.2, k: 41, fe: 0.3, ca: 33, vc: 6, va: 835, zn: 0.2, b12: 0, fb: 2.8 },
-  { id: 36, n: 'Tomate', e: '🍅', cat: 'Vegetais', p: 0.9, c: 3.9, g: 0.2, k: 18, fe: 0.3, ca: 10, vc: 21, va: 42, zn: 0.2, b12: 0, fb: 1.2 },
-  { id: 37, n: 'Abóbora cozida', e: '🎃', cat: 'Vegetais', p: 0.5, c: 7.5, g: 0.1, k: 33, fe: 0.6, ca: 14, vc: 8, va: 426, zn: 0.1, b12: 0, fb: 0.5 },
-  { id: 38, n: 'Couve-manteiga crua', e: '🥬', cat: 'Vegetais', p: 1.9, c: 4.9, g: 0.5, k: 32, fe: 0.7, ca: 104, vc: 71, va: 309, zn: 0.2, b12: 0, fb: 2.0 },
-  { id: 39, n: 'Abobrinha cozida', e: '🥒', cat: 'Vegetais', p: 1.2, c: 3.5, g: 0.4, k: 22, fe: 0.4, ca: 15, vc: 9, va: 10, zn: 0.3, b12: 0, fb: 1.2 },
-  { id: 40, n: 'Pepino', e: '🥒', cat: 'Vegetais', p: 0.7, c: 2.9, g: 0.1, k: 13, fe: 0.3, ca: 14, vc: 3, va: 5, zn: 0.2, b12: 0, fb: 0.5 },
-  { id: 41, n: 'Alface', e: '🥗', cat: 'Vegetais', p: 1.4, c: 2.2, g: 0.2, k: 15, fe: 0.4, ca: 35, vc: 18, va: 370, zn: 0.2, b12: 0, fb: 2.1 },
-  { id: 42, n: 'Beterraba cozida', e: '🫀', cat: 'Vegetais', p: 1.9, c: 10, g: 0.1, k: 46, fe: 0.8, ca: 16, vc: 4, va: 2, zn: 0.4, b12: 0, fb: 2.0 },
-  { id: 43, n: 'Chuchu cozido', e: '🥦', cat: 'Vegetais', p: 0.8, c: 3.8, g: 0.1, k: 20, fe: 0.4, ca: 13, vc: 7, va: 4, zn: 0.2, b12: 0, fb: 1.7 },
-  { id: 44, n: 'Repolho cru', e: '🥬', cat: 'Vegetais', p: 1.4, c: 5.8, g: 0.1, k: 28, fe: 0.5, ca: 40, vc: 51, va: 5, zn: 0.2, b12: 0, fb: 2.5 },
-  { id: 45, n: 'Vagem cozida', e: '🫘', cat: 'Vegetais', p: 1.8, c: 6.1, g: 0.3, k: 31, fe: 0.7, ca: 37, vc: 12, va: 41, zn: 0.2, b12: 0, fb: 2.7 },
-  // Frutas
-  { id: 46, n: 'Banana prata', e: '🍌', cat: 'Frutas', p: 1.4, c: 26, g: 0.1, k: 110, fe: 0.4, ca: 8, vc: 22, va: 5, zn: 0.2, b12: 0, fb: 2.0 },
-  { id: 47, n: 'Maçã fuji', e: '🍎', cat: 'Frutas', p: 0.3, c: 13.8, g: 0.4, k: 57, fe: 0.1, ca: 4, vc: 5, va: 3, zn: 0.05, b12: 0, fb: 1.3 },
-  { id: 48, n: 'Laranja pera', e: '🍊', cat: 'Frutas', p: 0.8, c: 11.5, g: 0.1, k: 47, fe: 0.3, ca: 22, vc: 53, va: 11, zn: 0.1, b12: 0, fb: 1.1 },
-  { id: 49, n: 'Mamão papaia', e: '🍈', cat: 'Frutas', p: 0.5, c: 10.4, g: 0.1, k: 46, fe: 0.4, ca: 20, vc: 73, va: 47, zn: 0.1, b12: 0, fb: 1.8 },
-  { id: 50, n: 'Manga', e: '🥭', cat: 'Frutas', p: 0.4, c: 14.9, g: 0.2, k: 64, fe: 0.2, ca: 9, vc: 36, va: 38, zn: 0.1, b12: 0, fb: 1.6 },
-  { id: 51, n: 'Uva Itália', e: '🍇', cat: 'Frutas', p: 0.7, c: 17.3, g: 0.5, k: 79, fe: 0.3, ca: 9, vc: 7, va: 3, zn: 0.1, b12: 0, fb: 0.9 },
-  { id: 52, n: 'Morango', e: '🍓', cat: 'Frutas', p: 0.8, c: 7.7, g: 0.3, k: 34, fe: 0.4, ca: 16, vc: 68, va: 1, zn: 0.2, b12: 0, fb: 2.3 },
-  { id: 53, n: 'Melancia', e: '🍉', cat: 'Frutas', p: 0.6, c: 7.4, g: 0.1, k: 33, fe: 0.2, ca: 8, vc: 7, va: 28, zn: 0.1, b12: 0, fb: 0.4 },
-  { id: 54, n: 'Abacate', e: '🥑', cat: 'Frutas', p: 1.2, c: 8.5, g: 14.6, k: 168, fe: 0.6, ca: 13, vc: 10, va: 7, zn: 0.6, b12: 0, fb: 6.7 },
-  { id: 55, n: 'Kiwi', e: '🥝', cat: 'Frutas', p: 1.1, c: 15.8, g: 0.6, k: 64, fe: 0.3, ca: 34, vc: 93, va: 4, zn: 0.1, b12: 0, fb: 2.1 },
-  // Gorduras e oleaginosas
-  { id: 56, n: 'Azeite de oliva (col.)', e: '🫒', cat: 'Gorduras', p: 0, c: 0, g: 14, k: 119, fe: 0.1, ca: 1, vc: 0, va: 0, zn: 0, b12: 0, fb: 0 },
-  { id: 57, n: 'Amendoim torrado', e: '🥜', cat: 'Oleaginosas', p: 25.8, c: 20.1, g: 44.2, k: 567, fe: 2.0, ca: 54, vc: 0, va: 0, zn: 3.3, b12: 0, fb: 8.5 },
-  { id: 58, n: 'Castanha-do-pará', e: '🌰', cat: 'Oleaginosas', p: 14, c: 12, g: 61, k: 643, fe: 2.4, ca: 160, vc: 0.7, va: 0, zn: 4.1, b12: 0, fb: 7.5 },
-  { id: 59, n: 'Amêndoas', e: '🌰', cat: 'Oleaginosas', p: 21, c: 22, g: 49, k: 579, fe: 3.7, ca: 264, vc: 0, va: 0, zn: 3.1, b12: 0, fb: 12.5 },
-  { id: 60, n: 'Nozes', e: '🌰', cat: 'Oleaginosas', p: 15, c: 14, g: 65, k: 654, fe: 2.9, ca: 98, vc: 1.3, va: 0, zn: 3.1, b12: 0, fb: 6.7 },
-  { id: 61, n: 'Pasta de amendoim (col.)', e: '🥜', cat: 'Gorduras', p: 7, c: 6, g: 16, k: 188, fe: 0.6, ca: 17, vc: 0, va: 0, zn: 0.9, b12: 0, fb: 1.9 },
-  { id: 62, n: 'Coco ralado seco', e: '🥥', cat: 'Oleaginosas', p: 2.7, c: 6.4, g: 36, k: 354, fe: 2.4, ca: 14, vc: 1.5, va: 0, zn: 0.9, b12: 0, fb: 9.0 },
-  // Laticínios adicionais
-  { id: 63, n: 'Requeijão cremoso (col.)', e: '🧀', cat: 'Laticínios', p: 1.8, c: 1.8, g: 7.5, k: 84, fe: 0.1, ca: 32, vc: 0, va: 55, zn: 0.3, b12: 0.2, fb: 0 },
-  // Bebidas
-  { id: 64, n: 'Leite de amêndoas (copo)', e: '🥛', cat: 'Bebidas', p: 1.5, c: 3, g: 3, k: 42, fe: 0.7, ca: 188, vc: 0, va: 75, zn: 0.1, b12: 0, fb: 0.5 },
-  { id: 65, n: 'Suco de laranja (natural)', e: '🍊', cat: 'Bebidas', p: 0.7, c: 10.4, g: 0.2, k: 45, fe: 0.2, ca: 11, vc: 50, va: 10, zn: 0.1, b12: 0, fb: 0.2 },
-  // Outros
-  { id: 66, n: 'Mel (col.)', e: '🍯', cat: 'Outros', p: 0.3, c: 17, g: 0, k: 64, fe: 0.1, ca: 2, vc: 0.1, va: 0, zn: 0.1, b12: 0, fb: 0 },
-  { id: 67, n: 'Linhaça (col.)', e: '🌿', cat: 'Sementes', p: 1.5, c: 2.5, g: 3.5, k: 46, fe: 0.5, ca: 25, vc: 0.1, va: 0, zn: 0.5, b12: 0, fb: 2.5 },
-  { id: 68, n: 'Chia (col.)', e: '🌿', cat: 'Sementes', p: 1.7, c: 3.7, g: 2.9, k: 46, fe: 1.0, ca: 92, vc: 0.4, va: 1, zn: 0.5, b12: 0, fb: 3.9 },
-  { id: 69, n: 'Inhame cozido', e: '🧆', cat: 'Tubérculos', p: 1.5, c: 24, g: 0.1, k: 102, fe: 0.5, ca: 17, vc: 17, va: 7, zn: 0.2, b12: 0, fb: 4.1 },
-  { id: 70, n: 'Ervilha cozida', e: '🫘', cat: 'Leguminosas', p: 5.2, c: 14, g: 0.3, k: 80, fe: 1.5, ca: 25, vc: 14, va: 38, zn: 1.2, b12: 0, fb: 5.1 },
-  { id: 71, n: 'Edamame', e: '🫘', cat: 'Leguminosas', p: 11.9, c: 8.9, g: 5.2, k: 122, fe: 2.3, ca: 63, vc: 9, va: 8, zn: 1.4, b12: 0, fb: 5.2 },
-  { id: 72, n: 'Tofu firme', e: '🧊', cat: 'Proteínas', p: 8, c: 2, g: 4.5, k: 76, fe: 1.8, ca: 201, vc: 0, va: 0, zn: 0.8, b12: 0, fb: 0.3 },
-  { id: 73, n: 'Tempeh', e: '🧆', cat: 'Proteínas', p: 19, c: 9, g: 11, k: 193, fe: 2.7, ca: 111, vc: 0, va: 0, zn: 1.7, b12: 0, fb: 0 },
-  { id: 74, n: 'Pão de forma branco', e: '🍞', cat: 'Cereais', p: 7.8, c: 50, g: 3, k: 264, fe: 2.2, ca: 35, vc: 0, va: 0, zn: 0.7, b12: 0, fb: 2.0 },
-  { id: 75, n: 'Biscoito de arroz', e: '🍘', cat: 'Cereais', p: 2, c: 20, g: 0.5, k: 92, fe: 0.2, ca: 4, vc: 0, va: 0, zn: 0.3, b12: 0, fb: 0.4 },
-  { id: 76, n: 'Proteína texturizada de soja (PTS)', e: '💪', cat: 'Proteínas', p: 52, c: 30, g: 1, k: 341, fe: 9.6, ca: 276, vc: 0, va: 0, zn: 2.5, b12: 0, fb: 17 },
-  { id: 77, n: 'Canjiquinha cozida', e: '🌽', cat: 'Cereais', p: 2.0, c: 26, g: 0.6, k: 118, fe: 0.4, ca: 5, vc: 0, va: 0, zn: 0.4, b12: 0, fb: 2.2 },
-  { id: 78, n: 'Farinha de aveia (col.)', e: '🌾', cat: 'Cereais', p: 2.2, c: 11, g: 1.2, k: 66, fe: 0.8, ca: 9, vc: 0, va: 0, zn: 0.5, b12: 0, fb: 1.5 },
-  { id: 79, n: 'Couve-flor cozida', e: '🥦', cat: 'Vegetais', p: 2.1, c: 3.5, g: 0.2, k: 22, fe: 0.3, ca: 16, vc: 46, va: 1, zn: 0.2, b12: 0, fb: 2.0 },
-  { id: 80, n: 'Berinjela cozida', e: '🍆', cat: 'Vegetais', p: 0.8, c: 5.5, g: 0.2, k: 26, fe: 0.2, ca: 6, vc: 1.5, va: 1, zn: 0.2, b12: 0, fb: 2.5 }
-];
-
-var SUBS = {
-  'Frango grelhado (peito)': [{ n: 'Peru grelhado', e: '🦃' }, { n: 'Tofu firme', e: '🧊' }, { n: 'Atum em água (lata)', e: '🐟' }, { n: 'Clara de ovo', e: '🥚' }, { n: 'Tempeh', e: '🧆' }],
-  'Arroz branco cozido': [{ n: 'Arroz integral cozido', e: '🍚' }, { n: 'Quinoa cozida', e: '🌾' }, { n: 'Batata-doce cozida', e: '🍠' }, { n: 'Canjiquinha cozida', e: '🌽' }, { n: 'Macarrão integral cozido', e: '🍝' }],
-  'Feijão preto cozido': [{ n: 'Feijão carioca cozido', e: '🫘' }, { n: 'Lentilha cozida', e: '🫘' }, { n: 'Grão-de-bico cozido', e: '🫘' }, { n: 'Ervilha cozida', e: '🫘' }],
-  'Leite integral (copo)': [{ n: 'Leite desnatado (copo)', e: '🥛' }, { n: 'Iogurte natural integral', e: '🫙' }, { n: 'Leite de amêndoas (copo)', e: '🥛' }],
-  'Iogurte natural integral': [{ n: 'Iogurte grego integral', e: '🫙' }, { n: 'Leite integral (copo)', e: '🥛' }, { n: 'Queijo cottage', e: '🧀' }],
-  'Banana prata': [{ n: 'Maçã fuji', e: '🍎' }, { n: 'Mamão papaia', e: '🍈' }, { n: 'Manga', e: '🥭' }, { n: 'Morango', e: '🍓' }],
-  'Aveia em flocos': [{ n: 'Farinha de aveia (col.)', e: '🌾' }, { n: 'Quinoa cozida', e: '🌾' }, { n: 'Granola natural', e: '🌾' }],
-  'Azeite de oliva (col.)': [{ n: 'Abacate', e: '🥑' }, { n: 'Castanha-do-pará', e: '🌰' }, { n: 'Pasta de amendoim (col.)', e: '🥜' }]
-};
-
-var RDA = { fe: { n: 'Ferro', un: 'mg', ref: 14, ico: '🩸' }, ca: { n: 'Cálcio', un: 'mg', ref: 1000, ico: '🦴' }, vc: { n: 'Vit C', un: 'mg', ref: 75, ico: '🍊' }, va: { n: 'Vit A', un: 'µg', ref: 700, ico: '🥕' }, zn: { n: 'Zinco', un: 'mg', ref: 8, ico: '💊' }, b12: { n: 'Vit B12', un: 'µg', ref: 2.4, ico: '⚡' }, fb: { n: 'Fibras', un: 'g', ref: 25, ico: '🌿' } };
-
-// MEAL TEMPLATES
-var TEMPLATES = [
-  {
-    id: 1, name: 'Emagrecimento 1600kcal', desc: 'Déficit calórico moderado, alto teor proteico, baixo carboidrato', kcal: 1600, meals: [
-      { name: 'Café da manhã', em: '☀️', items: [{ fid: 17, qty: 40 }, { fid: 27, qty: 150 }, { fid: 55, qty: 100 }] },
-      { name: 'Almoço', em: '🍽️', items: [{ fid: 1, qty: 120 }, { fid: 12, qty: 80 }, { fid: 14, qty: 80 }, { fid: 33, qty: 80 }] },
-      { name: 'Lanche', em: '🥛', items: [{ fid: 28, qty: 150 }, { fid: 47, qty: 120 }] },
-      { name: 'Jantar', em: '🌙', items: [{ fid: 3, qty: 120 }, { fid: 39, qty: 100 }, { fid: 22, qty: 100 }] },
-      { name: 'Ceia', em: '🌙', items: [{ fid: 7, qty: 60 }] }
-    ]
-  },
-  {
-    id: 2, name: 'Hipertrofia 2800kcal', desc: 'Superávit calórico, alta proteína, carboidratos estratégicos', kcal: 2800, meals: [
-      { name: 'Café da manhã', em: '☀️', items: [{ fid: 6, qty: 150 }, { fid: 17, qty: 60 }, { fid: 46, qty: 120 }, { fid: 27, qty: 200 }] },
-      { name: 'Pré-treino', em: '⚡', items: [{ fid: 22, qty: 150 }, { fid: 32, qty: 30 }] },
-      { name: 'Almoço', em: '🍽️', items: [{ fid: 2, qty: 180 }, { fid: 11, qty: 120 }, { fid: 13, qty: 100 }, { fid: 35, qty: 80 }] },
-      { name: 'Pós-treino', em: '💪', items: [{ fid: 32, qty: 40 }, { fid: 46, qty: 100 }] },
-      { name: 'Jantar', em: '🌙', items: [{ fid: 1, qty: 150 }, { fid: 18, qty: 80 }, { fid: 33, qty: 80 }] },
-      { name: 'Ceia', em: '🌙', items: [{ fid: 29, qty: 100 }, { fid: 68, qty: 15 }] }
-    ]
-  },
-  {
-    id: 3, name: 'Manutenção saudável', desc: 'Equilíbrio entre macros, foco em micronutrientes e fibras', kcal: 2000, meals: [
-      { name: 'Café da manhã', em: '☀️', items: [{ fid: 17, qty: 40 }, { fid: 27, qty: 150 }, { fid: 47, qty: 150 }] },
-      { name: 'Almoço', em: '🍽️', items: [{ fid: 1, qty: 100 }, { fid: 11, qty: 80 }, { fid: 14, qty: 80 }, { fid: 33, qty: 60 }, { fid: 36, qty: 60 }] },
-      { name: 'Lanche', em: '🥛', items: [{ fid: 28, qty: 150 }, { fid: 57, qty: 25 }] },
-      { name: 'Jantar', em: '🌙', items: [{ fid: 3, qty: 120 }, { fid: 12, qty: 80 }, { fid: 42, qty: 80 }] },
-      { name: 'Ceia', em: '🌙', items: [{ fid: 29, qty: 80 }] }
-    ]
-  }
-];
-
-// PATIENTS
-var pats = [
-  {
-    id: 1, n: 'Fernanda Lima', age: 28, sex: 'F', w: 68.4, h: 165, bmi: 25.1, fat: 28, wStart: 75, goal: 'Emagrecimento', cond: 'SOP, resistência à insulina', alerg: 'Glúten', agua: 1.8, prog: 72, last: '12/02/2026', av: 'a4', i: 'FL', st: 'tg', stxt: 'Em dia', exams: { gli: 98, col: 185, vitd: 24, hem: 12.1, fer: 22, tgo: 18, tgp: 22, tsh: 2.1 }, historico: [
-      { data: '05/03/2026', peso: 68.4, imc: 25.1, cintura: 82, fat: 28.0, obs: 'Progresso consistente' },
-      { data: '05/02/2026', peso: 70.1, imc: 25.8, cintura: 84, fat: 29.2, obs: 'Boa adesão ao plano' },
-      { data: '05/01/2026', peso: 71.8, imc: 26.4, cintura: 86, fat: 30.1, obs: 'Início do programa' },
-      { data: '05/12/2025', peso: 73.2, imc: 26.9, cintura: 88, fat: 31.3, obs: 'Avaliação inicial' },
-      { data: '05/11/2025', peso: 75.0, imc: 27.6, cintura: 90, fat: 32.5, obs: 'Cadastro' }
-    ], diary: [
-      { data: '05/03/2026', refeicoes: [{ n: 'Café da manhã', items: ['Aveia 40g', 'Iogurte grego 150g', 'Morango 100g'], k: 380 }, { n: 'Almoço', items: ['Frango 120g', 'Arroz integral 80g', 'Feijão 80g', 'Salada verde'], k: 520 }, { n: 'Lanche', items: ['Iogurte grego 150g', 'Kiwi 80g'], k: 210 }, { n: 'Jantar', items: ['Salmão 120g', 'Batata-doce 100g', 'Brócolis 80g'], k: 430 }], total: 1540 },
-      { data: '04/03/2026', refeicoes: [{ n: 'Café da manhã', items: ['Ovos mexidos 2un', 'Pão integral 1 fatia', 'Café preto'], k: 310 }, { n: 'Almoço', items: ['Frango 120g', 'Arroz 80g', 'Feijão 80g', 'Salada'], k: 510 }, { n: 'Lanche', items: ['Banana 1un', 'Pasta amendoim 1col'], k: 290 }, { n: 'Jantar', items: ['Tilápia 120g', 'Abobrinha refogada', 'Tomate'], k: 280 }], total: 1390 }
-    ], plans: []
-  },
-  {
-    id: 2, n: 'Carlos Mendes', age: 35, sex: 'M', w: 88.2, h: 178, bmi: 27.8, fat: 22, wStart: 90, goal: 'Hipertrofia', cond: 'Saudável', alerg: '', agua: 2.5, prog: 55, last: '29/01/2026', av: 'a3', i: 'CM', st: 'ty', stxt: 'Pendente', exams: { gli: 92, col: 170, vitd: 35, hem: 15.2, fer: 85, tgo: 22, tgp: 28, tsh: 1.8 }, historico: [
-      { data: '05/03/2026', peso: 88.2, imc: 27.8, cintura: 90, fat: 22.0, obs: 'Ganho de massa' },
-      { data: '05/01/2026', peso: 88.5, imc: 27.9, cintura: 91, fat: 22.8, obs: 'Início do programa' }
-    ], diary: [], plans: [], appointments: []
-  },
-  {
-    id: 3, n: 'Ana Rodrigues', age: 42, sex: 'F', w: 72.0, h: 162, bmi: 27.4, fat: 32, wStart: 78, goal: 'Saúde geral', cond: 'Hipertensão leve', alerg: '', agua: 2.0, prog: 88, last: '02/03/2026', av: 'a2', i: 'AR', st: 'tg', stxt: 'Em dia', exams: { gli: 105, col: 210, vitd: 28, hem: 13.0, fer: 40, tgo: 25, tgp: 30, tsh: 3.2 }, historico: [
-      { data: '02/03/2026', peso: 72.0, imc: 27.4, cintura: 86, fat: 32, obs: 'Melhorou pressão' },
-      { data: '02/01/2026', peso: 74.5, imc: 28.4, cintura: 89, fat: 33.5, obs: 'Início do protocolo' }
-    ], diary: [], plans: [], appointments: []
-  },
-  {
-    id: 4, n: 'Pedro Alves', age: 19, sex: 'M', w: 75.0, h: 182, bmi: 22.6, fat: 14, wStart: 72, goal: 'Hipertrofia', cond: 'Saudável', alerg: '', agua: 3.0, prog: 40, last: '10/01/2026', av: 'a5', i: 'PA', st: 'tr', stxt: 'Alerta', exams: { gli: 88, col: 145, vitd: 42, hem: 15.8, fer: 95, tgo: 18, tgp: 20, tsh: 1.5 }, historico: [
-      { data: '10/01/2026', peso: 75.0, imc: 22.6, cintura: 78, fat: 14, obs: 'Boa disposição' }
-    ], diary: [], plans: [], appointments: []
-  },
-  {
-    id: 5, n: 'Maria Santos', age: 55, sex: 'F', w: 65.0, h: 158, bmi: 26.0, fat: 36, wStart: 68, goal: 'Saúde geral', cond: 'Diabetes tipo 2, dislipidemia', alerg: 'Lactose', agua: 1.5, prog: 65, last: '25/02/2026', av: 'a6', i: 'MS', st: 'ty', stxt: 'Atenção', exams: { gli: 142, col: 230, vitd: 18, hem: 11.5, fer: 15, tgo: 28, tgp: 35, tsh: 4.8 }, historico: [
-      { data: '25/02/2026', peso: 65.0, imc: 26.0, cintura: 88, fat: 36, obs: 'Glicemia controlando' },
-      { data: '25/01/2026', peso: 66.2, imc: 26.5, cintura: 89, fat: 37, obs: 'Início do protocolo' }
-    ], diary: [], plans: [], appointments: []
-  },
-  {
-    id: 6, n: 'João Costa', age: 48, sex: 'M', w: 95.0, h: 175, bmi: 31.0, fat: 28, wStart: 97, goal: 'Emagrecimento', cond: 'Apneia do sono', alerg: '', agua: 2.2, prog: 30, last: '15/02/2026', av: 'a7', i: 'JC', st: 'ty', stxt: 'Atenção', exams: { gli: 110, col: 195, vitd: 22, hem: 15.0, fer: 70, tgo: 32, tgp: 40, tsh: 2.8 }, historico: [
-      { data: '15/02/2026', peso: 95.0, imc: 31.0, cintura: 105, fat: 28, obs: 'Início do programa' }
-    ], diary: [], plans: [], appointments: []
-  },
-  {
-    id: 7, n: 'Lucia Ferreira', age: 31, sex: 'F', w: 58.0, h: 160, bmi: 22.7, fat: 24, wStart: 60, goal: 'Manutenção', cond: 'Ansiedade', alerg: '', agua: 2.0, prog: 90, last: '28/02/2026', av: 'a8', i: 'LF', st: 'tg', stxt: 'Em dia', exams: { gli: 85, col: 165, vitd: 38, hem: 12.8, fer: 35, tgo: 20, tgp: 18, tsh: 1.9 }, historico: [
-      { data: '28/02/2026', peso: 58.0, imc: 22.7, cintura: 72, fat: 24, obs: 'Mantendo bem' }
-    ], diary: [], plans: [], appointments: []
-  },
-  {
-    id: 8, n: 'Roberto Lima', age: 62, sex: 'M', w: 78.0, h: 170, bmi: 27.0, fat: 25, wStart: 80, goal: 'Saúde geral', cond: 'Artrite, colesterol alto', alerg: 'Amendoim', agua: 1.8, prog: 78, last: '01/03/2026', av: 'a1', i: 'RL', st: 'tg', stxt: 'Em dia', exams: { gli: 95, col: 245, vitd: 20, hem: 14.2, fer: 60, tgo: 24, tgp: 26, tsh: 2.5 }, historico: [
-      { data: '01/03/2026', peso: 78.0, imc: 27.0, cintura: 94, fat: 25, obs: 'Colesterol melhorou' },
-      { data: '01/01/2026', peso: 80.0, imc: 27.7, cintura: 97, fat: 26, obs: 'Início do protocolo' }
-    ], diary: [], plans: [], appointments: []
-  },
-  {
-    id: 9, n: 'Bianca Souza', age: 26, sex: 'F', w: 54.0, h: 163, bmi: 20.3, fat: 20, wStart: 54, goal: 'Hipertrofia', cond: 'Amenorréia funcional', alerg: '', agua: 2.2, prog: 62, last: '03/03/2026', av: 'a2', i: 'BS', st: 'tg', stxt: 'Em dia',
-    anamnese: { sono: 6.5, agua: 2.2, intestino: 'Normal (1×/dia)', tabagismo: 'Não', stress: 'Alto', ativ: 'Muito ativo', treino: '5×/semana — musculação', historico_dieta: 'Passou por período restritivo, agora em recuperação', queixas: 'Cansaço após treinos, cabelo fraco', meds: 'Suplemento ferro', pref: 'Dieta com bastante proteína, não gosta de peixe' },
-    exams: { gli: 82, col: 155, vitd: 32, hem: 11.8, fer: 18, tgo: 18, tgp: 20, tsh: 2.1 }, historico: [
-      { data: '03/03/2026', peso: 54.0, imc: 20.3, cintura: 68, fat: 20, obs: 'Boa evolução' },
-      { data: '03/01/2026', peso: 53.0, imc: 19.9, cintura: 67, fat: 19.5, obs: 'Início do protocolo' }
-    ], diary: [], plans: [], appointments: []
-  },
-  {
-    id: 10, n: 'Tomás Vieira', age: 44, sex: 'M', w: 102.0, h: 180, bmi: 31.5, fat: 30, wStart: 106, goal: 'Emagrecimento', cond: 'Síndrome metabólica, resistência insulínica', alerg: 'Frutos do mar', agua: 1.5, prog: 45, last: '28/02/2026', av: 'a3', i: 'TV', st: 'ty', stxt: 'Atenção',
-    anamnese: { sono: 5.5, agua: 1.5, intestino: 'Irregular', tabagismo: 'Ex-fumante', stress: 'Muito alto', ativ: 'Sedentário', treino: 'Caminhada 2×/semana', historico_dieta: 'Diversas dietas com efeito sanfona, nunca sustentou por mais de 3 meses', queixas: 'Fadiga, refluxo, ronco', meds: 'Metformina 850mg, Omeprazol 20mg', pref: 'Prefere almoço tradicional, não consegue jantar cedo' },
-    exams: { gli: 128, col: 220, vitd: 15, hem: 15.5, fer: 90, tgo: 45, tgp: 52, tsh: 3.5 }, historico: [
-      { data: '28/02/2026', peso: 102.0, imc: 31.5, cintura: 110, fat: 30, obs: 'Iniciou atividade' },
-      { data: '28/01/2026', peso: 104.0, imc: 32.1, cintura: 112, fat: 31, obs: 'Início do protocolo' },
-      { data: '28/12/2025', peso: 106.0, imc: 32.7, cintura: 114, fat: 32, obs: 'Avaliação inicial' }
-    ], diary: [], plans: [], appointments: []
-  },
-  {
-    id: 11, n: 'Isabela Nunes', age: 33, sex: 'F', w: 61.0, h: 165, bmi: 22.4, fat: 26, wStart: 61, goal: 'Saúde geral', cond: 'SOP, hipotireoidismo subclínico', alerg: 'Glúten', agua: 2.5, prog: 80, last: '04/03/2026', av: 'a6', i: 'IN', st: 'tg', stxt: 'Em dia',
-    anamnese: { sono: 7, agua: 2.5, intestino: 'Normal (1×/dia)', tabagismo: 'Não', stress: 'Moderado', ativ: 'Moderadamente ativo', treino: 'Yoga + caminhada 3×/sem', historico_dieta: 'Dieta sem glúten há 2 anos, melhora dos sintomas', queixas: 'Irregular menstrual, inchaço abdominal, queda de cabelo', meds: 'Levotiroxina 50mcg, Mio-inositol 2g', pref: 'Come fora no almoço, prefere jantares práticos' },
-    exams: { gli: 95, col: 185, vitd: 24, hem: 12.5, fer: 28, tgo: 22, tgp: 25, tsh: 4.2 }, historico: [
-      { data: '04/03/2026', peso: 61.0, imc: 22.4, cintura: 75, fat: 26, obs: 'TSH melhorou' },
-      { data: '04/01/2026', peso: 62.0, imc: 22.8, cintura: 77, fat: 27, obs: 'Início do protocolo' }
-    ], diary: [], plans: [], appointments: []
-  },
-  {
-    id: 12, n: 'Gustavo Prado', age: 17, sex: 'M', w: 68.0, h: 175, bmi: 22.2, fat: 15, wStart: 64, goal: 'Hipertrofia', cond: 'Saudável', alerg: '', agua: 2.8, prog: 70, last: '02/03/2026', av: 'a5', i: 'GP', st: 'tg', stxt: 'Em dia',
-    anamnese: { sono: 8, agua: 2.8, intestino: 'Normal (1×/dia)', tabagismo: 'Não', stress: 'Baixo', ativ: 'Muito ativo', treino: 'Musculação 4×/semana + futebol', historico_dieta: 'Sem histórico de dieta, come bastante mas não seletivo', queixas: 'Quer ganhar massa mas sem gordura', meds: 'Nenhum', pref: 'Come na escola, precisa de lanches práticos' },
-    exams: { gli: 85, col: 148, vitd: 45, hem: 16.0, fer: 100, tgo: 16, tgp: 18, tsh: 1.6 }, historico: [
-      { data: '02/03/2026', peso: 68.0, imc: 22.2, cintura: 80, fat: 15, obs: 'Bom ganho muscular' },
-      { data: '02/01/2026', peso: 64.0, imc: 20.9, cintura: 78, fat: 14, obs: 'Início do protocolo' }
-    ], diary: [], plans: [], appointments: []
-  }
-];
-
-var WEEK = [
-  { n: 'Domingo', meals: [{ n: 'Café', items: [{ e: '🌾', n: 'Aveia', k: 160 }, { e: '🫙', n: 'Iogurte grego', k: 97 }] }, { n: 'Almoço', items: [{ e: '🍗', n: 'Frango grelhado', k: 200 }, { e: '🍚', n: 'Arroz integral', k: 125 }, { e: '🫘', n: 'Feijão', k: 77 }, { e: '🥦', n: 'Brócolis', k: 35 }] }, { n: 'Jantar', items: [{ e: '🥚', n: 'Omelete', k: 200 }, { e: '🥗', n: 'Salada mista', k: 45 }] }] },
-  { n: 'Segunda', meals: [{ n: 'Café', items: [{ e: '🍞', n: 'Pão integral', k: 124 }, { e: '🥚', n: 'Ovo cozido', k: 143 }, { e: '🍎', n: 'Maçã', k: 57 }] }, { n: 'Almoço', items: [{ e: '🥩', n: 'Patinho grelhado', k: 163 }, { e: '🍚', n: 'Arroz integral', k: 125 }, { e: '🫘', n: 'Feijão carioca', k: 77 }, { e: '🥕', n: 'Cenoura refogada', k: 41 }] }, { n: 'Lanche', items: [{ e: '🫙', n: 'Iogurte grego', k: 97 }] }, { n: 'Jantar', items: [{ e: '🐟', n: 'Atum c/ legumes', k: 180 }] }] },
-  { n: 'Terça', meals: [{ n: 'Café', items: [{ e: '🌾', n: 'Aveia com banana', k: 200 }, { e: '🥛', n: 'Leite desnatado', k: 70 }] }, { n: 'Almoço', items: [{ e: '🍗', n: 'Frango grelhado', k: 200 }, { e: '🍝', n: 'Macarrão integral', k: 124 }, { e: '🥦', n: 'Salada verde', k: 30 }] }, { n: 'Lanche', items: [{ e: '🌰', n: 'Castanha-do-pará 2un', k: 65 }] }, { n: 'Jantar', items: [{ e: '🐠', n: 'Tilápia grelhada', k: 129 }, { e: '🍠', n: 'Batata-doce', k: 110 }] }] },
-  { n: 'Quarta', meals: [{ n: 'Café', items: [{ e: '🫓', n: 'Tapioca recheada', k: 220 }, { e: '🫙', n: 'Iogurte', k: 97 }] }, { n: 'Almoço', items: [{ e: '🥩', n: 'Carne bovina', k: 163 }, { e: '🍚', n: 'Arroz', k: 128 }, { e: '🫘', n: 'Lentilha', k: 116 }, { e: '🍅', n: 'Salada', k: 25 }] }, { n: 'Lanche', items: [{ e: '🍓', n: 'Frutas mistas', k: 70 }] }, { n: 'Jantar', items: [{ e: '🍗', n: 'Frango desfiado', k: 180 }, { e: '🥦', n: 'Legumes no vapor', k: 50 }] }] },
-  { n: 'Quinta', meals: [{ n: 'Café', items: [{ e: '🌾', n: 'Aveia', k: 160 }, { e: '🥚', n: 'Ovos mexidos', k: 143 }] }, { n: 'Almoço', items: [{ e: '🐟', n: 'Salmão', k: 208 }, { e: '🌾', n: 'Quinoa', k: 120 }, { e: '🥬', n: 'Espinafre refogado', k: 23 }] }, { n: 'Lanche', items: [{ e: '🧀', n: 'Queijo cottage', k: 98 }, { e: '🍎', n: 'Maçã', k: 57 }] }, { n: 'Jantar', items: [{ e: '🥚', n: 'Omelete de claras', k: 120 }, { e: '🫀', n: 'Beterraba', k: 46 }] }] },
-  { n: 'Sexta', meals: [{ n: 'Café', items: [{ e: '🍞', n: 'Pão integral', k: 124 }, { e: '🥑', n: 'Abacate', k: 160 }, { e: '☕', n: 'Café s/ açúcar', k: 5 }] }, { n: 'Almoço', items: [{ e: '🍗', n: 'Frango grelhado', k: 200 }, { e: '🍚', n: 'Arroz integral', k: 125 }, { e: '🫘', n: 'Feijão preto', k: 77 }, { e: '🥗', n: 'Salada', k: 30 }] }, { n: 'Lanche', items: [{ e: '🥜', n: 'Mix de oleaginosas', k: 180 }] }, { n: 'Jantar', items: [{ e: '🥩', n: 'Patinho grelhado', k: 163 }, { e: '🥔', n: 'Batata cozida', k: 77 }] }] },
-  { n: 'Sábado', meals: [{ n: 'Café', items: [{ e: '🌾', n: 'Granola', k: 200 }, { e: '🥛', n: 'Leite', k: 61 }, { e: '🍌', n: 'Banana', k: 110 }] }, { n: 'Almoço', items: [{ e: '🍗', n: 'Frango assado', k: 200 }, { e: '🍚', n: 'Arroz', k: 128 }, { e: '🫘', n: 'Feijão', k: 77 }, { e: '🥕', n: 'Legumes variados', k: 60 }] }, { n: 'Lanche', items: [{ e: '🍊', n: 'Laranja', k: 47 }] }, { n: 'Jantar', items: [{ e: '🐟', n: 'Peixe grelhado', k: 170 }, { e: '🥗', n: 'Salada completa', k: 80 }] }] }
-];
-
-// ─── STATE ───
-var cu = null, selPat = null, meals = [], taskCt = 10, prescGoal = 0, mP = 0, mC = 0, mF = 0, macroMode = 'gkg', formula = 'mf';
-var templates = [...TEMPLATES], notifs = [];
-var tasks = [
-  { id: 1, text: 'Beber 2L de água por dia', cat: 's', done: true },
-  { id: 2, text: 'Tomar suplemento de Vitamina D', cat: 'u', done: false },
-  { id: 3, text: 'Fazer exame de glicemia em jejum', cat: 'e', done: false },
-  { id: 4, text: 'Registrar diário alimentar', cat: 'g', done: true },
-  { id: 5, text: 'Praticar caminhada 30min', cat: 's', done: false }
-];
-function initMeals(src) {
-  if (src) {
-    meals = src.map(function (m) { return { name: m.name, em: m.em || '🍽️', items: m.items.map(function (it) { var f = FOOD_DB.find(function (x) { return x.id === it.fid }); if (!f) return null; var factor = it.qty / 100; return { food: f, qty: it.qty, k: Math.round(f.k * factor), p: +(f.p * factor).toFixed(1), c: +(f.c * factor).toFixed(1), g: +(f.g * factor).toFixed(1) }; }).filter(Boolean) }; });
-  } else {
-    meals = [
-      { name: 'Café da manhã', em: '☀️', items: [] },
-      { name: 'Almoço', em: '🍽️', items: [] },
-      { name: 'Lanche da tarde', em: '🥛', items: [] },
-      { name: 'Jantar', em: '🌙', items: [] },
-      { name: 'Ceia', em: '🌙', items: [] }
-    ];
-  }
-}
-initMeals();
-
-// ─── AUTH ───
-function lTab(t) {
-  document.getElementById('f-in').style.display = t === 'in' ? 'block' : 'none';
-  document.getElementById('f-up').style.display = t === 'up' ? 'block' : 'none';
-  document.getElementById('t-in').classList.toggle('on', t === 'in');
-  document.getElementById('t-up').classList.toggle('on', t === 'up');
-  var eb = document.getElementById('err-up'); if (eb) eb.style.display = 'none';
-  var ob = document.getElementById('ok-up'); if (ob) ob.style.display = 'none';
-}
-function upTab(t) {
-  var isPro = t === 'pro';
-  document.getElementById('up-pro').style.display = isPro ? 'block' : 'none';
-  document.getElementById('up-pac').style.display = isPro ? 'none' : 'block';
-  var btnPro = document.getElementById('up-tab-pro');
-  var btnPac = document.getElementById('up-tab-pac');
-  btnPro.classList.toggle('on', isPro);
-  btnPac.classList.toggle('on', !isPro);
-  var eb = document.getElementById('err-up'); if (eb) eb.style.display = 'none';
-  var ob = document.getElementById('ok-up'); if (ob) ob.style.display = 'none';
-}
-var _cfPassed = { pro: false, pac: false };
-function cfCheckChange(who) { var cb = document.getElementById('cf-check-' + who); _cfPassed[who] = cb && cb.checked; }
-var _crnVerified = false;
-function resetCrnStatus() {
-  _crnVerified = false;
-  var s = document.getElementById('crn-status'); if (s) s.textContent = '';
-  var d = document.getElementById('crn-detail'); if (d) d.textContent = '';
-}
-function verifyCRN() {
-  var raw = (document.getElementById('up-pro-crn') || {}).value || '';
-  var match = raw.replace(/\s+/g, '').toUpperCase().match(/CRN-?(\d{1,2})\s*([A-Z]?\d+)/);
-  if (!match) { showUpErr('Formato inválido. Use: CRN-3 12345'); return; }
-  var regional = match[1], numero = match[2];
-  var btn = document.getElementById('crn-btn');
-  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
-  var s = document.getElementById('crn-status'); if (s) { s.style.color = '#6b7280'; s.textContent = 'Consultando CFN…'; }
-  var url = 'https://www.cfn.org.br/wp-json/regulacao/v1/profissionais?crn=' + regional + '&registro=' + numero;
-  fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(8000) })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      if (btn) { btn.textContent = 'Verificar'; btn.disabled = false; }
-      var prof = Array.isArray(data) && data.length ? data[0] : (data && (data.nome || data.NM_PROFISSIONAL) ? data : null);
-      if (prof && (prof.nome || prof.name || prof.NM_PROFISSIONAL)) {
-        var nome = prof.nome || prof.name || prof.NM_PROFISSIONAL || '';
-        var situacao = prof.situacao || prof.status || prof.DS_SITUACAO || 'Ativo';
-        var ativo = situacao.toLowerCase().includes('ativo') || situacao.toLowerCase().includes('regular');
-        if (ativo) {
-          _crnVerified = true;
-          var s2 = document.getElementById('crn-status'); if (s2) { s2.style.color = '#16a34a'; s2.textContent = '✅ Verificado'; }
-          var d = document.getElementById('crn-detail'); if (d) { d.style.color = '#16a34a'; d.innerHTML = '<strong>' + nome + '</strong> · CRN-' + regional + ' ' + numero + ' · ' + situacao; }
-          var ni = document.getElementById('up-pro-nome'); if (ni && !ni.value.trim() && nome) ni.value = nome;
-          var eb = document.getElementById('err-up'); if (eb) eb.style.display = 'none';
-        } else {
-          _crnVerified = false;
-          var s3 = document.getElementById('crn-status'); if (s3) { s3.style.color = '#dc2626'; s3.textContent = '⚠ Irregular'; }
-          var d2 = document.getElementById('crn-detail'); if (d2) { d2.style.color = '#dc2626'; d2.innerHTML = 'Situação: <strong>' + situacao + '</strong>. Regularize seu cadastro no CFN.'; }
-        }
-      } else {
-        _crnVerified = false;
-        var s4 = document.getElementById('crn-status'); if (s4) { s4.style.color = '#dc2626'; s4.textContent = '❌ Não encontrado'; }
-        var d3 = document.getElementById('crn-detail'); if (d3) { d3.style.color = '#dc2626'; d3.textContent = 'CRN-' + regional + ' ' + numero + ' não localizado no CFN.'; }
-      }
-    })
-    .catch(function () {
-      if (btn) { btn.textContent = 'Verificar'; btn.disabled = false; }
-      _crnVerified = true;
-      var s5 = document.getElementById('crn-status'); if (s5) { s5.style.color = '#d97706'; s5.textContent = '⚠ Aceito (offline)'; }
-      var d4 = document.getElementById('crn-detail'); if (d4) { d4.style.color = '#d97706'; d4.textContent = 'Sistema do CFN indisponível. CRN aceito provisoriamente — revisão manual necessária.'; }
-    });
-}
-function showUpErr(m) {
-  var b = document.getElementById('err-up'); if (b) b.style.display = 'flex';
-  var s = document.getElementById('err-up-msg'); if (s) s.textContent = m;
-  var o = document.getElementById('ok-up'); if (o) o.style.display = 'none';
-}
-function showUpOk(m) {
-  var o = document.getElementById('ok-up'); if (o) o.style.display = 'flex';
-  var s = document.getElementById('ok-up-msg'); if (s) s.textContent = m;
-  var b = document.getElementById('err-up'); if (b) b.style.display = 'none';
-}
-function doRegisterPro() {
-  var nome = (document.getElementById('up-pro-nome') || {}).value || '';
-  var email = (document.getElementById('up-pro-email') || {}).value || '';
-  var pw = (document.getElementById('up-pro-pw') || {}).value || '';
-  var pw2 = (document.getElementById('up-pro-pw2') || {}).value || '';
-  if (!nome.trim()) { showUpErr('Informe seu nome completo.'); return; }
-
-  if (!email.trim() || !email.includes('@')) { showUpErr('Informe um e-mail válido.'); return; }
-  if (pw.length < 8) { showUpErr('A senha deve ter no mínimo 8 caracteres.'); return; }
-  if (pw !== pw2) { showUpErr('As senhas não coincidem.'); return; }
-  if (!_cfPassed.pro) { showUpErr('Confirme que você não é um robô marcando a caixa de segurança.'); return; }
-  if (USERS.find(function (u) { return u.email === email; })) { showUpErr('Este e-mail já está cadastrado.'); return; }
-  var ini = nome.trim().split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w[0].toUpperCase(); }).join('');
-  var avOpts = ['a1', 'a2', 'a3', 'a5', 'a6'];
-  USERS.push({ id: USERS.length + 1, name: nome.trim(), email: email.trim(), pw: pw, role: 'pro', crn: '', av: avOpts[Math.floor(Math.random() * avOpts.length)], init: ini });
-  showUpOk('Conta criada com sucesso! Redirecionando para o acesso…');
-  setTimeout(function () {
-    lTab('in');
-    document.getElementById('inp-em').value = email.trim();
-    document.getElementById('inp-pw').value = pw;
-    var eb = document.getElementById('err-box'); if (eb) eb.style.display = 'none';
-    showToast('Bem-vindo(a), ' + nome.trim().split(' ')[0] + '! 🎉', 's');
-    setTimeout(doLogin, 700);
-  }, 1800);
-}
-function doRegisterPac() {
-  var nome = (document.getElementById('up-pac-nome') || {}).value || '';
-  var email = (document.getElementById('up-pac-email') || {}).value || '';
-  var code = (document.getElementById('up-pac-code') || {}).value || '';
-  var pw = (document.getElementById('up-pac-pw') || {}).value || '';
-  var pw2 = (document.getElementById('up-pac-pw2') || {}).value || '';
-  if (!nome.trim()) { showUpErr('Informe seu nome completo.'); return; }
-  if (!email.trim() || !email.includes('@')) { showUpErr('Informe um e-mail válido.'); return; }
-  if (!code.trim() || code.trim().length < 4) { showUpErr('Código inválido. Solicite um código válido ao seu nutricionista.'); return; }
-  if (pw.length < 6) { showUpErr('A senha deve ter no mínimo 6 caracteres.'); return; }
-  if (pw !== pw2) { showUpErr('As senhas não coincidem.'); return; }
-  if (!_cfPassed.pac) { showUpErr('Confirme que você não é um robô marcando a caixa de segurança.'); return; }
-  if (USERS.find(function (u) { return u.email === email; })) { showUpErr('Este e-mail já está cadastrado.'); return; }
-  var ini = nome.trim().split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w[0].toUpperCase(); }).join('');
-  var avOpts = ['a2', 'a4', 'a5', 'a6'];
-  USERS.push({ id: USERS.length + 1, name: nome.trim(), email: email.trim(), pw: pw, role: 'pac', av: avOpts[Math.floor(Math.random() * avOpts.length)], init: ini });
-  showUpOk('Conta de paciente criada! Redirecionando para o acesso…');
-  setTimeout(function () {
-    lTab('in');
-    document.getElementById('inp-em').value = email.trim();
-    document.getElementById('inp-pw').value = pw;
-    var eb = document.getElementById('err-box'); if (eb) eb.style.display = 'none';
-    showToast('Bem-vindo(a), ' + nome.trim().split(' ')[0] + '! 🎉', 's');
-    setTimeout(doLogin, 700);
-  }, 1800);
-}
-function fillDemo(e, p) { document.getElementById('inp-em').value = e; document.getElementById('inp-pw').value = p; }
-function showErr(m) { var b = document.getElementById('err-box'); b.style.display = 'flex'; document.getElementById('err-msg').textContent = m; }
-
-function updatePatBadge() {
-  var b = document.getElementById('pat-count-badge');
-  if (b) b.textContent = pats.length;
-}
-function updateNotifBadge() {
-  var badge = document.getElementById('notif-badge');
-  var dot = document.getElementById('notif-dot');
-  // Count manual + smart alerts
-  var smartCount = 0;
-  try { smartCount = _generateSmartAlerts().length; } catch (e) { }
-  var count = notifs.length + smartCount;
-  if (badge) {
-    badge.textContent = count;
-    badge.style.display = count > 0 ? '' : 'none';
-  }
-  if (dot) {
-    dot.style.display = count > 0 ? '' : 'none';
   }
 }
 

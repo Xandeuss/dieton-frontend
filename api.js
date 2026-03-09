@@ -125,9 +125,9 @@ async function _renewToken() {
 
 // ── LOGIN ─────────────────────────────────────────────────────────
 // Substitui a função doLogin() original do dieton.js
-async function doLogin(directEmail = null, directPw = null, directTs = null) {
-  const email = directEmail || document.getElementById('inp-em').value.trim();
-  const pw = directPw || document.getElementById('inp-pw').value;
+async function doLogin() {
+  const email = document.getElementById('inp-em').value.trim();
+  const pw = document.getElementById('inp-pw').value;
 
   // Modo local (sem backend)
   if (!API_MODE) {
@@ -139,9 +139,9 @@ async function doLogin(directEmail = null, directPw = null, directTs = null) {
   }
 
   // Modo API
-  let ts = directTs || '';
+  let ts = '';
   try {
-    if (!ts && typeof turnstile !== 'undefined') {
+    if (typeof turnstile !== 'undefined') {
       // Tenta pegar pelo ID específico do login
       ts = turnstile.getResponse(document.getElementById('ts-login'));
     }
@@ -171,23 +171,8 @@ async function doLogin(directEmail = null, directPw = null, directTs = null) {
       name: data.name,
       email: email,
       role: data.role,
-      invite_code: data.invite_code,
       pw: pw   // mantido para compatibilidade local
     };
-
-    // Sincronizar com o objeto de perfis e localStorage do dieton.js
-    if (data.invite_code) {
-      try {
-        let inv = JSON.parse(localStorage.getItem('dieton_invites') || '{}');
-        inv[cu.id] = data.invite_code;
-        localStorage.setItem('dieton_invites', JSON.stringify(inv));
-      } catch (e) { }
-
-      if (typeof userProfiles !== 'undefined') {
-        if (!userProfiles[cu.id]) userProfiles[cu.id] = { photo: null, bio: '', inviteCode: null };
-        userProfiles[cu.id].inviteCode = data.invite_code;
-      }
-    }
 
     _finishLogin();
   } catch (e) {
@@ -202,12 +187,7 @@ function _finishLogin() {
   if (typeof tasks !== 'undefined') tasks = [];
   if (typeof notifs !== 'undefined') notifs = [];
   if (typeof templates !== 'undefined') templates = [];
-  var hadData;
-  if (typeof DB !== 'undefined') {
-    hadData = DB.load();
-  } else {
-    console.warn('DB object not found. Data persistence may be unavailable.');
-  }
+  var hadData = DB.load();
   var isDemoAdmin = cu && cu.email === 'admin@dieton.com.br';
   if (!hadData && isDemoAdmin) {
     notifs = [
@@ -220,6 +200,20 @@ function _finishLogin() {
   document.getElementById('app').style.display = 'flex';
   if (cu.role === 'pro') initPro(); else initPac();
   setTimeout(updateNotifBadge, 100);
+  setTimeout(updatePatBadge, 100);
+  // Sincronizar pacientes com backend
+  if (typeof apiGetPatients === 'function') {
+    apiGetPatients().then(function(remotePats) {
+      if (remotePats && remotePats.length) {
+        pats = remotePats;
+        DB.save();
+        updatePatBadge();
+        var activePage = document.querySelector('.ni.on');
+        var pageId = activePage ? activePage.id.replace('ni-','') : 'dash';
+        if (pageId === 'pat' || pageId === 'dash') goP(pageId, activePage);
+      }
+    }).catch(function(){});
+  }
 }
 
 
@@ -296,11 +290,11 @@ async function doRegisterPro() {
 
     if (!res.ok) { showUpErr(data.detail || 'Erro ao criar conta.'); return; }
 
-    showUpOk('Conta criada! Bem-vindo ao DietOn.');
+    showUpOk(`Conta criada! Seu código de convite: ${data.invite_code}`);
     // Auto-login após cadastro
     document.getElementById('up-pro-email').value = email;
     document.getElementById('up-pro-pw').value = pw;
-    setTimeout(() => doLogin(email, pw, ts), 1500);
+    setTimeout(doLogin, 1500);
   } catch (e) {
     showUpErr('Erro de conexão. Tente novamente.');
   }
@@ -353,8 +347,9 @@ async function doRegisterPac() {
     if (!res.ok) { showUpErr(data.detail || 'Erro ao criar conta.'); return; }
 
     showUpOk(`Bem-vindo(a)! Nutricionista: ${data.nutritionist}`);
-    // Tenta login automático passando os dados diretamente
-    setTimeout(() => doLogin(email, pw, ts), 1500);
+    document.getElementById('up-pac-email').value = email;
+    document.getElementById('up-pac-pw').value = pw;
+    setTimeout(doLogin, 1500);
   } catch (e) {
     showUpErr('Erro de conexão. Tente novamente.');
   }
@@ -506,42 +501,85 @@ async function apiDeleteFinancial(recordId) {
   try { await apiCall(`/api/v1/financial/${recordId}`, 'DELETE'); } catch (e) { }
 }
 
-async function doRegenInviteCode() {
-  if (!API_MODE) {
-    showToast('Recurso disponível apenas no servidor.', 'w');
-    return;
-  }
+// ── PACIENTES (sincronização com backend) ──────────────────────────────────
 
+async function apiGetPatients() {
+  if (!API_MODE) return null;
   try {
-    const res = await apiCall('/api/v1/auth/regenerate-invite', 'POST');
-    if (!res || !res.ok) {
-      showToast('Erro ao gerar código no servidor.', 'e');
-      return;
-    }
+    const res = await apiCall('/api/v1/patients');
+    if (!res || !Array.isArray(res)) return null;
+    return res.map(p => ({
+      id: p.id,
+      n: p.name,
+      age: p.age || 0,
+      sex: p.sex || 'F',
+      w: p.weight || 0,
+      wStart: p.weight_start || p.weight || 0,
+      h: p.height || 0,
+      bmi: p.bmi || 0,
+      fat: p.fat_percent || 0,
+      goal: p.goal || 'Emagrecimento',
+      cond: p.condition || '',
+      alerg: p.allergies || '',
+      prog: p.adherence || 0,
+      st: p.status || 'ok',
+      last: p.last_consultation || new Date().toLocaleDateString('pt-BR'),
+      phone: p.phone || '',
+      email: p.email || '',
+      agua: p.water_goal || 2,
+      exams: p.exams || {},
+      appointments: p.appointments || [],
+      suplementos: p.supplements || [],
+      measures: p.measures || [],
+      _backendId: p.id
+    }));
+  } catch (e) { console.error('apiGetPatients:', e); return null; }
+}
 
-    const data = await res.json();
-    if (data && data.invite_code) {
-      if (cu) cu.invite_code = data.invite_code;
+async function apiCreatePatient(pat) {
+  if (!API_MODE) return null;
+  try {
+    const res = await apiCall('/api/v1/patients', 'POST', {
+      name: pat.n,
+      age: pat.age,
+      sex: pat.sex,
+      weight: pat.w,
+      weight_start: pat.wStart || pat.w,
+      height: pat.h,
+      bmi: pat.bmi,
+      fat_percent: pat.fat,
+      goal: pat.goal,
+      condition: pat.cond,
+      allergies: pat.alerg,
+      phone: pat.phone || '',
+      email: pat.email || '',
+      water_goal: pat.agua || 2,
+      exams: pat.exams || {}
+    });
+    return res;
+  } catch (e) { console.error('apiCreatePatient:', e); return null; }
+}
 
-      // Sincronizar localStorage
-      try {
-        let inv = JSON.parse(localStorage.getItem('dieton_invites') || '{}');
-        inv[cu.id] = data.invite_code;
-        localStorage.setItem('dieton_invites', JSON.stringify(inv));
-      } catch (e) { }
+async function apiUpdatePatient(patId, pat) {
+  if (!API_MODE) return;
+  try {
+    await apiCall(`/api/v1/patients/${patId}`, 'PUT', {
+      name: pat.n,
+      age: pat.age,
+      sex: pat.sex,
+      weight: pat.w,
+      height: pat.h,
+      bmi: pat.bmi,
+      fat_percent: pat.fat,
+      goal: pat.goal,
+      condition: pat.cond,
+      allergies: pat.alerg,
+      exams: pat.exams || {}
+    });
+  } catch (e) { console.error('apiUpdatePatient:', e); }
+}
 
-      if (typeof userProfiles !== 'undefined' && userProfiles[cu.id]) {
-        userProfiles[cu.id].inviteCode = data.invite_code;
-      }
-
-      // Atualizar UI (se o modal estiver aberto)
-      const el = document.getElementById('prof-invite-code');
-      if (el) el.textContent = data.invite_code;
-
-      showToast('Novo código gerado e salvo!', 's');
-    }
-  } catch (e) {
-    console.error('Erro ao gerar código:', e);
-    showToast('Falha ao gerar novo código.', 'e');
-  }
+async function apiDeletePatient(patId) {
+  if (!API_MODE) return;
+  try { await apiCall(`/api/v1/patients/${patId}`, 'DELETE'); } catch (e) { console.error('apiDeletePatient:', e); }
 }
