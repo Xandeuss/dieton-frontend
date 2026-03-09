@@ -202,7 +202,12 @@ function _finishLogin() {
   if (typeof tasks !== 'undefined') tasks = [];
   if (typeof notifs !== 'undefined') notifs = [];
   if (typeof templates !== 'undefined') templates = [];
-  var hadData = DB.load();
+  var hadData;
+  if (typeof DB !== 'undefined') {
+    hadData = DB.load();
+  } else {
+    console.warn('DB object not found. Data persistence may be unavailable.');
+  }
   var isDemoAdmin = cu && cu.email === 'admin@dieton.com.br';
   if (!hadData && isDemoAdmin) {
     notifs = [
