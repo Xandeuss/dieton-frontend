@@ -836,7 +836,7 @@ function deletePat(id) {
     + '<div style="font-size:13px;color:var(--n5);line-height:1.7;margin-bottom:22px">Tem certeza que deseja remover <strong style="color:var(--n9)">' + nome + '</strong>?<br>Esta ação não pode ser desfeita.</div>'
     + '<div style="display:flex;gap:8px;justify-content:center">'
     + '<button class="btn btn-ghost btn-lg" style="min-width:120px" onclick="closeM(\'m-del-pat\')">Cancelar</button>'
-    + '<button class="btn btn-danger btn-lg" style="min-width:120px" onclick="confirmDeletePat(\'+id+\')">Sim, remover</button>'
+    + '<button class="btn btn-danger btn-lg" style="min-width:120px" onclick="confirmDeletePat('+id+')">Sim, remover</button>'
     + '</div></div>';
   document.body.appendChild(modal);
   setTimeout(function () { modal.classList.add('open'); }, 10);
@@ -846,7 +846,7 @@ function deletePat(id) {
 function confirmDeletePat(id) {
   var p = pats.find(function (x) { return x.id == id });
   var nome = p ? p.n : 'paciente';
-  pats = pats.filter(function (x) { return x.id !== id });
+  pats = pats.filter(function (x) { return x.id != id });
   if (selPat && selPat.id === id) selPat = pats[0] || null;
   DB.save();
   closeM('m-del-pat');
@@ -4502,7 +4502,7 @@ function deletePat(id) {
     + '<div style="font-size:13px;color:var(--n5);line-height:1.7;margin-bottom:22px">Tem certeza que deseja remover <strong style="color:var(--n9)">' + nome + '</strong>?<br>Esta ação não pode ser desfeita.</div>'
     + '<div style="display:flex;gap:8px;justify-content:center">'
     + '<button class="btn btn-ghost btn-lg" style="min-width:120px" onclick="closeM(\'m-del-pat\')">Cancelar</button>'
-    + '<button class="btn btn-danger btn-lg" style="min-width:120px" onclick="confirmDeletePat(\'+id+\')">Sim, remover</button>'
+    + '<button class="btn btn-danger btn-lg" style="min-width:120px" onclick="confirmDeletePat('+id+')">Sim, remover</button>'
     + '</div></div>';
   document.body.appendChild(modal);
   setTimeout(function () { modal.classList.add('open'); }, 10);
@@ -4512,7 +4512,7 @@ function deletePat(id) {
 function confirmDeletePat(id) {
   var p = pats.find(function (x) { return x.id == id });
   var nome = p ? p.n : 'paciente';
-  pats = pats.filter(function (x) { return x.id !== id });
+  pats = pats.filter(function (x) { return x.id != id });
   if (selPat && selPat.id === id) selPat = pats[0] || null;
   DB.save();
   closeM('m-del-pat');
