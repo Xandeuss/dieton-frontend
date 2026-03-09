@@ -827,89 +827,362 @@ var _origGoP=window.goP;
 // ══════════════════════════════════════════════════════════════════
 
 // ══ SUPLEMENTAÇÃO (nutricionista) ════════════════════════════════
-function rSupl(){
- var p=selPat;
- if(!p)return '<div style="padding:40px;text-align:center;color:var(--n4)">Selecione um paciente primeiro.</div>';
- if(!p.suplementos)p.suplementos=[];
- var list=p.suplementos.length
-  ?p.suplementos.map(function(s,i){
-    return '<div style="background:#fff;border-radius:12px;border:1px solid var(--n2);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
-     +'<div style="width:40px;height:40px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">&#128138;</div>'
-     +'<div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--n9)">'+escHtml(s.nome||'')+'</div>'
-     +'<div style="font-size:11.5px;color:var(--n5);margin-top:2px">'+escHtml(s.dose||'')+(s.frequencia?' &middot; '+escHtml(s.frequencia):'')+'</div>'
-     +(s.obs?'<div style="font-size:11px;color:var(--n4);margin-top:2px">'+escHtml(s.obs)+'</div>':'')
-     +'</div>'
-     +'<button class="btn btn-danger btn-sm" onclick="suplDel('+p.id+','+i+')">&times;</button>'
-     +'</div>';
-   }).join('')
-  :'<div style="text-align:center;padding:40px 0"><div style="font-size:40px;margin-bottom:12px">&#128138;</div>'
-   +'<div style="font-weight:700;font-size:14px;color:var(--n7);margin-bottom:6px">Nenhum suplemento prescrito</div>'
-   +'<div style="font-size:12px;color:var(--n4)">Clique em + Adicionar para prescrever.</div></div>';
- return '<div class="card">'
-  +'<div class="ch"><span class="ct">Suplementação &mdash; '+escHtml(p.n)+'</span>'
-  +'<button class="btn btn-p btn-sm" onclick="toggleSuplForm()">+ Adicionar</button></div>'
-  +'<div id="supl-form" style="display:none;background:var(--g0);border-radius:10px;padding:14px;margin-bottom:14px">'
-  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
-  +'<input class="inp" id="sl-nome" placeholder="Nome do suplemento *">'
-  +'<input class="inp" id="sl-dose" placeholder="Dose (ex: 1 capsula)">'
-  +'<input class="inp" id="sl-freq" placeholder="Frequencia (ex: 1x ao dia)">'
-  +'<input class="inp" id="sl-obs" placeholder="Observacoes (opcional)">'
-  +'</div>'
-  +'<button class="btn btn-p" onclick="suplAdd()">Prescrever suplemento</button>'
-  +'</div>'
-  +list+'</div>';
+// ══════════════════════════════════════════════════════════════════════
+// SUPLEMENTAÇÃO — Módulo completo
+// ══════════════════════════════════════════════════════════════════════
+
+// Banco de suplementos comuns para autocomplete
+var SUPL_DB = [
+  { nome: 'Vitamina D3', categoria: 'Vitaminas', icon: '☀️', doseDefault: '2.000 UI', freqDefault: '1x ao dia (com refeição)' },
+  { nome: 'Vitamina C', categoria: 'Vitaminas', icon: '🍊', doseDefault: '500 mg', freqDefault: '1x ao dia' },
+  { nome: 'Vitamina B12', categoria: 'Vitaminas', icon: '💊', doseDefault: '1.000 mcg', freqDefault: '1x ao dia' },
+  { nome: 'Complexo B', categoria: 'Vitaminas', icon: '💊', doseDefault: '1 cápsula', freqDefault: '1x ao dia (com refeição)' },
+  { nome: 'Ômega-3', categoria: 'Ácidos Graxos', icon: '🐟', doseDefault: '1 g', freqDefault: '2x ao dia (com refeição)' },
+  { nome: 'Magnésio', categoria: 'Minerais', icon: '⚡', doseDefault: '300 mg', freqDefault: '1x ao dia (à noite)' },
+  { nome: 'Zinco', categoria: 'Minerais', icon: '🔷', doseDefault: '15 mg', freqDefault: '1x ao dia' },
+  { nome: 'Ferro', categoria: 'Minerais', icon: '🔴', doseDefault: '40 mg', freqDefault: '1x ao dia (em jejum)' },
+  { nome: 'Cálcio', categoria: 'Minerais', icon: '🦴', doseDefault: '500 mg', freqDefault: '2x ao dia (com refeição)' },
+  { nome: 'Whey Protein', categoria: 'Proteínas', icon: '💪', doseDefault: '30 g', freqDefault: 'Pós-treino' },
+  { nome: 'Creatina', categoria: 'Performance', icon: '⚡', doseDefault: '5 g', freqDefault: '1x ao dia' },
+  { nome: 'Probiótico', categoria: 'Intestinal', icon: '🦠', doseDefault: '1 cápsula', freqDefault: '1x ao dia (em jejum)' },
+  { nome: 'Colágeno Hidrolisado', categoria: 'Colágeno', icon: '✨', doseDefault: '10 g', freqDefault: '1x ao dia' },
+  { nome: 'Melatonina', categoria: 'Sono', icon: '🌙', doseDefault: '0,21 mg', freqDefault: '1x ao dia (30min antes de dormir)' },
+  { nome: 'Spirulina', categoria: 'Superalimentos', icon: '🌿', doseDefault: '3 g', freqDefault: '1x ao dia' },
+  { nome: 'Coenzima Q10', categoria: 'Antioxidantes', icon: '🧬', doseDefault: '100 mg', freqDefault: '1x ao dia (com refeição)' },
+  { nome: 'Vitamina E', categoria: 'Vitaminas', icon: '💛', doseDefault: '400 UI', freqDefault: '1x ao dia (com refeição)' },
+  { nome: 'Biotina', categoria: 'Vitaminas', icon: '💇', doseDefault: '5.000 mcg', freqDefault: '1x ao dia' },
+  { nome: 'Ácido Fólico', categoria: 'Vitaminas', icon: '🌱', doseDefault: '400 mcg', freqDefault: '1x ao dia' },
+  { nome: 'L-Carnitina', categoria: 'Performance', icon: '🔥', doseDefault: '2 g', freqDefault: '1x ao dia (pré-treino)' },
+  { nome: 'Glutamina', categoria: 'Aminoácidos', icon: '💪', doseDefault: '5 g', freqDefault: 'Pós-treino' },
+  { nome: 'Curcumina', categoria: 'Anti-inflamatório', icon: '🟡', doseDefault: '500 mg', freqDefault: '2x ao dia (com refeição)' },
+  { nome: 'Ácido Hialurônico', categoria: 'Colágeno', icon: '💧', doseDefault: '120 mg', freqDefault: '1x ao dia' },
+  { nome: 'Selênio', categoria: 'Minerais', icon: '🛡️', doseDefault: '200 mcg', freqDefault: '1x ao dia' },
+  { nome: 'Iodo', categoria: 'Minerais', icon: '🔵', doseDefault: '150 mcg', freqDefault: '1x ao dia' },
+];
+
+var _suplFormOpen = false;
+
+function rSupl() {
+  var p = selPat;
+  if (!p) {
+    // Mostrar lista de pacientes para selecionar
+    if (!pats.length) return '<div style="padding:60px;text-align:center"><div style="font-size:48px;margin-bottom:16px">💊</div><div style="font-weight:700;font-size:16px;color:var(--n7);margin-bottom:8px">Nenhum paciente cadastrado</div><div style="font-size:13px;color:var(--n4)">Cadastre um paciente primeiro para gerenciar suplementos.</div></div>';
+    return '<div style="max-width:520px;margin:0 auto;padding:28px 0">'
+      + '<div style="text-align:center;margin-bottom:24px"><div style="font-size:40px;margin-bottom:10px">💊</div><div style="font-weight:800;font-size:16px;color:var(--n9);margin-bottom:6px">Selecione um paciente</div><div style="font-size:12.5px;color:var(--n5)">Escolha abaixo para ver e gerenciar os suplementos prescritos</div></div>'
+      + pats.map(function(p) {
+          return '<div onclick="selPat=pats.find(function(x){return x.id==='+p.id+'});goP(\'supl\',document.getElementById(\'ni-supl\'))" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--n2);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .15s;background:#fff" onmouseover="this.style.borderColor=\'var(--g4)\';this.style.background=\'var(--g0)\'" onmouseout="this.style.borderColor=\'var(--n2)\';this.style.background=\'#fff\'">'
+            + '<div class="av ' + (p.av||'a1') + '" style="width:38px;height:38px;font-size:13px;flex-shrink:0">' + (p.i||p.n[0]) + '</div>'
+            + '<div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--n9)">' + escHtml(p.n) + '</div><div style="font-size:11px;color:var(--n5)">' + (p.suplementos&&p.suplementos.length ? p.suplementos.length + ' suplemento(s) prescrito(s)' : 'Nenhum suplemento ainda') + '</div></div>'
+            + '<svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:var(--n4)"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+
+  if (!p.suplementos) p.suplementos = [];
+
+  // KPIs
+  var total = p.suplementos.length;
+  var categorias = {};
+  p.suplementos.forEach(function(s) { categorias[s.categoria||'Outros'] = (categorias[s.categoria||'Outros']||0)+1; });
+  var nCats = Object.keys(categorias).length;
+  var aderidos = p.suplementos.filter(function(s){ return s.aderindo !== false; }).length;
+  var pctAdesao = total ? Math.round((aderidos/total)*100) : 0;
+
+  var kpis = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">'
+    + _suplKpi('💊', total, 'Prescritos', '#f0fdf4', '#15803d')
+    + _suplKpi('📂', nCats, 'Categorias', '#eff6ff', '#1d4ed8')
+    + _suplKpi('✅', pctAdesao+'%', 'Adesão', pctAdesao>=80?'#f0fdf4':pctAdesao>=50?'#fffbeb':'#fef2f2', pctAdesao>=80?'#15803d':pctAdesao>=50?'#b45309':'#b91c1c')
+    + '</div>';
+
+  // Form de adicionar
+  var form = '<div id="supl-form" style="display:none;background:var(--g0);border:1.5px solid var(--g2);border-radius:14px;padding:18px;margin-bottom:18px">'
+    + '<div style="font-weight:700;font-size:13px;color:var(--n9);margin-bottom:12px">💊 Prescrever suplemento para ' + escHtml(p.n) + '</div>'
+    // Search / autocomplete
+    + '<div style="margin-bottom:10px;position:relative">'
+    + '<input class="inp" id="sl-busca" placeholder="🔍 Buscar suplemento ou digitar nome..." oninput="suplBusca()" autocomplete="off" style="padding-right:36px">'
+    + '<div id="sl-busca-list" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--n2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;display:none;max-height:200px;overflow-y:auto"></div>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    + '<input class="inp" id="sl-nome" placeholder="Nome do suplemento *">'
+    + '<input class="inp" id="sl-dose" placeholder="Dose (ex: 2.000 UI, 30g)">'
+    + '<input class="inp" id="sl-freq" placeholder="Frequência (ex: 1x ao dia)">'
+    + '<input class="inp" id="sl-hora" placeholder="Melhor horário (ex: manhã)">'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
+    + '<select class="sel" id="sl-cat"><option value="">Categoria...</option>'
+    + ['Vitaminas','Minerais','Proteínas','Ácidos Graxos','Aminoácidos','Performance','Intestinal','Colágeno','Sono','Antioxidantes','Superalimentos','Anti-inflamatório','Outros'].map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('')
+    + '</select>'
+    + '<select class="sel" id="sl-prioridade"><option value="normal">Prioridade Normal</option><option value="alta">Prioridade Alta</option><option value="essencial">Essencial</option></select>'
+    + '</div>'
+    + '<input class="inp" id="sl-obs" placeholder="Observações clínicas (ex: tomar com vitamina C para melhor absorção)" style="margin-bottom:12px">'
+    + '<div style="display:flex;gap:8px">'
+    + '<button class="btn btn-p" onclick="suplAdd()">💊 Prescrever</button>'
+    + '<button class="btn btn-ghost" onclick="toggleSuplForm()">Cancelar</button>'
+    + '</div></div>';
+
+  // Lista de suplementos agrupados por categoria
+  var grouped = {};
+  p.suplementos.forEach(function(s, i) {
+    var cat = s.categoria || 'Outros';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push({ s: s, i: i });
+  });
+
+  var catIcons = { 'Vitaminas':'🌟','Minerais':'⚡','Proteínas':'💪','Ácidos Graxos':'🐟','Aminoácidos':'🔬','Performance':'🏃','Intestinal':'🦠','Colágeno':'✨','Sono':'🌙','Antioxidantes':'🧬','Superalimentos':'🌿','Anti-inflamatório':'🛡️','Outros':'💊' };
+
+  var lista = '';
+  if (!total) {
+    lista = '<div style="text-align:center;padding:48px 0">'
+      + '<div style="font-size:52px;margin-bottom:16px">💊</div>'
+      + '<div style="font-weight:800;font-size:15px;color:var(--n7);margin-bottom:8px">Nenhum suplemento prescrito ainda</div>'
+      + '<div style="font-size:12.5px;color:var(--n4);margin-bottom:20px">Clique em <strong>+ Prescrever</strong> para adicionar suplementos para ' + escHtml(p.n) + '</div>'
+      + '</div>';
+  } else {
+    Object.keys(grouped).forEach(function(cat) {
+      var items = grouped[cat];
+      lista += '<div style="margin-bottom:20px">'
+        + '<div style="font-size:11px;font-weight:700;color:var(--n5);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px">'
+        + '<span>' + (catIcons[cat]||'💊') + '</span><span>' + cat + '</span>'
+        + '<span style="background:var(--n1);color:var(--n6);border-radius:99px;padding:1px 8px;font-size:10px">' + items.length + '</span></div>';
+
+      items.forEach(function(item) {
+        var s = item.s; var i = item.i;
+        var priColor = s.prioridade==='essencial'?'#b91c1c':s.prioridade==='alta'?'#b45309':'#6b7280';
+        var priBg = s.prioridade==='essencial'?'#fef2f2':s.prioridade==='alta'?'#fffbeb':'var(--n0)';
+        lista += '<div style="background:#fff;border-radius:14px;border:1.5px solid var(--n2);padding:14px 16px;margin-bottom:8px;transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.08)\'" onmouseout="this.style.boxShadow=\'none\'">'
+          + '<div style="display:flex;align-items:flex-start;gap:12px">'
+          + '<div style="width:42px;height:42px;border-radius:11px;background:'+priBg+';display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0">' + (catIcons[s.categoria||'Outros']||'💊') + '</div>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">'
+          + '<div style="font-weight:800;font-size:13.5px;color:var(--n9)">' + escHtml(s.nome||'') + '</div>'
+          + (s.prioridade&&s.prioridade!=='normal'?'<span style="font-size:9px;font-weight:700;background:'+priBg+';color:'+priColor+';border-radius:99px;padding:2px 8px;text-transform:uppercase;letter-spacing:.04em">' + (s.prioridade==='essencial'?'⭐ Essencial':'🔺 Alta prioridade') + '</span>':'')
+          + '</div>'
+          + '<div style="display:flex;gap:14px;flex-wrap:wrap">'
+          + (s.dose?'<span style="font-size:11.5px;color:var(--n6);display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' + escHtml(s.dose) + '</span>':'')
+          + (s.frequencia?'<span style="font-size:11.5px;color:var(--n6);display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 5h-2v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>' + escHtml(s.frequencia) + '</span>':'')
+          + (s.horario?'<span style="font-size:11.5px;color:var(--g5);display:flex;align-items:center;gap:4px">🕐 ' + escHtml(s.horario) + '</span>':'')
+          + '</div>'
+          + (s.obs?'<div style="font-size:11px;color:var(--n5);margin-top:5px;background:var(--n0);border-radius:6px;padding:5px 8px;font-style:italic">📝 ' + escHtml(s.obs) + '</div>':'')
+          + '</div>'
+          + '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
+          + '<button class="btn btn-ghost btn-sm" onclick="suplToggleAdesao('+p.id+','+i+')" title="'+(s.aderindo===false?'Marcar como ativo':'Marcar como suspenso')+'" style="padding:4px 8px;font-size:11px">'+(s.aderindo===false?'<span style=\'color:#9ca3af\'>⏸ Suspenso</span>':'<span style=\'color:#15803d\'>✅ Ativo</span>')+'</button>'
+          + '<button class="btn btn-danger btn-sm" onclick="suplDel('+p.id+','+i+')" style="padding:4px 8px;font-size:11px" title="Remover">✕</button>'
+          + '</div></div></div>';
+      });
+      lista += '</div>';
+    });
+  }
+
+  // Interaction history / notas
+  var notas = p.suplNotas || [];
+  var notasHtml = '<div class="card" style="margin-top:16px">'
+    + '<div class="ch"><span class="ct">📝 Notas Clínicas</span><button class="btn btn-ghost btn-sm" onclick="suplAddNota('+p.id+')">+ Nota</button></div>'
+    + (notas.length ? notas.slice(-5).reverse().map(function(n){ return '<div style="padding:10px 0;border-bottom:1px solid var(--n1);font-size:12px;color:var(--n7)"><span style="color:var(--n4);font-size:10.5px">'+escHtml(n.data||'')+'</span> — '+escHtml(n.txt||'')+'</div>'; }).join('') : '<div style="font-size:12px;color:var(--n4);padding:8px 0">Nenhuma nota ainda. Registre observações sobre a adesão do paciente.</div>')
+    + '</div>';
+
+  return '<div class="card" style="margin-bottom:16px">'
+    + '<div class="ch"><span class="ct">💊 Suplementação — ' + escHtml(p.n) + '</span>'
+    + '<div style="display:flex;gap:8px;align-items:center">'
+    + '<button class="btn btn-ghost btn-sm" onclick="selPat=null;goP(\'supl\',document.getElementById(\'ni-supl\'))" style="font-size:11px">↩ Trocar paciente</button>'
+    + '<button class="btn btn-p btn-sm" onclick="toggleSuplForm()">+ Prescrever</button>'
+    + '</div></div>'
+    + kpis + form + lista
+    + '</div>'
+    + notasHtml;
 }
-function toggleSuplForm(){
- var f=document.getElementById('supl-form');
- if(f)f.style.display=f.style.display===''?'none':'';
+
+function _suplKpi(icon, val, label, bg, color) {
+  return '<div style="background:'+bg+';border-radius:12px;padding:14px 16px;text-align:center">'
+    + '<div style="font-size:22px;margin-bottom:4px">'+icon+'</div>'
+    + '<div style="font-size:22px;font-weight:900;color:'+color+';line-height:1">'+val+'</div>'
+    + '<div style="font-size:10.5px;color:var(--n5);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">'+label+'</div>'
+    + '</div>';
 }
-function rPSupl(){
- var p=selPat;
- if(!p||!p.suplementos||!p.suplementos.length)
-  return '<div style="padding:40px;text-align:center;color:var(--n4)">Nenhum suplemento prescrito.</div>';
- return '<div class="card"><div class="ch"><span class="ct">Minha Suplementacao</span></div>'
-  +p.suplementos.map(function(s){
-   return '<div style="background:#fff;border-radius:12px;border:1px solid var(--n2);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
-    +'<div style="width:40px;height:40px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">&#128138;</div>'
-    +'<div><div style="font-weight:700;font-size:13px;color:var(--n9)">'+escHtml(s.nome||'')+'</div>'
-    +'<div style="font-size:11.5px;color:var(--n5);margin-top:2px">'+escHtml(s.dose||'')+(s.frequencia?' &middot; '+escHtml(s.frequencia):'')+'</div>'
-    +(s.obs?'<div style="font-size:11px;color:var(--n4);margin-top:2px">'+escHtml(s.obs)+'</div>':'')
-    +'</div></div>';
-  }).join('')+'</div>';
+
+function suplBusca() {
+  var q = (document.getElementById('sl-busca')||{}).value||'';
+  var list = document.getElementById('sl-busca-list');
+  if (!list) return;
+  if (!q.trim()) { list.style.display='none'; return; }
+  var q2 = q.toLowerCase();
+  var results = SUPL_DB.filter(function(s){ return s.nome.toLowerCase().indexOf(q2)>=0 || s.categoria.toLowerCase().indexOf(q2)>=0; }).slice(0,6);
+  if (!results.length) { list.style.display='none'; return; }
+  list.innerHTML = results.map(function(s){
+    return '<div onclick="suplSelectFromDB(\''+escHtml(s.nome)+'\',\''+escHtml(s.doseDefault)+'\',\''+escHtml(s.freqDefault)+'\',\''+escHtml(s.categoria)+'\')" style="padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--n1);display:flex;gap:10px;align-items:center" onmouseover="this.style.background=\'var(--g0)\'" onmouseout="this.style.background=\'#fff\'">'
+      + '<span style="font-size:18px">'+s.icon+'</span>'
+      + '<div><div style="font-size:12.5px;font-weight:600;color:var(--n9)">'+escHtml(s.nome)+'</div>'
+      + '<div style="font-size:10.5px;color:var(--n4)">'+escHtml(s.doseDefault)+' · '+escHtml(s.freqDefault)+'</div></div>'
+      + '</div>';
+  }).join('');
+  list.style.display = 'block';
 }
-function suplAdd(){
- var p=selPat;if(!p)return;
- var nome=(document.getElementById('sl-nome')||{}).value||'';nome=nome.trim();
- if(!nome){showToast('Informe o nome do suplemento','w');return;}
- if(!p.suplementos)p.suplementos=[];
- var s={
-  nome:nome,
-  dose:(document.getElementById('sl-dose')||{}).value||'',
-  frequencia:(document.getElementById('sl-freq')||{}).value||'',
-  obs:(document.getElementById('sl-obs')||{}).value||''
- };
- p.suplementos.push(s);DB.save();
- showToast('Suplemento adicionado','s');
- if(typeof apiAddSupplement==='function')apiAddSupplement(p._backendId||p.id,s).catch(function(){});
- goP('supl',document.getElementById('ni-supl'));
+
+function suplSelectFromDB(nome, dose, freq, cat) {
+  var el = function(id){ return document.getElementById(id); };
+  if(el('sl-nome')) el('sl-nome').value = nome;
+  if(el('sl-dose')) el('sl-dose').value = dose;
+  if(el('sl-freq')) el('sl-freq').value = freq;
+  if(el('sl-busca')) el('sl-busca').value = nome;
+  if(el('sl-cat')) el('sl-cat').value = cat;
+  var list = el('sl-busca-list');
+  if(list) list.style.display='none';
 }
-function suplDel(patId,idx){
- var p=pats.find(function(x){return x.id==patId});
- if(!p||!p.suplementos)return;
- var removed=p.suplementos.splice(idx,1)[0];
- DB.save();showToast('Suplemento removido','i');
- if(removed&&removed.id&&typeof apiDeleteSupplement==='function')
-  apiDeleteSupplement(p._backendId||p.id,removed.id).catch(function(){});
- goP('supl',document.getElementById('ni-supl'));
+
+function toggleSuplForm() {
+  var f = document.getElementById('supl-form');
+  if (f) {
+    _suplFormOpen = !_suplFormOpen;
+    f.style.display = _suplFormOpen ? 'block' : 'none';
+    if (_suplFormOpen) {
+      setTimeout(function(){ var el=document.getElementById('sl-busca'); if(el) el.focus(); }, 50);
+    }
+  }
 }
-function openPatSupl(id){
- var p=pats.find(function(x){return x.id==id});
- if(p)selPat=p;
- closeM('m-pd');
- setTimeout(function(){
-  goP('supl',document.getElementById('ni-supl')||null);
- },80);
+
+function suplAdd() {
+  var p = selPat; if (!p) return;
+  var nome = (document.getElementById('sl-nome')||{}).value||''; nome=nome.trim();
+  if (!nome) { showToast('Informe o nome do suplemento','w'); return; }
+  if (!p.suplementos) p.suplementos = [];
+  var s = {
+    nome: nome,
+    dose: (document.getElementById('sl-dose')||{}).value||'',
+    frequencia: (document.getElementById('sl-freq')||{}).value||'',
+    horario: (document.getElementById('sl-hora')||{}).value||'',
+    categoria: (document.getElementById('sl-cat')||{}).value||'Outros',
+    prioridade: (document.getElementById('sl-prioridade')||{}).value||'normal',
+    obs: (document.getElementById('sl-obs')||{}).value||'',
+    aderindo: true,
+    dataPrescricao: new Date().toLocaleDateString('pt-BR')
+  };
+  p.suplementos.push(s);
+  _suplFormOpen = false;
+  DB.save();
+  showToast('💊 ' + nome + ' prescrito com sucesso!','s');
+  if (typeof apiAddSupplement==='function') apiAddSupplement(p._backendId||p.id, s).catch(function(){});
+  goP('supl', document.getElementById('ni-supl'));
 }
+
+function suplDel(patId, idx) {
+  var p = pats.find(function(x){ return x.id==patId; });
+  if (!p||!p.suplementos) return;
+  var nome = p.suplementos[idx] && p.suplementos[idx].nome;
+  var removed = p.suplementos.splice(idx,1)[0];
+  DB.save();
+  showToast((nome||'Suplemento')+' removido','i');
+  if (removed&&removed.id&&typeof apiDeleteSupplement==='function') apiDeleteSupplement(p._backendId||p.id, removed.id).catch(function(){});
+  goP('supl', document.getElementById('ni-supl'));
+}
+
+function suplToggleAdesao(patId, idx) {
+  var p = pats.find(function(x){ return x.id==patId; });
+  if (!p||!p.suplementos||!p.suplementos[idx]) return;
+  var s = p.suplementos[idx];
+  s.aderindo = s.aderindo===false ? true : false;
+  DB.save();
+  showToast(s.aderindo ? '✅ Marcado como ativo' : '⏸ Suspenso', 's');
+  goP('supl', document.getElementById('ni-supl'));
+}
+
+function suplAddNota(patId) {
+  var p = pats.find(function(x){ return x.id==patId; });
+  if (!p) return;
+  var txt = prompt('Nota clínica sobre suplementação:');
+  if (!txt||!txt.trim()) return;
+  if (!p.suplNotas) p.suplNotas = [];
+  p.suplNotas.push({ txt: txt.trim(), data: new Date().toLocaleDateString('pt-BR') });
+  DB.save();
+  showToast('Nota salva','s');
+  goP('supl', document.getElementById('ni-supl'));
+}
+
+// ══ VISÃO DO PACIENTE — Minha Suplementação ══
+function rPSupl() {
+  var p = selPat;
+  if (!p||!p.suplementos||!p.suplementos.length) {
+    return '<div style="padding:60px;text-align:center">'
+      + '<div style="font-size:52px;margin-bottom:16px">💊</div>'
+      + '<div style="font-weight:800;font-size:15px;color:var(--n7);margin-bottom:8px">Nenhum suplemento prescrito</div>'
+      + '<div style="font-size:12.5px;color:var(--n4)">Seu nutricionista ainda não prescreveu suplementos. Em caso de dúvidas, entre em contato.</div>'
+      + '</div>';
+  }
+
+  var hoje = new Date();
+  var diaSemana = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][hoje.getDay()];
+  var ativos = p.suplementos.filter(function(s){ return s.aderindo !== false; });
+
+  // Organizar por horário do dia
+  var turnos = { 'Manhã': [], 'Almoço': [], 'Pré-treino': [], 'Pós-treino': [], 'Tarde': [], 'Noite': [], 'Outros': [] };
+  ativos.forEach(function(s) {
+    var h = (s.horario||s.frequencia||'').toLowerCase();
+    if (h.indexOf('manhã')>=0||h.indexOf('manha')>=0||h.indexOf('jejum')>=0||h.indexOf('acordar')>=0) turnos['Manhã'].push(s);
+    else if (h.indexOf('almoço')>=0||h.indexOf('almoco')>=0) turnos['Almoço'].push(s);
+    else if (h.indexOf('pré-treino')>=0||h.indexOf('pre-treino')>=0||h.indexOf('pré treino')>=0) turnos['Pré-treino'].push(s);
+    else if (h.indexOf('pós-treino')>=0||h.indexOf('pos-treino')>=0||h.indexOf('pós treino')>=0) turnos['Pós-treino'].push(s);
+    else if (h.indexOf('tarde')>=0) turnos['Tarde'].push(s);
+    else if (h.indexOf('noite')>=0||h.indexOf('dormir')>=0||h.indexOf('sono')>=0) turnos['Noite'].push(s);
+    else turnos['Outros'].push(s);
+  });
+
+  var turnoIcons = { 'Manhã':'🌅','Almoço':'☀️','Pré-treino':'⚡','Pós-treino':'💪','Tarde':'🌤️','Noite':'🌙','Outros':'💊' };
+
+  var html = '<div style="max-width:600px">'
+    + '<div style="background:linear-gradient(135deg,#e85a0a,#c4420a);border-radius:16px;padding:20px;color:#fff;margin-bottom:20px">'
+    + '<div style="font-size:11px;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+diaSemana+', '+hoje.toLocaleDateString('pt-BR')+'</div>'
+    + '<div style="font-size:20px;font-weight:900;margin-bottom:8px">Meus Suplementos 💊</div>'
+    + '<div style="display:flex;gap:16px">'
+    + '<div><div style="font-size:22px;font-weight:900">'+ativos.length+'</div><div style="font-size:10px;opacity:.8">Prescritos</div></div>'
+    + '<div style="opacity:.3;font-size:20px">|</div>'
+    + '<div><div style="font-size:22px;font-weight:900">'+Object.values(turnos).filter(function(t){return t.length>0;}).length+'</div><div style="font-size:10px;opacity:.8">Horários</div></div>'
+    + '</div></div>';
+
+  var temAlgum = false;
+  Object.keys(turnos).forEach(function(turno) {
+    if (!turnos[turno].length) return;
+    temAlgum = true;
+    html += '<div style="margin-bottom:20px">'
+      + '<div style="font-size:11px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">'
+      + turnoIcons[turno]+' '+turno+'</div>';
+    turnos[turno].forEach(function(s) {
+      html += '<div style="background:#fff;border:1.5px solid var(--n2);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
+        + '<div style="width:44px;height:44px;border-radius:12px;background:var(--g0);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">💊</div>'
+        + '<div style="flex:1">'
+        + '<div style="font-weight:800;font-size:13.5px;color:var(--n9)">'+escHtml(s.nome||'')+'</div>'
+        + '<div style="font-size:12px;color:var(--n5);margin-top:3px">'+escHtml(s.dose||'')+(s.frequencia?' · '+escHtml(s.frequencia):'')+'</div>'
+        + (s.obs?'<div style="font-size:11px;color:var(--n5);margin-top:4px;background:var(--n0);border-radius:6px;padding:4px 8px">📝 '+escHtml(s.obs)+'</div>':'')
+        + '</div>'
+        + '<div style="width:36px;height:36px;border-radius:50%;background:var(--g0);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" title="Marcar como tomado">✓</div>'
+        + '</div>';
+    });
+    html += '</div>';
+  });
+
+  if (!temAlgum) html += '<div style="text-align:center;padding:32px;color:var(--n4)">Nenhum suplemento ativo</div>';
+
+  // Notas do nutricionista visíveis para o paciente
+  var notas = p.suplNotas||[];
+  if (notas.length) {
+    html += '<div class="card" style="margin-top:4px">'
+      + '<div class="ch"><span class="ct">📋 Orientações do Nutricionista</span></div>'
+      + notas.slice(-3).reverse().map(function(n){ return '<div style="padding:8px 0;border-bottom:1px solid var(--n1);font-size:12.5px;color:var(--n7)"><span style="font-size:10px;color:var(--n4)">'+escHtml(n.data||'')+'</span><br>'+escHtml(n.txt||'')+'</div>'; }).join('')
+      + '</div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function openPatSupl(id) {
+  var p = pats.find(function(x){ return x.id==id; });
+  if (p) selPat = p;
+  closeM('m-pd');
+  setTimeout(function() {
+    goP('supl', document.getElementById('ni-supl')||null);
+  }, 80);
+}
+
+
 
 // ══ FINANCEIRO (nutricionista) ════════════════════════════════════
 function rFin(){
