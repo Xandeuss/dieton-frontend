@@ -962,7 +962,7 @@
   <!-- ── JavaScript Principal ── -->
   <script src="dieton.js?v=1.3"></script>
   <script src="api.js?v=1.3"></script>
-  <script>console.log("DietOn v1.2 inicializado");</script>
+  <script>console.log("DietOn v1.3 inicializado");</script>
 
 
   <!-- Modal Suplementação -->
@@ -1104,29 +1104,48 @@
     }
   </script>
 
-<!-- ══ TOUR GUIADO ══ -->
-<div id="tour-overlay" style="display:none;position:fixed;inset:0;z-index:9998;pointer-events:none">
-  <svg style="position:absolute;inset:0;width:100%;height:100%" xmlns="http://www.w3.org/2000/svg">
-    <defs><mask id="tour-mask"><rect width="100%" height="100%" fill="white"/><rect id="tour-hole" x="0" y="0" width="0" height="0" rx="8" fill="black"/></mask></defs>
-    <rect width="100%" height="100%" fill="rgba(0,0,0,0.55)" mask="url(#tour-mask)"/>
-  </svg>
-  <div id="tour-ring" style="position:absolute;border:2px solid #e85a0a;border-radius:10px;opacity:0;transition:all .3s ease;pointer-events:none;box-shadow:0 0 0 3px rgba(232,90,10,.25)"></div>
-</div>
-<div id="tour-tip" style="display:none;position:fixed;z-index:9999;background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 40px rgba(0,0,0,.18);font-family:'Plus Jakarta Sans',sans-serif;min-width:280px;max-width:320px">
-  <div style="height:3px;background:#f3f4f6;border-radius:99px;margin-bottom:12px"><div id="tour-prog" style="height:100%;background:linear-gradient(90deg,#e85a0a,#f97316);border-radius:99px;transition:width .3s ease;width:0%"></div></div>
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <span id="tour-step-lbl" style="font-size:10px;color:#9ca3af;font-weight:600;letter-spacing:.05em;text-transform:uppercase"></span>
-    <button onclick="tourEnd()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:16px;padding:0;line-height:1">×</button>
+  <!-- ══ TOUR GUIADO ══ -->
+  <div id="tour-overlay" style="display:none;position:fixed;inset:0;z-index:9998;pointer-events:none">
+    <svg style="position:absolute;inset:0;width:100%;height:100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <mask id="tour-mask">
+          <rect width="100%" height="100%" fill="white" />
+          <rect id="tour-hole" x="0" y="0" width="0" height="0" rx="8" fill="black" />
+        </mask>
+      </defs>
+      <rect width="100%" height="100%" fill="rgba(0,0,0,0.55)" mask="url(#tour-mask)" />
+    </svg>
+    <div id="tour-ring"
+      style="position:absolute;border:2px solid #e85a0a;border-radius:10px;opacity:0;transition:all .3s ease;pointer-events:none;box-shadow:0 0 0 3px rgba(232,90,10,.25)">
+    </div>
   </div>
-  <div style="text-align:center;margin-bottom:10px"><span id="tour-icon" style="font-size:32px"></span></div>
-  <div id="tour-title" style="font-size:15px;font-weight:800;color:#111827;margin-bottom:6px;text-align:center"></div>
-  <div id="tour-body" style="font-size:12.5px;color:#6b7280;line-height:1.6;margin-bottom:14px;text-align:center"></div>
-  <div id="tour-dots" style="display:flex;gap:4px;justify-content:center;margin-bottom:14px"></div>
-  <div style="display:flex;gap:8px;justify-content:center">
-    <button id="tour-prev" onclick="tourPrev()" style="display:none;background:#f3f4f6;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;color:#374151">← Anterior</button>
-    <button id="tour-next" onclick="tourNext()" style="background:linear-gradient(135deg,#e85a0a,#c4420a);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:12px;font-weight:700;cursor:pointer">Próximo →</button>
+  <div id="tour-tip"
+    style="display:none;position:fixed;z-index:9999;background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 40px rgba(0,0,0,.18);font-family:'Plus Jakarta Sans',sans-serif;min-width:280px;max-width:320px">
+    <div style="height:3px;background:#f3f4f6;border-radius:99px;margin-bottom:12px">
+      <div id="tour-prog"
+        style="height:100%;background:linear-gradient(90deg,#e85a0a,#f97316);border-radius:99px;transition:width .3s ease;width:0%">
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span id="tour-step-lbl"
+        style="font-size:10px;color:#9ca3af;font-weight:600;letter-spacing:.05em;text-transform:uppercase"></span>
+      <button onclick="tourEnd()"
+        style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:16px;padding:0;line-height:1">×</button>
+    </div>
+    <div style="text-align:center;margin-bottom:10px"><span id="tour-icon" style="font-size:32px"></span></div>
+    <div id="tour-title" style="font-size:15px;font-weight:800;color:#111827;margin-bottom:6px;text-align:center"></div>
+    <div id="tour-body" style="font-size:12.5px;color:#6b7280;line-height:1.6;margin-bottom:14px;text-align:center">
+    </div>
+    <div id="tour-dots" style="display:flex;gap:4px;justify-content:center;margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button id="tour-prev" onclick="tourPrev()"
+        style="display:none;background:#f3f4f6;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;color:#374151">←
+        Anterior</button>
+      <button id="tour-next" onclick="tourNext()"
+        style="background:linear-gradient(135deg,#e85a0a,#c4420a);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:12px;font-weight:700;cursor:pointer">Próximo
+        →</button>
+    </div>
   </div>
-</div>
 
 </body>
 
