@@ -415,7 +415,7 @@ function doRegisterPac() {
     document.getElementById('login').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     initPac();
-    setTimeout(updateNotifBadge, 100);
+    setTimeout(updateNotifBadge, 100); setTimeout(updatePatBadge, 100);
   }, 1200);
 }
 function showErr(m) { var b = document.getElementById('err-box'); b.style.display = 'flex'; document.getElementById('err-msg').textContent = m; }
@@ -436,7 +436,7 @@ function doLogin() {
   document.getElementById('login').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   if (cu.role === 'pro') initPro(); else initPac();
-  setTimeout(updateNotifBadge, 100);
+  setTimeout(updateNotifBadge, 100); setTimeout(updatePatBadge, 100);
 }
 function doLogout() {
   DB.save();
@@ -446,6 +446,11 @@ function doLogout() {
   document.getElementById('login').style.display = 'flex';
 }
 
+
+function updatePatBadge() {
+  var b = document.getElementById('pat-count-badge');
+  if (b) b.textContent = pats.length;
+}
 function updateNotifBadge() {
   var badge = document.getElementById('notif-badge');
   var dot = document.getElementById('notif-dot');
@@ -476,7 +481,7 @@ function initPro() {
   <button class="ni on" id="ni-dash" onclick="goP('dash',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>Dashboard</button>
   <button class="ni" id="ni-agenda" onclick="goP('agenda',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg>Agenda</button>
   <button class="ni" id="ni-fin" onclick="goP('fin',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>Financeiro</button>
-  <button class="ni" id="ni-pat" onclick="goP('pat',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Pacientes<span class="nb nb-y">8</span></button>
+  <button class="ni" id="ni-pat" onclick="goP('pat',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Pacientes<span class="nb nb-y" id="pat-count-badge">8</span></button>
   <button class="ni" id="ni-presc" onclick="goP('presc',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Prescrição</button>
   <button class="ni" id="ni-week" onclick="goP('week',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z"/></svg>Plano Semanal</button>
   <button class="ni" id="ni-ev" onclick="goP('ev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Acompanhamento</button>
@@ -505,7 +510,8 @@ function initPac() {
   <button class="ni" id="pi-plan" onclick="goP('pplan',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Meu Plano</button>
   <button class="ni" id="pi-diary" onclick="goP('pdiary',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2z"/></svg>Diário Alimentar</button>
   <button class="ni" id="pi-task" onclick="goP('ptask',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>Tarefas<span class="nb nb-y">${tasks.filter(function (t) { return !t.done }).length}</span></button>
-  <button class="ni" id="pi-ev" onclick="goP('pev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Evolução</button>`;
+  <button class="ni" id="pi-ev" onclick="goP('pev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Evolução</button>
+  <button class="ni" id="pi-supl" onclick="goP('psupl',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.5 10h-2v5h2v-5zm4 0h-2v5h2v-5zm8.5 7H4v2h15v-2zm-4.5-7h-2v5h2v-5zM11.5 1L2 6v2h19V6l-9.5-5z"/></svg>Suplementação</button>`;
   goP('pdash', document.getElementById('pi-dash'));
 }
 
@@ -524,7 +530,7 @@ function goP(id, btn) {
   document.getElementById('tb-title').textContent = t[id] || id;
   var pages = {
     dash: rDash, pat: rPat, agenda: rAgenda, presc: rPresc, week: rWeek, ev: rEv, micro: rMicro, rec: rRec, ai: rAI, notif: rNotif, tpl: rTpl, 'pac-diary': rPacDiary, anam: rAnam, busca: rBusca, 'diary-pro': rDiaryPro,
-    pdash: rPDash, pplan: rPPlan, pdiary: rPDiary, ptask: rPTask, pev: rPEv, fin: rFin
+    pdash: rPDash, pplan: rPPlan, pdiary: rPDiary, ptask: rPTask, pev: rPEv, supl: rSupl, psupl: rPSupl, fin: rFin
   };
   var rbts = {
     dash: '<button class="btn btn-s btn-sm" onclick=""><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5z"/></svg> Exportar PDF</button><button class="btn btn-p btn-sm" onclick="openM(\'m-pat\')">+ Novo Paciente</button>',
@@ -570,7 +576,7 @@ function rDash() {
   <div class="kpi kpi-g"><div class="kpi-top"><div class="kpi-ico ki-g"><svg viewBox="0 0 24 24" fill="#16a34a"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><span class="kpi-bdg kbd-g">↑ +2</span></div><div class="kpi-n">${pats.length}</div><div class="kpi-l">Pacientes Ativos</div><div class="kpi-ft kft-g"><strong>+2 novos</strong> em março</div></div>
   <div class="kpi kpi-b"><div class="kpi-top"><div class="kpi-ico ki-b"><svg viewBox="0 0 24 24" fill="#1d4ed8"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div><span class="kpi-bdg kbd-b">↑ +15%</span></div><div class="kpi-n">${weekCt}</div><div class="kpi-l">Consultas esta semana</div><div class="kpi-ft kft-b">${weekTrendHtml}</div></div>
   <div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><span class="kpi-bdg kbd-y">↑ +5%</span></div><div class="kpi-n">${avgAdesao}%</div><div class="kpi-l">Taxa de Adesão</div><div class="kpi-ft kft-y">Média de ${pats.length} pacientes</div></div>
-  <div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">${alerts}</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r"><strong>Ver alertas</strong> →</div></div>
+  <div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">${alerts}</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r" onclick="goP(\'notif\',document.getElementById(\'ni-notif\'))" style="cursor:pointer"><strong>Ver alertas</strong> →</div></div>
  </div>
  <div class="dash-row2">
   <div class="card"><div class="ch"><div><div class="ct">Consultas Realizadas</div><div class="cs" style="margin-top:2px">Últimas 8 semanas</div></div><div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n4)"><span style="width:9px;height:9px;border-radius:2px;background:var(--g5);display:inline-block"></span>Consultas</div></div><div class="bchart" id="bchart"></div></div>
@@ -604,6 +610,15 @@ function buildBChart() {
     var we=new Date(ws); we.setDate(ws.getDate()+6);
     data.push(allAppts.filter(function(a){ return a.isoDate>=ws.toISOString().slice(0,10)&&a.isoDate<=we.toISOString().slice(0,10); }).length);
     labels.push('S'+(8-w));
+  }
+  var totalAppts = data.reduce(function(s,v){return s+v;},0);
+  var el = document.getElementById('bchart'); if (!el) return;
+  if (!totalAppts) {
+    el.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px 0;color:var(--n4);font-size:12.5px;gap:8px">'
+      +'<svg width="32" height="32" viewBox="0 0 24 24" fill="var(--n3)"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>'
+      +'<span>Nenhuma consulta registrada ainda</span></div>';
+    var el2 = document.getElementById('d-recent'); if (el2) { el2.innerHTML = ''; buildBChart(); }
+    return;
   }
   var mx = Math.max.apply(null,data)||1, labels = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'], mx = Math.max.apply(null, data);
   var el = document.getElementById('bchart'); if (!el) return;
@@ -835,7 +850,7 @@ function confirmDeletePat(id) {
   if (selPat && selPat.id === id) selPat = pats[0] || null;
   DB.save();
   closeM('m-del-pat');
-  showToast('"' + nome + '" removido da lista.', 'i');
+  updatePatBadge(); showToast('"' + nome + '" removido da lista.', 'i');
   goP('pat', document.getElementById('ni-pat'));
   // Atualizar badge
   var niPat = document.getElementById('ni-pat');
@@ -1575,6 +1590,7 @@ function _generateSmartAlerts() {
   return al;
 }
 
+function _clearAllNotifs() { notifs = []; updateNotifBadge(); if (typeof DB !== "undefined") DB.save(); goP("notif", null); showToast("Todas as notificações limpas", "s"); }
 function _clearNotifs() { notifs = []; updateNotifBadge(); if (typeof DB !== 'undefined') DB.save(); goP('notif', null); showToast('Alertas limpos', 's'); }
 function _removeNotif(idx) { notifs.splice(idx, 1); updateNotifBadge(); if (typeof DB !== 'undefined') DB.save(); goP('notif', null); }
 function _goPatEv(pid) { selPat = pats.find(function (x) { return x.id === pid; }); goP('ev', document.getElementById('ni-ev')); }
@@ -1593,7 +1609,7 @@ function rNotif() {
   var ur = allNotifs.filter(function (n) { return n.type === 'r'; });
   var at = allNotifs.filter(function (n) { return n.type === 'w'; });
   var inf = allNotifs.filter(function (n) { return n.type === 'i'; });
-  var html = '<div style="max-width:640px"><div class="card" style="margin-bottom:10px"><div class="ch"><span class="ct">Central de Alertas</span><div style="display:flex;gap:6px"><span style="font-size:10.5px;color:var(--n4)">' + allNotifs.length + ' alertas</span><button class="btn btn-ghost btn-sm" onclick="_clearNotifs()">Limpar manuais</button></div></div>';
+  var html = '<div style="max-width:640px"><div class="card" style="margin-bottom:10px"><div class="ch"><span class="ct">Central de Alertas</span><div style="display:flex;gap:6px"><span style="font-size:10.5px;color:var(--n4)">' + allNotifs.length + ' alertas</span><button class="btn btn-ghost btn-sm" onclick="_clearNotifs()">Limpar manuais</button><button class="btn btn-danger btn-sm" onclick="_clearAllNotifs()">Limpar todas</button></div></div>';
   if (ur.length) { html += '<div style="background:#fef2f2;border-radius:var(--r);padding:10px;margin-bottom:8px"><div style="font-size:9.5px;font-weight:800;color:#dc2626;margin-bottom:6px">🚨 Urgente</div>'; ur.forEach(function (n, i) { html += nRow(n, i, '#dc2626', '#fff', '#fee2e2'); }); html += '</div>'; }
   if (at.length) { html += '<div style="margin-bottom:8px"><div style="font-size:9.5px;font-weight:800;color:#d97706;margin-bottom:6px">⚠ Atenção</div>'; at.forEach(function (n, i) { html += nRow(n, i, '#d97706', 'var(--n0)', '#fef3c7'); }); html += '</div>'; }
   if (inf.length) { html += '<div style="margin-bottom:8px"><div style="font-size:9.5px;font-weight:800;color:#3b82f6;margin-bottom:6px">ℹ Informativo</div>'; inf.forEach(function (n, i) { html += nRow(n, i, '#3b82f6', 'var(--n0)', '#eff6ff'); }); html += '</div>'; }
@@ -2815,6 +2831,106 @@ function _buildTodayAgenda() {
       +'</div>';
   }).join('');
 }
+
+// ═══ SUPLEMENTAÇÃO (visão do paciente) ═════════════════════════
+function rPSupl() {
+  var p = selPat || pats[0];
+  if (!p) return '<div style="padding:20px;color:var(--n4)">Nenhum paciente selecionado.</div>';
+  if (!p.suplementos) p.suplementos = [];
+
+  apiGetSupplements(p.id).then(function(list) {
+    if (list && list.length) {
+      p.suplementos = list.map(function(s) {
+        return { id: s.id, nome: s.name||s.nome, dose: s.dose, frequencia: s.frequency||s.frequencia, obs: s.obs||s.notes };
+      });
+      DB.save();
+      var btn = document.getElementById('pi-supl');
+      if (btn && btn.classList.contains('on')) goP('psupl', btn);
+    }
+  }).catch(function(){});
+
+  var list = p.suplementos.length
+    ? p.suplementos.map(function(s, i) {
+        return '<div style="background:#fff;border-radius:12px;border:1px solid var(--n2);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
+          + '<div style="width:40px;height:40px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💊</div>'
+          + '<div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--n9)">' + escHtml(s.nome||'') + '</div>'
+          + '<div style="font-size:11.5px;color:var(--n5);margin-top:2px">' + escHtml(s.dose||'') + (s.frequencia ? ' · ' + escHtml(s.frequencia) : '') + '</div>'
+          + (s.obs ? '<div style="font-size:11px;color:var(--n4);margin-top:2px">' + escHtml(s.obs) + '</div>' : '')
+          + '</div></div>';
+      }).join('')
+    : '<div style="text-align:center;padding:36px 0"><div style="font-size:36px;margin-bottom:10px">💊</div>'
+      + '<div style="font-weight:600;color:var(--n6);margin-bottom:4px">Nenhum suplemento prescrito</div>'
+      + '<div style="font-size:12px;color:var(--n4)">Sua nutricionista adicionará suplementos aqui.</div></div>';
+
+  return '<div class="ch"><span class="ct">💊 Minha Suplementação</span></div>'
+    + '<div style="background:#f0fdf4;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#166534">'
+    + '✅ Tome seus suplementos conforme prescrito. Em caso de dúvidas, consulte sua nutricionista.</div>'
+    + list;
+}
+
+// ═══ SUPLEMENTAÇÃO (visão do nutricionista — dentro do perfil do paciente) ═══
+function rSupl() {
+  var p = selPat;
+  if (!p) return '<div style="padding:20px;color:var(--n4)">Selecione um paciente.</div>';
+  if (!p.suplementos) p.suplementos = [];
+
+  apiGetSupplements(p.id).then(function(list) {
+    if (list && list.length) {
+      p.suplementos = list.map(function(s) {
+        return { id: s.id, nome: s.name||s.nome, dose: s.dose, frequencia: s.frequency||s.frequencia, obs: s.obs||s.notes };
+      });
+      DB.save();
+      var btn = document.getElementById('ni-supl');
+      if (btn && btn.classList.contains('on')) goP('supl', btn);
+    }
+  }).catch(function(){});
+
+  var list = p.suplementos.length
+    ? p.suplementos.map(function(s, i) {
+        return '<div style="background:#fff;border-radius:12px;border:1px solid var(--n2);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
+          + '<div style="width:40px;height:40px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💊</div>'
+          + '<div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--n9)">' + escHtml(s.nome||'') + '</div>'
+          + '<div style="font-size:11.5px;color:var(--n5);margin-top:2px">' + escHtml(s.dose||'') + (s.frequencia ? ' · ' + escHtml(s.frequencia) : '') + '</div>'
+          + (s.obs ? '<div style="font-size:11px;color:var(--n4);margin-top:2px">' + escHtml(s.obs) + '</div>' : '') + '</div>'
+          + '<button class="btn btn-danger btn-sm" onclick="suplDel(' + p.id + ',' + i + ')" style="padding:4px 10px;font-size:11px">✕</button>'
+          + '</div>';
+      }).join('')
+    : '<div style="text-align:center;padding:28px 0;color:var(--n4);font-size:12px">Nenhum suplemento prescrito ainda.</div>';
+
+  return '<div class="ch"><span class="ct">💊 Suplementação — ' + escHtml(p.n) + '</span>'
+    + '<button class="btn btn-p btn-sm" onclick="openM(\'m-supl-add\')">+ Adicionar</button></div>'
+    + list
+    + '<div class="ov" id="m-supl-add" style="display:none"><div class="modal" style="max-width:380px">'
+    + '<div class="mh"><div class="mt">💊 Novo Suplemento</div><button class="mc" onclick="closeM(\'m-supl-add\')">×</button></div>'
+    + '<div style="padding:16px;display:flex;flex-direction:column;gap:10px">'
+    + '<input class="inp" id="sl-nome" placeholder="Nome do suplemento *">'
+    + '<input class="inp" id="sl-dose" placeholder="Dose (ex: 1 cápsula, 10ml)">'
+    + '<input class="inp" id="sl-freq" placeholder="Frequência (ex: 1x ao dia, com almoço)">'
+    + '<input class="inp" id="sl-obs" placeholder="Observações (opcional)">'
+    + '<button class="btn btn-p" onclick="suplAdd()">Prescrever</button>'
+    + '</div></div></div>';
+}
+function suplAdd() {
+  var p = selPat; if (!p) return;
+  var nome = document.getElementById('sl-nome').value.trim();
+  if (!nome) { showToast('Informe o nome do suplemento', 'w'); return; }
+  if (!p.suplementos) p.suplementos = [];
+  var s = { nome: nome, dose: document.getElementById('sl-dose').value.trim(),
+    frequencia: document.getElementById('sl-freq').value.trim(),
+    obs: document.getElementById('sl-obs').value.trim() };
+  apiAddSupplement(Object.assign({ patient_id: p.id, name: s.nome, frequency: s.frequencia, notes: s.obs }, s));
+  p.suplementos.push(s); DB.save();
+  closeM('m-supl-add'); showToast('Suplemento adicionado ✅', 's');
+  var btn = document.getElementById('ni-supl'); if (btn) goP('supl', btn);
+}
+function suplDel(patId, idx) {
+  var p = pats.find(function(x){ return x.id == patId; }); if (!p || !p.suplementos) return;
+  var rem = p.suplementos.splice(idx, 1)[0];
+  if (rem && rem.id) apiDeleteSupplement(rem.id);
+  DB.save(); showToast('Suplemento removido', 'i');
+  var btn = document.getElementById('ni-supl'); if (btn) goP('supl', btn);
+}
+
 function rFin() {
   if (!cu.financeiro) cu.financeiro = [];
   apiGetFinancial().then(function(list) {
@@ -3955,7 +4071,7 @@ function doLogin() {
   document.getElementById('login').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   if (cu.role === 'pro') initPro(); else initPac();
-  setTimeout(updateNotifBadge, 100);
+  setTimeout(updateNotifBadge, 100); setTimeout(updatePatBadge, 100);
 }
 function doLogout() {
   DB.save();
@@ -3965,6 +4081,11 @@ function doLogout() {
   document.getElementById('login').style.display = 'flex';
 }
 
+
+function updatePatBadge() {
+  var b = document.getElementById('pat-count-badge');
+  if (b) b.textContent = pats.length;
+}
 function updateNotifBadge() {
   var badge = document.getElementById('notif-badge');
   var dot = document.getElementById('notif-dot');
@@ -4022,7 +4143,8 @@ function initPac() {
   <button class="ni" id="pi-plan" onclick="goP('pplan',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Meu Plano</button>
   <button class="ni" id="pi-diary" onclick="goP('pdiary',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2z"/></svg>Diário Alimentar</button>
   <button class="ni" id="pi-task" onclick="goP('ptask',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>Tarefas<span class="nb nb-y">${tasks.filter(function (t) { return !t.done }).length}</span></button>
-  <button class="ni" id="pi-ev" onclick="goP('pev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Evolução</button>`;
+  <button class="ni" id="pi-ev" onclick="goP('pev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Evolução</button>
+  <button class="ni" id="pi-supl" onclick="goP('psupl',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.5 10h-2v5h2v-5zm4 0h-2v5h2v-5zm8.5 7H4v2h15v-2zm-4.5-7h-2v5h2v-5zM11.5 1L2 6v2h19V6l-9.5-5z"/></svg>Suplementação</button>`;
   goP('pdash', document.getElementById('pi-dash'));
 }
 
@@ -4042,7 +4164,7 @@ function goP(id, btn) {
   var pages = {
     dash: rDash, pat: rPat, agenda: rAgenda, presc: rPresc, week: rWeek, ev: rEv, micro: rMicro, rec: rRec, ai: rAI, notif: rNotif, tpl: rTpl, 'pac-diary': rPacDiary, 'diary-pro': rDiaryPro,
     anam: rAnam, busca: rBusca,
-    pdash: rPDash, pplan: rPPlan, pdiary: rPDiary, ptask: rPTask, pev: rPEv, fin: rFin
+    pdash: rPDash, pplan: rPPlan, pdiary: rPDiary, ptask: rPTask, pev: rPEv, supl: rSupl, psupl: rPSupl, fin: rFin
   };
   var rbts = {
     dash: '<button class="btn btn-s btn-sm" onclick=""><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5z"/></svg> Exportar PDF</button><button class="btn btn-p btn-sm" onclick="openM(\'m-pat\')">+ Novo Paciente</button>',
@@ -4089,7 +4211,7 @@ function rDash() {
   <div class="kpi kpi-g"><div class="kpi-top"><div class="kpi-ico ki-g"><svg viewBox="0 0 24 24" fill="#16a34a"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><span class="kpi-bdg kbd-g">↑ +2</span></div><div class="kpi-n">${pats.length}</div><div class="kpi-l">Pacientes Ativos</div><div class="kpi-ft kft-g"><strong>+2 novos</strong> em março</div></div>
   <div class="kpi kpi-b"><div class="kpi-top"><div class="kpi-ico ki-b"><svg viewBox="0 0 24 24" fill="#1d4ed8"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div><span class="kpi-bdg kbd-b">↑ +15%</span></div><div class="kpi-n">${weekCt}</div><div class="kpi-l">Consultas esta semana</div><div class="kpi-ft kft-b">${weekTrendHtml}</div></div>
   <div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><span class="kpi-bdg kbd-y">↑ +5%</span></div><div class="kpi-n">${avgAdesao}%</div><div class="kpi-l">Taxa de Adesão</div><div class="kpi-ft kft-y">Média de ${pats.length} pacientes</div></div>
-  <div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">${alerts}</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r"><strong>Ver alertas</strong> →</div></div>
+  <div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">${alerts}</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r" onclick="goP(\'notif\',document.getElementById(\'ni-notif\'))" style="cursor:pointer"><strong>Ver alertas</strong> →</div></div>
  </div>
  <div class="dash-row2">
   <div class="card"><div class="ch"><div><div class="ct">Consultas Realizadas</div><div class="cs" style="margin-top:2px">Últimas 8 semanas</div></div><div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n4)"><span style="width:9px;height:9px;border-radius:2px;background:var(--g5);display:inline-block"></span>Consultas</div></div><div class="bchart" id="bchart"></div></div>
@@ -4121,6 +4243,15 @@ function buildBChart() {
     var we=new Date(ws); we.setDate(ws.getDate()+6);
     data.push(allAppts.filter(function(a){ return a.isoDate>=ws.toISOString().slice(0,10)&&a.isoDate<=we.toISOString().slice(0,10); }).length);
     labels.push('S'+(8-w));
+  }
+  var totalAppts = data.reduce(function(s,v){return s+v;},0);
+  var el = document.getElementById('bchart'); if (!el) return;
+  if (!totalAppts) {
+    el.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px 0;color:var(--n4);font-size:12.5px;gap:8px">'
+      +'<svg width="32" height="32" viewBox="0 0 24 24" fill="var(--n3)"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>'
+      +'<span>Nenhuma consulta registrada ainda</span></div>';
+    var el2 = document.getElementById('d-recent'); if (el2) { el2.innerHTML = ''; buildBChart(); }
+    return;
   }
   var mx = Math.max.apply(null,data)||1, labels = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'], mx = Math.max.apply(null, data);
   var el = document.getElementById('bchart'); if (!el) return;
@@ -4385,7 +4516,7 @@ function confirmDeletePat(id) {
   if (selPat && selPat.id === id) selPat = pats[0] || null;
   DB.save();
   closeM('m-del-pat');
-  showToast('"' + nome + '" removido da lista.', 'i');
+  updatePatBadge(); showToast('"' + nome + '" removido da lista.', 'i');
   goP('pat', document.getElementById('ni-pat'));
   // Atualizar badge
   var niPat = document.getElementById('ni-pat');
