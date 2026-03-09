@@ -1188,44 +1188,112 @@ function openPatSupl(id) {
 function rFin(){
  if(!cu)return'';
  if(!cu.financeiro)cu.financeiro=[];
- var total=cu.financeiro.reduce(function(s,r){return s+(r.status==='pago'?r.valor:0);},0);
- var pend=cu.financeiro.reduce(function(s,r){return s+(r.status==='pendente'?r.valor:0);},0);
- var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px">'
-  +'<div class="card" style="text-align:center;padding:18px"><div style="font-size:22px;font-weight:800;color:var(--g5)">R$ '+total.toFixed(2)+'</div><div style="font-size:11.5px;color:var(--n4);margin-top:4px">Recebido</div></div>'
-  +'<div class="card" style="text-align:center;padding:18px"><div style="font-size:22px;font-weight:800;color:var(--y5)">R$ '+pend.toFixed(2)+'</div><div style="font-size:11.5px;color:var(--n4);margin-top:4px">Pendente</div></div>'
-  +'<div class="card" style="text-align:center;padding:18px"><div style="font-size:22px;font-weight:800;color:var(--n8)">'+cu.financeiro.length+'</div><div style="font-size:11.5px;color:var(--n4);margin-top:4px">Registros</div></div>'
-  +'</div>'
-  +'<div class="card"><div class="ch"><span class="ct">Cobranças</span>'
-  +'<button class="btn btn-p btn-sm" onclick="openM(\'m-fin-form\')">+ Nova Cobrança</button></div>';
- if(!cu.financeiro.length){
-  html+='<div style="text-align:center;padding:30px;color:var(--n4)">Nenhuma cobrança registrada.</div>';
- }else{
-  html+=cu.financeiro.map(function(r,i){
-   return '<div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r);background:var(--n0);margin-bottom:6px">'
-    +'<div style="flex:1"><div style="font-weight:600;font-size:13px">'+escHtml(r.paciente||'')+'</div>'
-    +'<div style="font-size:11px;color:var(--n4)">'+escHtml(r.data||'')+' &middot; '+escHtml(r.tipo||'')+'</div></div>'
-    +'<div style="font-weight:700;font-size:14px;color:'+(r.status==='pago'?'var(--g5)':'var(--y5)')+'">R$ '+Number(r.valor||0).toFixed(2)+'</div>'
-    +'<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:'+(r.status==='pago'?'#dcfce7':'#fef9c3')+';color:'+(r.status==='pago'?'#15803d':'#92400e')+'">'+escHtml(r.status||'')+'</span>'
-    +(r.status!=='pago'?'<button class="btn btn-s btn-sm" onclick="finPagar('+i+')">Pago</button>':'')
-    +'<button class="btn btn-danger btn-sm" onclick="finDel('+i+')">&times;</button>'
-    +'</div>';
-  }).join('');
+ var recs=cu.financeiro;
+ var now=new Date();
+ var mes=now.getMonth(); var ano=now.getFullYear();
+ // Stats
+ var totalRec=recs.reduce(function(s,r){return s+(r.status==='pago'?r.valor:0);},0);
+ var totalPend=recs.reduce(function(s,r){return s+(r.status==='pendente'?r.valor:0);},0);
+ var mesRec=recs.filter(function(r){
+  var d=new Date(r.data&&r.data.split('/').reverse().join('-')||'');
+  return d.getMonth()===mes&&d.getFullYear()===ano&&r.status==='pago';
+ }).reduce(function(s,r){return s+r.valor;},0);
+ var html='';
+ // KPI row
+ html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
+ [['💰','R$ '+totalRec.toFixed(2),'Total Recebido','#f0fdf4','#15803d'],
+  ['⏳','R$ '+totalPend.toFixed(2),'Pendente','#fffbeb','#b45309'],
+  ['📅','R$ '+mesRec.toFixed(2),'Este Mês','#eff6ff','#1d4ed8'],
+  ['📊',recs.length,'Registros','var(--n0)','var(--n7)']].forEach(function(k){
+  html+='<div style="background:'+k[3]+';border-radius:12px;padding:14px 16px"><div style="font-size:20px;margin-bottom:6px">'+k[0]+'</div>'
+   +'<div style="font-size:19px;font-weight:900;color:'+k[4]+';line-height:1">'+k[1]+'</div>'
+   +'<div style="font-size:10.5px;color:var(--n5);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">'+k[2]+'</div></div>';
+ });
+ html+='</div>';
+ // Inline form
+ html+='<div class="card" style="margin-bottom:16px">';
+ html+='<div class="ch"><span class="ct">💳 Cobranças</span>'
+  +'<button class="btn btn-p btn-sm" onclick="toggleFinForm()">+ Nova Cobrança</button></div>';
+ html+='<div id="fin-form" style="display:none;background:var(--g0);border:1.5px solid var(--g2);border-radius:12px;padding:16px;margin-bottom:16px">';
+ html+='<div style="font-weight:700;font-size:13px;color:var(--n9);margin-bottom:12px">Nova Cobrança</div>';
+ html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">';
+ html+='<select class="sel" id="fin-pac"><option value="">Selecionar paciente...</option>'
+  +(cu&&cu.role!=='pac'?recs.length?'':'' : '')
+  + (typeof pats!=='undefined'?pats.map(function(p){return '<option value="'+escHtml(p.n)+'">'+escHtml(p.n)+'</option>';}).join(''):'')
+  +'</select>';
+ html+='<input class="inp" id="fin-val" type="number" step="0.01" placeholder="Valor (R$) *" min="0">';
+ html+='<input class="inp" id="fin-data" type="date" value="'+now.toISOString().slice(0,10)+'">';
+ html+='</div>';
+ html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">';
+ html+='<select class="sel" id="fin-tipo"><option value="Consulta">Consulta</option><option value="Retorno">Retorno</option><option value="Plano Mensal">Plano Mensal</option><option value="Pacote">Pacote</option><option value="Outro">Outro</option></select>';
+ html+='<input class="inp" id="fin-obs" placeholder="Observação (opcional)">';
+ html+='</div>';
+ html+='<div style="display:flex;gap:8px"><button class="btn btn-p" onclick="finAdd()">Registrar</button><button class="btn btn-ghost" onclick="toggleFinForm()">Cancelar</button></div>';
+ html+='</div>';
+ // Records table
+ if(!recs.length){
+  html+='<div style="text-align:center;padding:48px;color:var(--n4)"><div style="font-size:40px;margin-bottom:12px">💳</div><div style="font-weight:700;font-size:14px;color:var(--n6);margin-bottom:6px">Nenhuma cobrança registrada</div><div style="font-size:12.5px">Clique em <strong>+ Nova Cobrança</strong> para começar.</div></div>';
+ } else {
+  // Group by month
+  var byMonth={};
+  recs.forEach(function(r,i){
+   var parts=(r.data||'').split('/');
+   var key=parts.length===3?parts[1]+'/'+parts[2]:'Sem data';
+   if(!byMonth[key])byMonth[key]=[];
+   byMonth[key].push({r:r,i:i});
+  });
+  var sortedMonths=Object.keys(byMonth).sort(function(a,b){return b.localeCompare(a);});
+  sortedMonths.forEach(function(month){
+   var items=byMonth[month];
+   var mTotal=items.reduce(function(s,x){return s+(x.r.status==='pago'?x.r.valor:0);},0);
+   html+='<div style="font-size:11px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:.06em;padding:8px 0 6px;border-bottom:2px solid var(--n2);margin-bottom:6px;display:flex;justify-content:space-between">'
+    +'<span>'+month+'</span><span style="color:var(--g5)">R$ '+mTotal.toFixed(2)+' recebidos</span></div>';
+   items.forEach(function(item){
+    var r=item.r; var i=item.i;
+    html+='<div style="display:flex;align-items:center;gap:12px;padding:11px 8px;border-radius:10px;transition:background .1s" onmouseover="this.style.background=\'var(--n0)\'" onmouseout="this.style.background=\'transparent\'">'
+     +'<div style="width:38px;height:38px;border-radius:10px;background:'+(r.status==='pago'?'#f0fdf4':'#fffbeb')+';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">'+(r.status==='pago'?'✅':'⏳')+'</div>'
+     +'<div style="flex:1;min-width:0">'
+     +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+     +'<span style="font-weight:700;font-size:13px;color:var(--n9)">'+escHtml(r.paciente||'—')+'</span>'
+     +'<span style="font-size:11px;color:var(--n5)">'+escHtml(r.tipo||'Consulta')+'</span>'
+     +'</div>'
+     +'<div style="font-size:11px;color:var(--n4);margin-top:2px">'+escHtml(r.data||'—')+(r.obs?' · '+escHtml(r.obs):'')+'</div>'
+     +'</div>'
+     +'<div style="text-align:right;flex-shrink:0">'
+     +'<div style="font-family:var(--in);font-size:15px;font-weight:800;color:'+(r.status==='pago'?'#15803d':'#b45309')+'">R$ '+r.valor.toFixed(2)+'</div>'
+     +'<div style="display:flex;gap:4px;margin-top:4px;justify-content:flex-end">'
+     +(r.status==='pendente'?'<button class="btn btn-s btn-sm" onclick="finPagar('+i+')" style="padding:3px 8px;font-size:10px">✓ Pago</button>':'<span style="font-size:10px;color:#15803d;font-weight:600">Recebido</span>')
+     +'<button class="btn btn-danger btn-sm" onclick="finDel('+i+')" style="padding:3px 6px;font-size:10px">✕</button>'
+     +'</div></div></div>';
+   });
+  });
  }
- return html+'</div>';
+ html+='</div>';
+ return html;
 }
 function finAdd(){
- if(!cu)return;if(!cu.financeiro)cu.financeiro=[];
+ if(!cu)return;
+ if(!cu.financeiro)cu.financeiro=[];
  var pac=(document.getElementById('fin-pac')||{}).value||'';
  var val=parseFloat((document.getElementById('fin-val')||{}).value)||0;
  if(!pac||!val){showToast('Preencha paciente e valor','w');return;}
  var today=new Date();
- var r={id:Date.now(),paciente:pac,valor:val,
+ var r={
+  id:Date.now(),
+  paciente:pac,
+  valor:val,
   data:(document.getElementById('fin-data')||{}).value||today.toLocaleDateString('pt-BR'),
   tipo:(document.getElementById('fin-tipo')||{}).value||'Consulta',
-  status:'pendente',obs:''};
- cu.financeiro.push(r);DB.save();
+  obs:(document.getElementById('fin-obs')||{}).value||'',
+  status:'pendente'
+ };
+ cu.financeiro.push(r);
+ DB.save();
  if(typeof apiAddFinancial==='function')apiAddFinancial(r).catch(function(){});
- closeM('m-fin-form');showToast('Cobrança registrada','s');
+ // Hide inline form
+ var f=document.getElementById('fin-form');
+ if(f)f.style.display='none';
+ showToast('Cobrança registrada!','s');
  goP('fin',document.getElementById('ni-fin'));
 }
 function finPagar(idx){
@@ -1265,6 +1333,7 @@ var DB = {
     notifs: notifs,
     templates: templates,
     userProfiles: userProfiles,
+    financeiro: cu ? (cu.financeiro||[]) : [],
     savedAt: Date.now()
    };
    localStorage.setItem(DB._keyFor(cu.id||cu.email), JSON.stringify(snapshot));
@@ -1282,6 +1351,7 @@ var DB = {
    if(data.notifs){notifs=data.notifs;}
    if(data.templates&&data.templates.length){templates=data.templates;}
    if(data.userProfiles){userProfiles=data.userProfiles;}
+   if(data.financeiro&&cu){cu.financeiro=data.financeiro;}
    return true;
   }catch(e){console.warn('DietOn: falha ao carregar dados',e);return false;}
  },
@@ -1544,7 +1614,7 @@ function _buildSmartAlerts(){
   html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:8px;background:'+bg+';border:1px solid '+bc+'">'
    +'<span style="font-size:18px;flex-shrink:0">'+a.ic+'</span>'
    +'<div style="flex:1"><div style="font-size:11.5px;font-weight:700;color:'+tc+'">'+a.p+'</div><div style="font-size:11px;color:'+vc+';margin-top:1px">'+a.t+'</div><div style="font-size:10.5px;color:var(--n5);margin-top:3px">→ '+a.ac+'</div></div>'
-   +'<button class="btn btn-ghost btn-sm" onclick="selPat=pats.find(function(x){return x.id===\'+a.pid+\'});goP(\'ev\',document.getElementById(\'ni-ev\'))">Ver</button>'
+   +'<button class="btn btn-ghost btn-sm" onclick="selPat=pats.find(function(x){return x.id==='+a.pid+'});goP(\'ev\',document.getElementById(\'ni-ev\'))">Ver</button>'
    +'</div>';
  });
  if(al.length>6)html+='<div style="text-align:center;font-size:11px;color:var(--n4);padding:4px">+'+(al.length-6)+' alertas adicionais</div>';
@@ -1560,32 +1630,68 @@ function _buildAdhCard(){
 
 // ─── BUSCA GLOBAL ───
 function rBusca(){
- var cards=[['👥','Pacientes','Acesse o histórico de qualquer paciente','pat','ni-pat'],['📋','Prescrição','Monte e edite o plano alimentar','presc','ni-presc'],['🤖','IA Nutricional','Gere planos com IA','ai','ni-ai'],['📊','Acompanhamento','Evolução e gráficos','ev','ni-ev'],['🗓️','Plano Semanal','Visualize e exporte a semana','week','ni-week'],['📝','Anamnese','Ficha completa e conduta','anam','ni-anam'],['🔬','Micronutrientes','Vitaminas e minerais','micro','ni-micro'],['⏱️','Recordatório','Compare prescrito vs consumido','rec','ni-rec'],['📁','Templates','Planos salvos reutilizáveis','tpl','ni-tpl']];
- var grid=cards.map(function(m){return '<div onclick="goP(\''+m[3]+'\',document.getElementById(\''+m[4]+'\'))" style="padding:16px;border:1.5px solid var(--n2);border-radius:10px;cursor:pointer;transition:border-color .15s" onmouseenter="this.style.borderColor=\'var(--g4)\';this.style.background=\'var(--g0)\'" onmouseleave="this.style.borderColor=\'var(--n2)\';this.style.background=\'\'">'+'<div style="font-size:24px;margin-bottom:8px">'+m[0]+'</div><div style="font-family:var(--jk);font-size:12.5px;font-weight:700;color:var(--n9);margin-bottom:4px">'+m[1]+'</div><div style="font-size:11px;color:var(--n4);line-height:1.5">'+m[2]+'</div></div>';}).join('');
- return '<div><div style="position:relative;margin-bottom:18px"><svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--n4)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="global-q" style="width:100%;padding:14px 14px 14px 44px;border:2px solid var(--n2);border-radius:12px;font-size:14px;color:var(--n9);outline:none;transition:border-color .15s;font-family:var(--jk)" placeholder="Buscar paciente, alimento, template..." oninput="globalSearch(this.value)" onfocus="this.style.borderColor=\'var(--g4)\'" onblur="this.style.borderColor=\'var(--n2)\'"></div><div id="global-results"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'+grid+'</div></div></div>';
+ return '<div style="max-width:680px">'
+  // Search bar
+  +'<div style="position:relative;margin-bottom:20px">'
+  +'<input class="inp" id="global-q" placeholder="🔍 Buscar pacientes, alimentos, templates..." oninput="globalSearch()" style="padding-left:44px;font-size:14px;height:48px;border-radius:14px" autofocus>'
+  +'<svg viewBox="0 0 24 24" fill="currentColor" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--n4)"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>'
+  +'</div>'
+  +'<div id="busca-results"></div>'
+  // Quick access cards when empty
+  +'<div id="busca-shortcuts">'
+  +'<div style="font-size:11px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Acesso Rápido</div>'
+  +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
+  +[['👥','Pacientes','pat','ni-pat'],['📋','Prescrição','presc','ni-presc'],['🤖','IA Nutricional','ai','ni-ai'],
+    ['📊','Acompanhamento','ev','ni-ev'],['🗓️','Plano Semanal','week','ni-week'],['📝','Anamnese','anam','ni-anam'],
+    ['🔬','Micronutrientes','micro','ni-micro'],['⏱️','Recordatório','rec','ni-rec'],['📁','Templates','tpl','ni-tpl'],
+    ['💊','Suplementação','supl','ni-supl'],['💰','Financeiro','fin','ni-fin'],['🗓','Agenda','agenda','ni-agenda']].map(function(m){
+    return '<div onclick="goP(\''+m[2]+'\',document.getElementById(\''+m[3]+'\'))" style="padding:12px;border:1.5px solid var(--n2);border-radius:12px;cursor:pointer;transition:all .15s;text-align:center;background:#fff" onmouseover="this.style.borderColor=\'var(--g4)\';this.style.background=\'var(--g0)\'" onmouseout="this.style.borderColor=\'var(--n2)\';this.style.background=\'#fff\'">'
+     +'<div style="font-size:22px;margin-bottom:4px">'+m[0]+'</div>'
+     +'<div style="font-size:11.5px;font-weight:700;color:var(--n7)">'+m[1]+'</div>'
+     +'</div>';
+   }).join('')
+  +'</div></div></div>';
 }
-function globalSearch(q){
- var el=document.getElementById('global-results');if(!el)return;
- var ql=(q||'').toLowerCase().trim();
- if(ql.length<2){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--n4)">Digite ao menos 2 caracteres para buscar</div>';return;}
- var results=[];
- pats.forEach(function(p){if(p.n.toLowerCase().indexOf(ql)!==-1||(p.goal||'').toLowerCase().indexOf(ql)!==-1||(p.cond||'').toLowerCase().indexOf(ql)!==-1)results.push({type:'pac',icon:'👤',title:p.n,sub:p.age+' anos · '+p.goal+(p.cond?' · '+p.cond:''),pid:p.id,badge:p.stxt,bc:p.st});});
- FOOD_DB.filter(function(f){return f.n.toLowerCase().indexOf(ql)!==-1&&results.length<18;}).slice(0,6).forEach(function(f){results.push({type:'alim',icon:f.e,title:f.n,sub:f.k+' kcal/100g · P:'+f.p+'g · C:'+f.c+'g · G:'+f.g+'g',pid:0,badge:f.cat,bc:'tg'});});
- templates.filter(function(t){return(t.name||'').toLowerCase().indexOf(ql)!==-1;}).forEach(function(t){results.push({type:'tpl',icon:'📁',title:t.name,sub:t.desc||t.kcal+' kcal',pid:0,badge:'Template',bc:'tg'});});
- if(!results.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--n4)"><div style="font-size:32px;margin-bottom:10px">😕</div><div>Nenhum resultado para "'+q+'"</div></div>';return;}
- var typeLabels={pac:'👥 Pacientes',alim:'🥗 Alimentos',tpl:'📁 Templates'};
- var grouped={};results.forEach(function(r){if(!grouped[r.type])grouped[r.type]=[];grouped[r.type].push(r);});
- var html='<div style="font-size:11px;color:var(--n4);margin-bottom:10px">'+results.length+' resultado(s) para "'+q+'"</div>';
- Object.keys(grouped).forEach(function(type){
-  html+='<div style="font-size:10px;font-weight:700;color:var(--n4);letter-spacing:.08em;text-transform:uppercase;margin:12px 0 6px">'+typeLabels[type]+'</div>';
-  grouped[type].forEach(function(r){
-   var ca=r.pid?'selPat=pats.find(function(x){return x.id==='+r.pid+'});goP(\'ev\',document.getElementById(\'ni-ev\'))':'goP(\'presc\',document.getElementById(\'ni-presc\'))';
-   if(r.type==='tpl')ca='goP(\'tpl\',document.getElementById(\'ni-tpl\'))';
-   html+='<div onclick="'+ca+'" class="sr-item" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:9px;border:1.5px solid var(--n2);margin-bottom:6px;cursor:pointer;transition:background .13s"><span style="font-size:22px;flex-shrink:0">'+r.icon+'</span><div style="flex:1;min-width:0"><div style="font-family:var(--jk);font-size:13px;font-weight:600;color:var(--n9)">'+r.title+'</div><div style="font-size:11px;color:var(--n5);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+r.sub+'</div></div><span class="tag '+r.bc+'">'+r.badge+'</span></div>';
-  });
+
+function globalSearch(){
+ var q=(document.getElementById('global-q')||{}).value||'';
+ var res=document.getElementById('busca-results');
+ var sht=document.getElementById('busca-shortcuts');
+ if(!q.trim()){if(res)res.innerHTML='';if(sht)sht.style.display='';return;}
+ if(sht)sht.style.display='none';
+ var ql=q.toLowerCase(); var results=[];
+ // Search patients
+ pats.forEach(function(p){
+  if(p.n.toLowerCase().indexOf(ql)>=0||((p.email||'').toLowerCase().indexOf(ql)>=0)||((p.cid||'').toLowerCase().indexOf(ql)>=0)){
+   results.push({type:'pat',icon:'👤',title:p.n,sub:(p.email||'')+(p.w?' · '+p.w+'kg':''),action:"selPat=pats.find(function(x){return x.id==="+p.id+"});openPatDetail("+p.id+")"});
+  }
  });
- el.innerHTML=html;
+ // Search templates
+ (templates||[]).forEach(function(t,i){
+  if((t.name||'').toLowerCase().indexOf(ql)>=0||(t.desc||'').toLowerCase().indexOf(ql)>=0){
+   results.push({type:'tpl',icon:'📁',title:t.name,sub:'Template · '+(t.kcal||'?')+' kcal',action:"goP('tpl',document.getElementById('ni-tpl'))"});
+  }
+ });
+ // Search foods
+ var foodMatches=FOOD_DB.filter(function(f){return f.n.toLowerCase().indexOf(ql)>=0;}).slice(0,5);
+ foodMatches.forEach(function(f){
+  results.push({type:'food',icon:f.e||'🍽️',title:f.n,sub:f.k+'kcal · P:'+f.p+'g C:'+f.c+'g G:'+f.g+'g por 100g',action:"goP('presc',document.getElementById('ni-presc'))"});
+ });
+ if(!results.length){
+  if(res)res.innerHTML='<div style="text-align:center;padding:40px;color:var(--n4)"><div style="font-size:32px;margin-bottom:8px">🔍</div><div style="font-size:13px;font-weight:600">Nenhum resultado para "'+escHtml(q)+'"</div></div>';
+  return;
+ }
+ var html='<div style="font-size:11px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">'+results.length+' resultado(s)</div>';
+ html+=results.map(function(r){
+  return '<div onclick="'+r.action+'" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--n2);border-radius:12px;margin-bottom:6px;cursor:pointer;background:#fff;transition:all .15s" onmouseover="this.style.borderColor=\'var(--g4)\';this.style.background=\'var(--g0)\'" onmouseout="this.style.borderColor=\'var(--n2)\';this.style.background=\'#fff\'">'
+   +'<div style="width:40px;height:40px;border-radius:10px;background:var(--n1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+r.icon+'</div>'
+   +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;color:var(--n9)">'+escHtml(r.title)+'</div><div style="font-size:11px;color:var(--n5);margin-top:2px">'+escHtml(r.sub)+'</div></div>'
+   +'<svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px;color:var(--n4);flex-shrink:0"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>'
+   +'</div>';
+ }).join('');
+ if(res)res.innerHTML=html;
 }
+
 
 // ─── HELPER ───
 function _anamSelChange(pid){var pp=pats.find(function(x){return x.id===pid;});if(pp){selPat=pp;goP('anam',document.getElementById('ni-anam'));}}
@@ -2504,10 +2610,30 @@ function initPro(){
 }
 
 function initPac(){
- document.getElementById('sb-av').textContent=cu.init||'PA';document.getElementById('sb-av').className='av '+(cu.av||'a4');
- document.getElementById('sb-name').textContent=cu.name;document.getElementById('sb-email').textContent=cu.email;
+ document.getElementById('sb-av').textContent=cu.init||'PA';
+ document.getElementById('sb-av').className='av '+(cu.av||'a4');
+ document.getElementById('sb-name').textContent=cu.name;
+ document.getElementById('sb-email').textContent=cu.email;
  setTimeout(_applySidebarProfile,50);
- var role=document.getElementById('sb-role');role.innerHTML='<span style="width:6px;height:6px;border-radius:50%;background:#60a5fa;display:inline-block"></span> Paciente';
+ var role=document.getElementById('sb-role');
+ role.innerHTML='<span style="width:6px;height:6px;border-radius:50%;background:#60a5fa;display:inline-block"></span> Paciente';
+
+ // ★ CRITICAL: Find and set selPat to the patient record matching this user
+ var myPat = pats.find(function(p){
+  return (p.email && p.email.toLowerCase()===(cu.email||'').toLowerCase())
+    || (p._uid && p._uid===cu.id)
+    || (p._backendId && p._backendId===cu.id);
+ });
+ // Fallback: if nurse added the patient by name matching
+ if (!myPat && cu.name) {
+  myPat = pats.find(function(p){
+   return p.n && p.n.toLowerCase() === cu.name.toLowerCase();
+  });
+ }
+ // If still nothing and only one patient, use it (single-patient demo)
+ if (!myPat && pats.length === 1) myPat = pats[0];
+ selPat = myPat || null;
+
  var nav=document.getElementById('sb-nav');
  nav.innerHTML=`
   <div class="sb-sec">Minha Área</div>
@@ -2515,7 +2641,8 @@ function initPac(){
   <button class="ni" id="pi-plan" onclick="goP('pplan',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Meu Plano</button>
   <button class="ni" id="pi-diary" onclick="goP('pdiary',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2z"/></svg>Diário Alimentar</button>
   <button class="ni" id="pi-task" onclick="goP('ptask',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>Tarefas<span class="nb nb-y">${tasks.filter(function(t){return!t.done}).length}</span></button>
-  <button class="ni" id="pi-ev" onclick="goP('pev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Evolução</button>`;
+  <button class="ni" id="pi-ev" onclick="goP('pev',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 8.17-4-4L2 16.99z"/></svg>Evolução</button>
+  <button class="ni" id="pi-supl" onclick="goP('psupl',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.5 10h-2v7h2v-7zm4 0h-2v7h2v-7zm8.5 9H4v2h15v-2zm-4.5-9h-2v7h2v-7zM11.5 1L2 6v2h19V6l-9.5-5z"/></svg>Suplementos</button>`;
  goP('pdash',document.getElementById('pi-dash'));
 }
 
@@ -2530,12 +2657,12 @@ function goP(id,btn){
  var days=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
  var months=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
  sub.textContent=days[now.getDay()]+', '+now.getDate()+' de '+months[now.getMonth()]+' de '+now.getFullYear();
- var t={dash:'Dashboard',pat:'Pacientes',presc:'Prescrição Nutricional',week:'Plano Semanal',ev:'Acompanhamento',micro:'Micronutrientes',rec:'Recordatório 24h',ai:'IA Nutricional',notif:'Notificações',tpl:'Templates de Plano',anam:'Anamnese Clínica',busca:'Busca Global','pac-diary':'Diário do Paciente',supl:'Suplementação',psupl:'Minha Suplementação',fin:'Financeiro',agenda:'Agenda','diary-pro':'Diário Visual',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Tarefas',pev:'Minha Evolução'};
+ var t={dash:'Dashboard',pat:'Pacientes',presc:'Prescrição Nutricional',week:'Plano Semanal',ev:'Acompanhamento',micro:'Micronutrientes',rec:'Recordatório 24h',ai:'IA Nutricional',notif:'Notificações',tpl:'Templates de Plano',anam:'Anamnese Clínica',busca:'Busca Global','pac-diary':'Diário do Paciente',supl:'Suplementação',psupl:'Minha Suplementação',fin:'Financeiro',agenda:'Agenda',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Minhas Tarefas',pev:'Minha Evolução','diary-pro':'Diário Visual',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Tarefas',pev:'Minha Evolução'};
  document.getElementById('tb-title').textContent=t[id]||id;
  var pages={
   dash:rDash,pat:rPat,agenda:rAgenda,presc:rPresc,week:rWeek,ev:rEv,micro:rMicro,rec:rRec,ai:rAI,notif:rNotif,tpl:rTpl,'pac-diary':rPacDiary,'diary-pro':rDiaryPro,
   anam:rAnam,busca:rBusca,supl:rSupl,psupl:rPSupl,fin:rFin,
-  pdash:rPDash,pplan:rPPlan,pdiary:rPDiary,ptask:rPTask,pev:rPEv
+  pdash:rPDash,pplan:rPPlan,pdiary:rPDiary,ptask:rPTask,pev:rPEv,psupl:rPSupl
  };
  var rbts={
   dash:'<button class="btn btn-s btn-sm" onclick=""><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5z"/></svg> Exportar PDF</button><button class="btn btn-p btn-sm" onclick="openM(\'m-pat\')">+ Novo Paciente</button>',
@@ -2544,7 +2671,13 @@ function goP(id,btn){
   ev:'<button class="btn btn-s btn-sm" onclick="openM(\'m-meas\')">+ Medidas</button><button class="btn btn-p btn-sm" onclick="rptMensal()">📊 Relatório PDF</button>',
   pdiary:'<button class="btn btn-p btn-sm" onclick="openDiaryAdd()">+ Registrar Refeição</button>',
   anam:'<button class="btn btn-ghost btn-sm" onclick="exportAnamPDF()">📄 Exportar Anamnese PDF</button>',
-  busca:''
+  busca:'',
+  pdash:'',
+  pplan:'',
+  pdiary:'<button class="btn btn-p btn-sm" onclick="openDiaryAdd()">+ Registrar Refeição</button>',
+  ptask:'',
+  pev:'',
+  psupl:''
  };
  var _helpBtn='<button class="btn btn-ghost btn-sm" onclick="showTour()" style="font-size:11px">📖 Tutorial</button>';
   ri.innerHTML=_helpBtn+(rbts[id]||'');
@@ -2563,34 +2696,71 @@ function afterRender(id){
 
 // ─── DASHBOARD ───
 function rDash(){
- var alerts=pats.filter(function(p){return p.st==='tr'||p.exams.vitd<25||p.exams.gli>120}).length;
+ var alerts=pats.filter(function(p){return p.st==='tr'||(p.exams&&(p.exams.vitd<25||p.exams.gli>120));}).length;
+ // Real stats
+ var now=new Date();
+ var todayStr=now.toISOString().slice(0,10);
+ var monthStart=new Date(now.getFullYear(),now.getMonth(),1);
+ var todayAppts=[],monthAppts=0,nextAppts=[];
+ pats.forEach(function(p){
+  (p.appointments||[]).forEach(function(a){
+   var d=new Date(a.isoDate||a.date||'');
+   var ds=(a.isoDate||a.date||'').slice(0,10);
+   if(ds===todayStr)todayAppts.push({p:p.n,a:a});
+   if(d>=monthStart&&d<=now)monthAppts++;
+   if(d>now)nextAppts.push({p:p.n,a:a,d:d});
+  });
+ });
+ nextAppts.sort(function(a,b){return a.d-b.d;});
+ var receita=(cu&&cu.financeiro||[]).reduce(function(s,r){return s+(r.status==='pago'?r.valor:0);},0);
+ var pendente=(cu&&cu.financeiro||[]).reduce(function(s,r){return s+(r.status==='pendente'?r.valor:0);},0);
+ // New patients this month
+ var newPats=pats.filter(function(p){
+  var d=new Date(p.since||p.dataCadastro||'');
+  return d>=monthStart;
+ }).length;
+ var smartAlertCount=0;try{smartAlertCount=_generateSmartAlerts().length;}catch(e){}
+
  return`
  <div class="kpi-row">
-  <div class="kpi kpi-g"><div class="kpi-top"><div class="kpi-ico ki-g"><svg viewBox="0 0 24 24" fill="#16a34a"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><span class="kpi-bdg kbd-g">↑ +2</span></div><div class="kpi-n">${pats.length}</div><div class="kpi-l">Pacientes Ativos</div><div class="kpi-ft kft-g"><strong>+2 novos</strong> em março</div></div>
-  <div class="kpi kpi-b"><div class="kpi-top"><div class="kpi-ico ki-b"><svg viewBox="0 0 24 24" fill="#1d4ed8"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div><span class="kpi-bdg kbd-b">↑ +15%</span></div><div class="kpi-n">12</div><div class="kpi-l">Consultas esta semana</div><div class="kpi-ft kft-b"><strong>+15%</strong> vs semana anterior</div></div>
-  <div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><span class="kpi-bdg kbd-y">↑ +5%</span></div><div class="kpi-n">87%</div><div class="kpi-l">Taxa de Adesão</div><div class="kpi-ft kft-y"><strong>+5 pts</strong> este mês</div></div>
-  <div class="kpi kpi-r"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">Atenção</span></div><div class="kpi-n">${alerts}</div><div class="kpi-l">Alertas Ativos</div><div class="kpi-ft kft-r" onclick="goP('notif',document.getElementById('ni-notif'))" style="cursor:pointer"><strong>Ver alertas</strong> →</div></div>
+  <div class="kpi kpi-g"><div class="kpi-top"><div class="kpi-ico ki-g"><svg viewBox="0 0 24 24" fill="#16a34a"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><span class="kpi-bdg kbd-g">${newPats>0?'↑ +'+newPats+' novo'+(newPats>1?'s':''):'—'}</span></div><div class="kpi-n">${pats.length}</div><div class="kpi-l">Pacientes Ativos</div><div class="kpi-ft kft-g">${newPats>0?'<strong>+'+newPats+'</strong> novos este mês':'Nenhum novo este mês'}</div></div>
+  <div class="kpi kpi-b"><div class="kpi-top"><div class="kpi-ico ki-b"><svg viewBox="0 0 24 24" fill="#1d4ed8"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div><span class="kpi-bdg kbd-b">${todayAppts.length>0?todayAppts.length+' hoje':'—'}</span></div><div class="kpi-n">${monthAppts}</div><div class="kpi-l">Consultas/Mês</div><div class="kpi-ft kft-b">${todayAppts.length>0?'<strong>'+todayAppts.length+'</strong> consulta(s) hoje':'Nenhuma consulta hoje'}</div></div>
+  <div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div><span class="kpi-bdg kbd-y">${pendente>0?'R$ '+pendente.toFixed(0)+' pend.':'—'}</span></div><div class="kpi-n">R$ ${receita.toFixed(0)}</div><div class="kpi-l">Receita do Mês</div><div class="kpi-ft kft-y">${pendente>0?'<strong>R$ '+pendente.toFixed(0)+'</strong> pendente':'Sem pendências'}</div></div>
+  <div class="kpi kpi-r" onclick="goP('notif',document.getElementById('ni-notif'))" style="cursor:pointer"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">${alerts+smartAlertCount>0?'Ativo':''}</span></div><div class="kpi-n">${alerts+smartAlertCount}</div><div class="kpi-l">Alertas Clínicos</div><div class="kpi-ft kft-r">${alerts+smartAlertCount>0?'<strong>Ver alertas</strong> →':'Nenhum alerta'}</div></div>
  </div>
- <div class="dash-row2">
-  <div class="card"><div class="ch"><div><div class="ct">Consultas Realizadas</div><div class="cs" style="margin-top:2px">Últimas 8 semanas</div></div><div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n4)"><span style="width:9px;height:9px;border-radius:2px;background:var(--g5);display:inline-block"></span>Consultas</div></div><div class="bchart" id="bchart"></div></div>
-  <div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span><span style="font-family:var(--jk);font-size:9px;font-weight:700;color:#c4420a;background:#fdd0a8;padding:3px 9px;border-radius:99px">4 consultas</span></div>
-   <div class="ag-item"><div class="ag-time">09:00</div><div class="ag-bar" style="background:#e85a0a"></div><div style="flex:1;min-width:0"><div class="ag-nm">Fernanda Lima</div><div class="ag-tp">Retorno · 45 min</div></div><span class="tag tg">Concluído</span></div>
-   <div class="ag-item"><div class="ag-time">10:30</div><div class="ag-bar" style="background:#f59e0b"></div><div style="flex:1;min-width:0"><div class="ag-nm">Carlos Mendes</div><div class="ag-tp">1ª Consulta</div></div><span class="tag ty">Pendente</span></div>
-   <div class="ag-item"><div class="ag-time">14:00</div><div class="ag-bar" style="background:#e85a0a"></div><div style="flex:1;min-width:0"><div class="ag-nm">Ana Rodrigues</div><div class="ag-tp">Retorno · 30 min</div></div><span class="tag tg">Concluído</span></div>
-   <div class="ag-item"><div class="ag-time">15:30</div><div class="ag-bar" style="background:#3b82f6"></div><div style="flex:1;min-width:0"><div class="ag-nm">Pedro Alves</div><div class="ag-tp">Online · 30 min</div></div><span class="tag tb2">Online</span></div>
+
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+  <div class="card"><div class="ch" style="margin-bottom:12px"><span class="ct">Consultas (8 semanas)</span><span class="cs">${monthAppts} este mês</span></div><div class="bchart" id="bchart"></div></div>
+  <div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span><span style="font-family:var(--jk);font-size:9px;font-weight:700;color:#c4420a;background:#fdd0a8;padding:3px 9px;border-radius:99px">${todayAppts.length} consulta${todayAppts.length!==1?'s':''}</span></div>
+   ${todayAppts.length===0
+     ? '<div style="text-align:center;padding:24px 0;color:var(--n4);font-size:12.5px">📅 Nenhuma consulta hoje</div>'
+     : todayAppts.slice(0,4).map(function(item){
+         var a=item.a;
+         return '<div class="ag-item"><div class="ag-time">'+(a.time||'—')+'</div><div class="ag-bar" style="background:#e85a0a"></div><div style="flex:1;min-width:0"><div class="ag-nm">'+escHtml(item.p)+'</div><div class="ag-tp">'+escHtml(a.type||'Consulta')+'</div></div><span class="tag '+(a.status==='done'?'tg':a.status==='cancel'?'tr':'ty')+'">'+(a.status==='done'?'Concluído':a.status==='cancel'?'Cancelado':'Pendente')+'</span></div>';
+       }).join('')
+   }
+   ${nextAppts.length>0?'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--n1);font-size:11px;color:var(--n5)">Próxima: <strong style="color:var(--n8)">'+escHtml(nextAppts[0].p)+'</strong> em '+(nextAppts[0].d).toLocaleDateString('pt-BR')+'</div>':''}
   </div>
  </div>
- <div class="dash-row2">
-  <div class="card"><div class="ch"><span class="ct">Pacientes Recentes</span><button style="font-family:var(--jk);font-size:10.5px;font-weight:700;color:var(--g5);background:none;border:none;cursor:pointer" onclick="goP('pat',document.getElementById('ni-pat'))">Ver todos →</button></div>
-   <div id="d-recent"></div></div>
-  <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-   <div style="font-family:var(--jk);font-size:9px;font-weight:700;color:var(--n4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">Meta Mensal de Consultas</div>
-   <div style="position:relative;width:114px;height:114px;margin-bottom:12px">
-    <svg width="114" height="114" viewBox="0 0 114 114"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#e85a0a"/><stop offset="100%" stop-color="#f9a868"/></linearGradient></defs><circle cx="57" cy="57" r="46" class="ring-track"/><circle id="dash-ring" cx="57" cy="57" r="46" class="ring-fill" stroke-dasharray="289" stroke-dashoffset="289" transform="rotate(-90 57 57)"/></svg>
-    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-family:var(--in);font-size:24px;font-weight:800;color:var(--n9);letter-spacing:-1px;line-height:1" id="ring-pct">0%</div><div style="font-size:10px;color:var(--n4);margin-top:1px">da meta</div></div>
-   </div>
-   <div style="font-size:12px;font-weight:600;color:var(--n7)" id="ring-sub"></div>
-   <div style="font-size:11px;color:var(--n4);margin-top:4px">Faltam <strong style="color:var(--g5)" id="ring-rem"></strong></div>
+
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+  <div class="card">
+   <div class="ch"><span class="ct">Aderência dos Pacientes</span><button class="btn btn-ghost btn-sm" onclick="goP('ev',document.getElementById('ni-ev'))">Ver todos →</button></div>
+   <div id="adh-chart"></div>
+  </div>
+  <div class="card">
+   <div class="ch"><span class="ct">Pacientes com Alertas</span><button class="btn btn-ghost btn-sm" onclick="goP('notif',document.getElementById('ni-notif'))">Ver alertas →</button></div>
+   ${(function(){
+     var al=[];try{al=_buildSmartAlerts();}catch(e){}
+     if(!al.length) return '<div style="text-align:center;padding:24px;color:var(--n5);font-size:12.5px">✅ Nenhum alerta clínico ativo</div>';
+     return al.slice(0,4).map(function(a){
+       return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--n1)">'
+        +'<div style="width:32px;height:32px;border-radius:8px;background:'+(a.c==='r'?'#fef2f2':a.c==='y'?'#fffbeb':'#eff6ff')+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">'+(a.ic||'⚠️')+'</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--n8)">'+escHtml(a.p||'')+'</div>'
+        +'<div style="font-size:11px;color:var(--n5);margin-top:2px">'+escHtml(a.t||'')+'</div></div>'
+        +'<button onclick="openPatById('+a.pid+')" style="font-size:10px;border:1px solid var(--n2);background:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--g5);font-weight:700">Ver</button></div>';
+     }).join('');
+   })()}
   </div>
  </div>`;
 }
@@ -2626,7 +2796,7 @@ function buildBChart(){
  // recent pats
  var el2=document.getElementById('d-recent');if(!el2)return;
  el2.innerHTML=pats.slice(0,5).map(function(p){
-  return'<div style="display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:var(--r);cursor:pointer;transition:background .13s" onmouseover="this.style.background=\'var(--n0)\'" onmouseout="this.style.background=\'transparent\'" onclick="selPat=pats.find(function(x){return x.id===\'+p.id+\'});goP(\'ev\',document.getElementById(\'ni-ev\'))">'
+  return'<div style="display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:var(--r);cursor:pointer;transition:background .13s" onmouseover="this.style.background=\'var(--n0)\'" onmouseout="this.style.background=\'transparent\'" onclick="selPat=pats.find(function(x){return x.id==='+p.id+'});goP(\'ev\',document.getElementById(\'ni-ev\'))">'
    +'<div class="pac-av '+p.av+'" style="width:34px;height:34px;border-radius:50%;font-size:11px">'+p.i+'</div>'
    +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--n8)">'+p.n+'</div><div style="font-size:10.5px;color:var(--n4);margin-top:1px">'+p.goal+' · '+p.last+'</div></div>'
    +'<span class="tag '+p.st+'">'+p.stxt+'</span></div>';
@@ -2684,30 +2854,37 @@ function rPat(){
 }
 function buildPatGrid(list){
  return list.map(function(p){
-  var loss=p.wStart-p.w;
-  var pct=p.prog;var pcls=pct>=70?'pf-g':pct>=40?'pf-y':'pf-r';
-  return'<div class="pat-card" style="position:relative">'
-  // Header — clicável abre detalhe
-  +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer" onclick="openPatDetail(\'+p.id+\')">'
-  +'<div class="pac-av '+p.av+'">'+p.i+'</div>'
-  +'<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700;color:var(--n9)">'+p.n+'</div><div style="font-size:10.5px;color:var(--n4);margin-top:2px">'+p.age+' anos · '+p.goal+'</div></div>'
-  +'<span class="tag '+p.st+'">'+p.stxt+'</span></div>'
-  // KPIs
-  +'<div class="pc-kpis" style="cursor:pointer" onclick="openPatDetail(\'+p.id+\')">'
-  +'<div class="pc-kpi"><strong>'+p.w+'</strong><span>kg</span></div>'
-  +'<div class="pc-kpi"><strong>'+p.bmi+'</strong><span>IMC</span></div>'
-  +'<div class="pc-kpi"><strong>'+(loss>=0?'-':'+')+(Math.abs(loss).toFixed(1))+'</strong><span>kg total</span></div></div>'
-  // Adesão
-  +'<div style="margin-top:8px;cursor:pointer" onclick="openPatDetail(\'+p.id+\')">'
+  var loss = (p.wStart||p.w||0) - (p.w||0);
+  var pct = p.prog||0;
+  var pcls = pct>=70?'pf-g':pct>=40?'pf-y':'pf-r';
+  var pid = p.id;
+  return '<div class="pat-card" style="position:relative">'
+  // Header — click opens detail
+  +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer" onclick="openPatDetail('+pid+')">'
+  +'<div class="pac-av '+(p.av||'a1')+'">'+escHtml(p.i||p.n[0])+'</div>'
+  +'<div style="flex:1;min-width:0">'
+  +'<div style="font-size:13.5px;font-weight:700;color:var(--n9)">'+escHtml(p.n)+'</div>'
+  +'<div style="font-size:10.5px;color:var(--n4);margin-top:2px">'+(p.age||'—')+' anos · '+escHtml(p.goal||'—')+'</div></div>'
+  +'<span class="tag '+(p.st||'tg')+'">'+escHtml(p.stxt||'Em dia')+'</span></div>'
+  // KPIs row
+  +'<div class="pc-kpis" style="cursor:pointer" onclick="openPatDetail('+pid+')">'
+  +'<div class="pc-kpi"><strong>'+(p.w||'—')+'</strong><span>kg</span></div>'
+  +'<div class="pc-kpi"><strong>'+(p.bmi||'—')+'</strong><span>IMC</span></div>'
+  +'<div class="pc-kpi"><strong>'+(loss>=0?'−':'+')+(Math.abs(loss).toFixed(1))+'</strong><span>kg total</span></div></div>'
+  // Adherence
+  +'<div style="margin-top:8px;cursor:pointer" onclick="openPatDetail('+pid+')">'
   +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--n4);margin-bottom:3px"><span>Adesão</span><span style="font-weight:700;color:var(--n7)">'+pct+'%</span></div>'
   +'<div class="prog-track"><div class="prog-fill '+pcls+'" style="width:'+pct+'%"></div></div></div>'
-  +'<div style="margin-top:8px;font-size:10px;color:var(--n4)">Última consulta: '+p.last+'</div>'
-  +(p.alerg?'<div style="margin-top:5px;font-size:10px;color:var(--red);font-weight:600">⚠ '+p.alerg+'</div>':'')
-  // Ações do nutricionista
+  +'<div style="margin-top:8px;font-size:10px;color:var(--n4)">Última consulta: '+escHtml(p.last||'—')+'</div>'
+  +(p.alerg?'<div style="margin-top:5px;font-size:10px;color:var(--red);font-weight:600">⚠ '+escHtml(p.alerg)+'</div>':'')
+  // Action buttons
   +'<div style="display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--n2)">'
-  +'<button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="event.stopPropagation();openPatDetail(\'+p.id+\')"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"/></svg> Ver</button>'
-  +'<button class="btn btn-s btn-sm" style="flex:1;font-size:11px" onclick="event.stopPropagation();editPat(\'+p.id+\')"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> Editar</button>'
-  +'<button class="btn btn-danger btn-sm" style="font-size:11px;padding:5px 10px" onclick="event.stopPropagation();deletePat(\'+p.id+\')" title="Remover paciente"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>'
+  +'<button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="event.stopPropagation();openPatDetail('+pid+')">'
+  +'<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"/></svg> Ver</button>'
+  +'<button class="btn btn-s btn-sm" style="flex:1;font-size:11px" onclick="event.stopPropagation();editPat('+pid+')">'
+  +'<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> Editar</button>'
+  +'<button class="btn btn-danger btn-sm" style="font-size:11px;padding:5px 10px" onclick="event.stopPropagation();deletePat('+pid+')" title="Remover">'
+  +'<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>'
   +'</div>'
   +'</div>';
  }).join('');
@@ -2744,6 +2921,11 @@ function openPatDetail(id){
  document.body.appendChild(modal);setTimeout(function(){modal.classList.add('open')},10);
  modal.addEventListener('click',function(e){if(e.target===modal)closeM('m-pd')});
 }
+function openPatById(id){
+  var p=pats.find(function(x){return x.id==id;});
+  if(p){selPat=p;openPatDetail(id);}
+}
+
 
 // ─── EDITAR PACIENTE ───
 function editPat(id){
@@ -3882,50 +4064,272 @@ function rNotif(){
 }
 // ─── TEMPLATES ───
 function rTpl(){
- return'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'
- +templates.map(function(t,i){return'<div class="card" style="cursor:default"><div class="ch"><div class="ct">'+t.name+'</div><span class="tag tg">'+t.kcal+' kcal</span></div><p style="font-size:12px;color:var(--n5);line-height:1.7;margin-bottom:12px">'+t.desc+'</p><div style="font-size:11.5px;color:var(--n4);margin-bottom:12px">'+t.meals.length+' refeições planejadas</div><div style="display:flex;gap:6px"><button class="btn btn-p btn-sm" style="flex:1" onclick="applyTpl('+t.id+');goP(\'presc\',document.getElementById(\'ni-presc\'))">Usar no plano</button><button class="btn btn-danger btn-sm" onclick="templates.splice('+i+',1);goP(\'tpl\',null)">🗑</button></div></div>';}).join('')
- +'<div class="card" style="border:1.5px dashed var(--n3);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor=\'var(--g4)\'" onmouseout="this.style.borderColor=\'var(--n3)\'" onclick="openM(\'m-tpl\')">'
- +'<div style="font-size:28px;margin-bottom:8px">➕</div><div style="font-family:var(--jk);font-size:12.5px;font-weight:700;color:var(--n4)">Novo Template</div><div style="font-size:11px;color:var(--n4);margin-top:3px;text-align:center">Salve o plano atual como template</div></div></div>';
+ var html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">';
+ if(!templates||!templates.length){
+  return '<div style="text-align:center;padding:60px"><div style="font-size:48px;margin-bottom:16px">📁</div>'
+   +'<div style="font-weight:800;font-size:15px;color:var(--n7);margin-bottom:8px">Nenhum template salvo</div>'
+   +'<div style="font-size:12.5px;color:var(--n4)">Acesse <strong>Prescrição</strong>, monte um plano e clique em <strong>Salvar como Template</strong>.</div></div>';
+ }
+ html+=templates.map(function(t,i){
+  var totalKcal=0,totalProt=0,totalCarb=0,totalGord=0;
+  (t.meals||[]).forEach(function(meal){
+   (meal.items||[]).forEach(function(it){
+    var f=FOOD_DB.find(function(x){return x.id===it.fid;});
+    if(f){var fac=(it.qty||100)/100;totalKcal+=Math.round(f.k*fac);totalProt+=+(f.p*fac).toFixed(1);totalCarb+=+(f.c*fac).toFixed(1);totalGord+=+(f.g*fac).toFixed(1);}
+   });
+  });
+  var kcal=totalKcal||t.kcal||0;
+  return '<div class="card" style="cursor:default;display:flex;flex-direction:column">'
+   +'<div class="ch"><div class="ct">'+escHtml(t.name||'Template')+'</div><span class="tag tg">'+kcal+' kcal</span></div>'
+   +'<p style="font-size:12px;color:var(--n5);line-height:1.6;margin-bottom:10px;flex:1">'+escHtml(t.desc||'')+'</p>'
+   // Macro pills
+   +'<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'
+   +'<span style="font-size:10px;font-weight:700;background:#eff6ff;color:#1d4ed8;border-radius:99px;padding:3px 9px">P: '+totalProt.toFixed(0)+'g</span>'
+   +'<span style="font-size:10px;font-weight:700;background:#fffbeb;color:#b45309;border-radius:99px;padding:3px 9px">C: '+totalCarb.toFixed(0)+'g</span>'
+   +'<span style="font-size:10px;font-weight:700;background:#fef2f2;color:#b91c1c;border-radius:99px;padding:3px 9px">G: '+totalGord.toFixed(0)+'g</span>'
+   +'</div>'
+   // Meal list preview
+   +'<div style="font-size:11px;color:var(--n5);margin-bottom:12px;display:flex;flex-wrap:wrap;gap:4px">'
+   +(t.meals||[]).map(function(m){return '<span style="background:var(--n1);border-radius:6px;padding:2px 7px">'+(m.em||'🍽️')+' '+(m.name||m.n||'')+'</span>';}).join('')
+   +'</div>'
+   +'<div style="display:flex;gap:6px">'
+   +'<button class="btn btn-p btn-sm" style="flex:1" onclick="applyTpl('+t.id+');goP(\'presc\',document.getElementById(\'ni-presc\'))">📋 Usar no Plano</button>'
+   +'<button class="btn btn-ghost btn-sm" onclick="duplicateTpl('+i+')" title="Duplicar">⧉</button>'
+   +'<button class="btn btn-danger btn-sm" onclick="templates.splice('+i+',1);DB.save();goP(\'tpl\',null)">🗑</button>'
+   +'</div></div>';
+ }).join('');
+ html+='</div>';
+ return html;
 }
 
 
 // ─── PATIENT PAGES ───
 function rPDash(){
- var p=pats[0];var loss=p.wStart-p.w;var done=tasks.filter(function(t){return t.done}).length;
- return'<div class="wb"><div class="wb-blob"></div><div><h2 style="position:relative;z-index:2">Olá, '+p.n.split(' ')[0]+'! 👋</h2><p style="position:relative;z-index:2">Você está no <strong style="color:#fcd34d">'+p.prog+'%</strong> do plano semanal.<br>Continue firme — grande progresso!</p></div><div class="wb-kpi" style="z-index:2"><div class="wb-n">'+(loss>=0?'−':'+')+(Math.abs(loss).toFixed(1))+'<span style="font-size:16px;font-weight:500"> kg</span></div><div class="wb-l">desde o início</div></div></div>'
- +(loss>=5?'<div class="ach"><div class="ach-ico">🏆</div><div><div class="ach-t">Conquista: −'+loss.toFixed(1)+' kg!</div><div class="ach-d">Parabéns pela consistência! Você atingiu uma perda significativa desde o início do programa.</div></div></div>':'')
- +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">'
- +'<div class="card" style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:10px;background:#fff3ec;display:flex;align-items:center;justify-content:center;font-size:20px">🥗</div><div><div style="font-family:var(--in);font-size:22px;font-weight:800;color:var(--g5)">1.750</div><div style="font-size:11.5px;color:var(--n4);margin-top:2px">kcal hoje</div><div style="font-size:10px;font-weight:700;color:var(--g5);margin-top:2px">97% da meta</div></div></div>'
- +'<div class="card" style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:10px;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:20px">💧</div><div><div style="font-family:var(--in);font-size:22px;font-weight:800;color:var(--blue)">'+p.agua+'L</div><div style="font-size:11.5px;color:var(--n4);margin-top:2px">água hoje</div><div style="font-size:10px;font-weight:700;color:var(--blue);margin-top:2px">Meta: 2,0L</div></div></div>'
- +'<div class="card" style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:10px;background:#fffbeb;display:flex;align-items:center;justify-content:center;font-size:20px">✅</div><div><div style="font-family:var(--in);font-size:22px;font-weight:800;color:#d97706">'+done+'/'+tasks.length+'</div><div style="font-size:11.5px;color:var(--n4);margin-top:2px">tarefas</div><div style="font-size:10px;font-weight:700;color:#d97706;margin-top:2px">Em dia</div></div></div></div>'
- +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
- +'<div class="card"><div class="ch"><span class="ct">Macros de Hoje</span></div><div style="text-align:center;margin-bottom:12px"><div style="font-family:var(--in);font-size:28px;font-weight:800;color:var(--g5)">1.750 kcal</div><div style="font-size:11px;color:var(--n4)">de 1.800 kcal prescritas</div></div><div style="display:flex;flex-direction:column;gap:8px">'
- +[['Proteínas','#3b82f6','75%','110g'],['Carboidratos','#f59e0b','82%','198g'],['Gorduras','#ef4444','58%','52g']].map(function(r){return'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;font-weight:700;min-width:84px;color:'+r[1]+'">'+r[0]+'</span><div style="flex:1;height:7px;background:var(--n2);border-radius:99px;overflow:hidden"><div style="width:'+r[2]+';height:100%;background:'+r[1]+';border-radius:99px"></div></div><span style="font-family:var(--in);font-size:10.5px;font-weight:800;color:'+r[1]+';min-width:32px;text-align:right">'+r[3]+'</span></div>';}).join('')+'</div></div>'
- +'<div class="card"><div class="ch"><span class="ct">Próxima Consulta</span></div><div style="text-align:center;padding:16px 0"><div style="font-size:32px;margin-bottom:8px">📅</div><div style="font-family:var(--in);font-size:18px;font-weight:800;color:var(--n9)">17 de Março</div><div style="font-size:12px;color:var(--n4);margin-top:4px">14:30 · Dra. Admin Nutriplan</div></div>'
- +'<div class="alert alert-y" style="margin-bottom:0"><span>💡 Lembre-se de registrar seu diário alimentar antes da consulta!</span></div></div></div>';
+ // Get the patient: logged patient finds their own record
+ var p = selPat;
+ if (!p) {
+  return '<div style="padding:60px;text-align:center">'
+   +'<div style="font-size:48px;margin-bottom:16px">👤</div>'
+   +'<div style="font-weight:800;font-size:15px;color:var(--n7);margin-bottom:8px">Perfil não vinculado</div>'
+   +'<div style="font-size:12.5px;color:var(--n4)">Seu cadastro ainda não foi vinculado pelo nutricionista.<br>Entre em contato para solicitar o vínculo.</div>'
+   +'</div>';
+ }
+
+ var now = new Date();
+ var diaSemana = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][now.getDay()];
+ var loss = (p.wStart||p.w||0) - (p.w||0);
+ var done = tasks.filter(function(t){return t.done;}).length;
+ var totalTasks = tasks.length;
+
+ // Calc macros from prescribed plan
+ var planKcal=0, planProt=0, planCarb=0, planGord=0;
+ var planSrc = (p.plans&&p.plans.length) ? p.plans[0].mealData : (p.meals||[]);
+ (planSrc||[]).forEach(function(meal){
+  (meal.items||[]).forEach(function(it){
+   var f=FOOD_DB.find(function(x){return x.id===it.fid;});
+   if(f){var fac=(it.qty||100)/100;planKcal+=Math.round(f.k*fac);planProt+=+(f.p*fac).toFixed(1);planCarb+=+(f.c*fac).toFixed(1);planGord+=+(f.g*fac).toFixed(1);}
+  });
+ });
+ var prescKcal = planKcal || p.meta || 1800;
+
+ // Next appointment for this patient
+ var nextAppt = null;
+ (p.appointments||[]).forEach(function(a){
+  var d = new Date(a.isoDate||a.date||'');
+  if(d > now && (!nextAppt || d < new Date(nextAppt.isoDate||nextAppt.date||''))) nextAppt = a;
+ });
+
+ // Supplements count
+ var suplAtivos = (p.suplementos||[]).filter(function(s){return s.aderindo!==false;}).length;
+
+ // Last weight from historico
+ var lastW = p.w;
+ var hist = p.historico||[];
+ if (hist.length > 1) lastW = hist[hist.length-1].peso || p.w;
+
+ var html = '';
+
+ // Welcome banner
+ html += '<div style="background:linear-gradient(135deg,#e85a0a,#c4420a);border-radius:16px;padding:20px 24px;color:#fff;margin-bottom:18px;position:relative;overflow:hidden">'
+  +'<div style="position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08)"></div>'
+  +'<div style="position:absolute;right:30px;bottom:-30px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.05)"></div>'
+  +'<div style="position:relative;z-index:1">'
+  +'<div style="font-size:11px;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+diaSemana+', '+now.toLocaleDateString('pt-BR')+'</div>'
+  +'<div style="font-size:21px;font-weight:900;margin-bottom:4px">Olá, '+escHtml(p.n.split(' ')[0])+'! 👋</div>'
+  +'<div style="font-size:13px;opacity:.9;margin-bottom:14px">'+
+   (planKcal ? 'Meta calórica: '+prescKcal+' kcal/dia' : 'Acompanhe sua evolução aqui.')+
+  '</div>'
+  +'<div style="display:flex;gap:20px">'
+  +'<div><div style="font-size:20px;font-weight:900">'+lastW+'</div><div style="font-size:10px;opacity:.75">kg atual</div></div>'
+  +(loss!==0?'<div style="opacity:.3;font-size:18px">|</div>'
+    +'<div><div style="font-size:20px;font-weight:900">'+(loss>0?'−'+loss.toFixed(1):'+'+Math.abs(loss).toFixed(1))+'</div><div style="font-size:10px;opacity:.75">kg desde início</div></div>':'')
+  +'<div style="opacity:.3;font-size:18px">|</div>'
+  +'<div><div style="font-size:20px;font-weight:900">'+(p.bmi||'—')+'</div><div style="font-size:10px;opacity:.75">IMC</div></div>'
+  +'</div></div></div>';
+
+ // KPI grid 3 cols
+ html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">';
+ // Kcal
+ html += '<div class="card" style="padding:14px;display:flex;align-items:center;gap:10px">'
+  +'<div style="width:38px;height:38px;border-radius:10px;background:#fff3ec;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🥗</div>'
+  +'<div><div style="font-size:18px;font-weight:800;color:var(--g5);line-height:1">'+(planKcal||'—')+'</div>'
+  +'<div style="font-size:10px;color:var(--n4);margin-top:2px">kcal prescritas</div></div></div>';
+ // Água
+ html += '<div class="card" style="padding:14px;display:flex;align-items:center;gap:10px">'
+  +'<div style="width:38px;height:38px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">💧</div>'
+  +'<div><div style="font-size:18px;font-weight:800;color:#3b82f6;line-height:1">'+(p.agua||2.0)+'L</div>'
+  +'<div style="font-size:10px;color:var(--n4);margin-top:2px">meta de água</div></div></div>';
+ // Tarefas
+ html += '<div class="card" style="padding:14px;display:flex;align-items:center;gap:10px">'
+  +'<div style="width:38px;height:38px;border-radius:10px;background:#fffbeb;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✅</div>'
+  +'<div><div style="font-size:18px;font-weight:800;color:#d97706;line-height:1">'+done+'/'+totalTasks+'</div>'
+  +'<div style="font-size:10px;color:var(--n4);margin-top:2px">tarefas</div></div></div>';
+ html += '</div>';
+
+ // Macros + Next appt row
+ html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
+ // Macros card
+ html += '<div class="card"><div class="ch"><span class="ct">Macros Prescritos</span></div>';
+ if (planKcal) {
+  html += '<div style="text-align:center;margin-bottom:10px">'
+   +'<div style="font-size:24px;font-weight:900;color:var(--g5)">'+planKcal+' kcal</div>'
+   +'<div style="font-size:11px;color:var(--n4)">Meta: '+prescKcal+' kcal</div></div>'
+   +'<div style="display:flex;flex-direction:column;gap:7px">';
+  [['Proteínas','#3b82f6',planProt,150,planProt.toFixed(0)+'g'],
+   ['Carboidratos','#f59e0b',planCarb,250,planCarb.toFixed(0)+'g'],
+   ['Gorduras','#ef4444',planGord,65,planGord.toFixed(0)+'g']].forEach(function(r){
+   var pct = r[2]>0 ? Math.min(Math.round(r[2]/r[3]*100),100) : 0;
+   html += '<div style="display:flex;align-items:center;gap:7px">'
+    +'<span style="font-size:10.5px;font-weight:700;min-width:80px;color:'+r[1]+'">'+r[0]+'</span>'
+    +'<div style="flex:1;height:6px;background:var(--n2);border-radius:99px;overflow:hidden">'
+    +'<div style="width:'+pct+'%;height:100%;background:'+r[1]+';border-radius:99px"></div></div>'
+    +'<span style="font-size:10px;font-weight:800;color:'+r[1]+';min-width:28px;text-align:right">'+r[4]+'</span></div>';
+  });
+  html += '</div>';
+ } else {
+  html += '<div style="text-align:center;padding:20px;color:var(--n4);font-size:12px">Plano não prescrito ainda.<br>Aguarde orientação do nutricionista.</div>';
+ }
+ html += '</div>';
+ // Next consult card
+ html += '<div class="card"><div class="ch"><span class="ct">Próxima Consulta</span></div>'
+  +'<div style="text-align:center;padding:14px 0">'
+  +'<div style="font-size:30px;margin-bottom:8px">📅</div>';
+ if (nextAppt) {
+  var nd = new Date(nextAppt.isoDate||nextAppt.date||'');
+  html += '<div style="font-size:17px;font-weight:800;color:var(--n9)">'+nd.toLocaleDateString('pt-BR',{day:'numeric',month:'long'})+'</div>';
+  if (nextAppt.time) html += '<div style="font-size:12px;color:var(--n5);margin-top:4px">⏰ '+escHtml(nextAppt.time)+'</div>';
+  if (nextAppt.type) html += '<div style="font-size:11px;color:var(--n4);margin-top:3px">'+escHtml(nextAppt.type)+'</div>';
+ } else {
+  html += '<div style="font-size:13px;color:var(--n5)">Nenhuma agendada</div>'
+   +'<div style="font-size:11px;color:var(--n4);margin-top:4px">Contate seu nutricionista para agendar</div>';
+ }
+ html += '</div><div class="alert alert-y" style="margin-bottom:0"><span>💡 Registre seu diário alimentar antes da consulta!</span></div></div>';
+ html += '</div>';
+
+ // Supplements + achievement
+ if (suplAtivos > 0) {
+  html += '<div class="card" style="margin-bottom:12px">'
+   +'<div class="ch"><span class="ct">💊 Suplementos Ativos</span>'
+   +'<button class="btn btn-ghost btn-sm" onclick="goP(\'psupl\',document.getElementById(\'pi-supl\'))">Ver todos →</button></div>'
+   +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
+   +(p.suplementos||[]).filter(function(s){return s.aderindo!==false;}).slice(0,6).map(function(s){
+    return '<span style="font-size:11px;font-weight:600;background:var(--g0);border:1px solid var(--g2);color:var(--g6);border-radius:8px;padding:4px 10px">💊 '+escHtml(s.nome||'')+(s.dose?' · '+escHtml(s.dose):'')+'</span>';
+   }).join('')
+   +'</div></div>';
+ }
+
+ // Achievement
+ if (loss >= 5) {
+  html += '<div class="ach"><div class="ach-ico">🏆</div><div>'
+   +'<div class="ach-t">Conquista: −'+loss.toFixed(1)+' kg!</div>'
+   +'<div class="ach-d">Parabéns pela consistência! Objetivo sendo alcançado.</div>'
+   +'</div></div>';
+ }
+
+ return html;
 }
 
 function rPPlan(){
- var today=new Date().getDay();
- var html='<div class="week-g" style="margin-bottom:14px">';
- for(var d=0;d<7;d++){
-  var day=WEEK[d];var isT=d===today;
-  var dt=day.meals.reduce(function(s,m){return s+m.items.reduce(function(ss,it){return ss+it.k},0)},0);
-  html+='<div class="day-col"><div class="day-hd'+(isT?' today':'')+'"><div class="day-dn">'+day.n.slice(0,3)+'</div><div class="day-dd">'+(isT?'Hoje':dt+' kcal')+'</div></div>';
-  day.meals.forEach(function(m){html+='<div class="day-mb"><div class="day-mn">'+m.n+'</div>'+m.items.map(function(it){return'<div class="day-fr"><span>'+it.e+' '+it.n+'</span><span>'+it.k+'</span></div>';}).join('')+'</div>';});
-  html+='<div class="day-tot">'+dt+' kcal</div></div>';
+ var p = selPat || (cu&&cu.role==='pac' ? pats.find(function(x){return x.email===cu.email||x._uid===cu.id;}) : null) || pats[0];
+ if(!p) return '<div style="padding:60px;text-align:center;color:var(--n4)">Nenhum paciente encontrado.</div>';
+ var planSrc = p.plans&&p.plans.length ? p.plans[0].mealData : (p.meals||[]);
+ if(!planSrc||!planSrc.length){
+  return '<div style="padding:60px;text-align:center"><div style="font-size:48px;margin-bottom:16px">🥗</div>'
+   +'<div style="font-weight:800;font-size:15px;color:var(--n7);margin-bottom:8px">Plano alimentar ainda não disponível</div>'
+   +'<div style="font-size:12.5px;color:var(--n4)">Aguarde seu nutricionista prescrever o plano alimentar.</div></div>';
  }
- html+='</div><div class="card" style="background:var(--y0);border-color:var(--y3)"><div class="ch"><span class="ct" style="color:#78350f">💡 Suas Orientações Nutricionais</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12.5px;color:#92400e;line-height:2">'+['Beba 2L de água por dia','Mastigue devagar — 20× por mordida','Evite telas durante as refeições','Prefira temperos naturais','Inclua proteína em todas refeições','Evite ultraprocessados','Durma 7–8 horas por noite','Pratique atividade física'].map(function(o){return'<div>• '+o+'</div>';}).join('')+'</div></div>';
+ var today = new Date().getDay();
+ // Build weekly view from plan (repeat same plan for 7 days with small variation note)
+ var dayNames = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+ var html = '<div style="margin-bottom:14px">';
+ // Show the plan meals
+ var totalKcal=0, totalProt=0, totalCarb=0, totalGord=0;
+ planSrc.forEach(function(meal){
+  (meal.items||[]).forEach(function(it){
+   var f=FOOD_DB.find(function(x){return x.id===it.fid;});
+   if(f){var fac=(it.qty||100)/100;totalKcal+=Math.round(f.k*fac);totalProt+=+(f.p*fac).toFixed(1);totalCarb+=+(f.c*fac).toFixed(1);totalGord+=+(f.g*fac).toFixed(1);}
+  });
+ });
+ // Macros summary
+ html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">';
+ [['🔥',totalKcal+' kcal','Energia','#e85a0a'],
+  ['🥩',totalProt.toFixed(0)+'g','Proteína','#3b82f6'],
+  ['🌾',totalCarb.toFixed(0)+'g','Carbs','#f59e0b'],
+  ['🥑',totalGord.toFixed(0)+'g','Gordura','#10b981']].forEach(function(m){
+  html+='<div style="background:#fff;border:1.5px solid var(--n2);border-radius:12px;padding:12px;text-align:center">'
+   +'<div style="font-size:20px;margin-bottom:4px">'+m[0]+'</div>'
+   +'<div style="font-family:var(--in);font-size:18px;font-weight:800;color:'+m[3]+'">'+m[1]+'</div>'
+   +'<div style="font-size:10.5px;color:var(--n4);margin-top:2px">'+m[2]+'</div></div>';
+ });
+ html += '</div>';
+ // Meals
+ planSrc.forEach(function(meal){
+  var mealKcal=0;
+  (meal.items||[]).forEach(function(it){var f=FOOD_DB.find(function(x){return x.id===it.fid;});if(f){var fac=(it.qty||100)/100;mealKcal+=Math.round(f.k*fac);}});
+  html += '<div style="background:#fff;border:1.5px solid var(--n2);border-radius:14px;padding:14px 16px;margin-bottom:10px">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  html += '<div style="font-weight:800;font-size:13.5px;color:var(--n9)">'+(meal.em||'🍽️')+' '+(meal.name||meal.n||'Refeição')+'</div>';
+  html += '<span style="font-size:11px;font-weight:700;color:var(--g5);background:var(--g0);padding:3px 10px;border-radius:99px">'+mealKcal+' kcal</span>';
+  html += '</div>';
+  (meal.items||[]).forEach(function(it){
+   var f=FOOD_DB.find(function(x){return x.id===it.fid;});
+   if(!f)return;
+   var fac=(it.qty||100)/100;
+   html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--n1)">'
+    +'<div style="display:flex;align-items:center;gap:8px">'
+    +'<span style="font-size:15px">'+(f.e||'🍽️')+'</span>'
+    +'<span style="font-size:12.5px;color:var(--n7)">'+escHtml(f.n)+'</span></div>'
+    +'<div style="display:flex;gap:12px;font-size:11px;color:var(--n5)">'
+    +'<span>'+it.qty+'g</span>'
+    +'<span style="font-weight:700;color:var(--n8)">'+Math.round(f.k*fac)+' kcal</span>'
+    +'</div></div>';
+  });
+  html += '</div>';
+ });
+ html += '</div>';
+ // Orientações
+ var orientacoes = (p.orientacoes && p.orientacoes.length) ? p.orientacoes : ['Beba 2L de água por dia','Mastigue devagar','Evite telas durante refeições','Inclua proteína em todas as refeições','Prefira temperos naturais'];
+ html += '<div class="card" style="background:var(--y0);border-color:var(--y3)"><div class="ch"><span class="ct" style="color:#78350f">💡 Orientações do Nutricionista</span></div>'
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;color:#92400e;line-height:1.8">'
+  +orientacoes.map(function(o){return '<div>• '+escHtml(o)+'</div>';}).join('')
+  +'</div></div>';
  return html;
 }
 
 function _getPacPatient(){
- // Paciente logado: encontrar pelo linkedUserId ou primeiro paciente
- if(cu&&cu.role==='pac'){
-  var linked=pats.find(function(p){return p.linkedUserId===cu.id||p.id===cu.id;});
-  if(linked)return linked;
+ // 1. If selPat is already set (nutricionista selected a patient, or initPac set it), use it
+ if(selPat) return selPat;
+ // 2. Patient role: find their record by email, _uid, or _backendId
+ if(cu && cu.role==='pac'){
+  var byEmail = pats.find(function(p){return p.email && p.email.toLowerCase()===(cu.email||'').toLowerCase();});
+  if(byEmail){selPat=byEmail;return byEmail;}
+  var byUid = pats.find(function(p){return p._uid===cu.id||p._backendId===cu.id||p.linkedUserId===cu.id;});
+  if(byUid){selPat=byUid;return byUid;}
+  var byName = pats.find(function(p){return p.n && p.n.toLowerCase()===(cu.name||'').toLowerCase();});
+  if(byName){selPat=byName;return byName;}
  }
- return pats[0];
+ // 3. Fallback to first patient
+ return pats[0]||null;
 }
 
 function rPDiary(){
@@ -4038,7 +4442,7 @@ function delTask(id){tasks=tasks.filter(function(t){return t.id!==id});DB.save()
 function addTask(){var inp=document.getElementById('new-task');var sel=document.getElementById('new-cat');if(!inp||!inp.value.trim()){showToast('Digite o texto da tarefa','w');return;}tasks.push({id:taskCt++,text:inp.value.trim(),cat:sel.value,done:false});DB.save();goP('ptask',document.getElementById('pi-task'));showToast('Tarefa adicionada!','s');}
 
 function rPEv(){
- var p=pats[0];var hist=[...p.historico].reverse();var loss=p.wStart-p.w;
+ var p=selPat||_getPacPatient()||pats[0];if(!p){return '<div style="padding:40px;text-align:center;color:var(--n4)">Nenhum dado disponível.</div>';}var hist=[...p.historico].reverse();var loss=p.wStart-p.w;
  var ws=hist.map(function(h){return h.peso});
  var mn=Math.min.apply(null,ws)-1,mx=Math.max.apply(null,ws)+1,nf=hist.length,cw=480,ch=130;
  var pts=hist.map(function(h,i){var x=20+i*(cw-40)/(nf>1?nf-1:1);var y=10+(mx-h.peso)/(mx-mn)*(ch-20);return{x:x.toFixed(1),y:y.toFixed(1),h:h}});
@@ -4269,3 +4673,16 @@ function toggleDark(){
 }
 // Restore dark mode preference
 (function(){try{if(localStorage.getItem('dieton_dark')==='1')document.body.classList.add('dark');}catch(e){}})();
+function toggleFinForm(){
+ var f=document.getElementById('fin-form');
+ if(f)f.style.display=f.style.display==='block'?'none':'block';
+}
+
+function duplicateTpl(idx){
+ if(!templates[idx])return;
+ var t=JSON.parse(JSON.stringify(templates[idx]));
+ t.id=Date.now();t.name=t.name+' (cópia)';
+ templates.push(t);DB.save();
+ showToast('Template duplicado','s');
+ goP('tpl',document.getElementById('ni-tpl'));
+}
