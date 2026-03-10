@@ -1,7 +1,7 @@
-// DietOn Service Worker v1.5
+// DietOn Service Worker v2.0
 // Cache-first for static assets, network-first for API calls
 
-const CACHE_NAME = 'dieton-v1.5';
+const CACHE_NAME = 'dieton-v2.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -43,7 +43,7 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
   var url = event.request.url;
 
-  // API calls: network-first, no cache
+  // API calls: network-only, no cache
   if (url.includes('railway.app') || url.includes('supabase.co') || url.includes('anthropic.com')) {
     event.respondWith(
       fetch(event.request).catch(function() {
@@ -55,14 +55,38 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Static assets: cache-first
+  // JS, CSS, HTML: network-first (always get latest version), fallback to cache
+  var isAppFile = url.endsWith('.js') || url.endsWith('.css') || url.endsWith('.html')
+    || url.endsWith('/') || url.includes('index.html');
+
+  if (isAppFile && event.request.method === 'GET') {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        // Update cache with new version
+        if (response && response.status === 200) {
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(event.request, clone);
+          });
+        }
+        return response;
+      }).catch(function() {
+        // Offline: serve from cache
+        return caches.match(event.request).then(function(cached) {
+          return cached || caches.match('/index.html');
+        });
+      })
+    );
+    return;
+  }
+
+  // Other assets (images, fonts): cache-first
   if (event.request.method === 'GET') {
     event.respondWith(
       caches.match(event.request).then(function(cached) {
         if (cached) return cached;
         return fetch(event.request).then(function(response) {
-          // Cache successful responses for our domain
-          if (response && response.status === 200 && response.type === 'basic') {
+          if (response && response.status === 200 && response.type !== 'opaque') {
             var clone = response.clone();
             caches.open(CACHE_NAME).then(function(cache) {
               cache.put(event.request, clone);
@@ -70,7 +94,6 @@ self.addEventListener('fetch', function(event) {
           }
           return response;
         }).catch(function() {
-          // Offline fallback for navigation requests
           if (event.request.mode === 'navigate') {
             return caches.match('/index.html');
           }
@@ -79,7 +102,6 @@ self.addEventListener('fetch', function(event) {
     );
   }
 });
-
 // Background sync for patient data
 self.addEventListener('sync', function(event) {
   if (event.tag === 'sync-patients') {

@@ -505,6 +505,8 @@ function rChat(){
   var unread = msgs.filter(function(m){return m.role==='pac'&&!m.read;}).length;
   return {p:p, last:last, unread:unread};
  }).sort(function(a,b){
+  // Conversations with messages first, sorted by most recent
+  if(!!a.last !== !!b.last) return a.last ? -1 : 1;
   var ta = a.last?a.last.ts||'':'';
   var tb = b.last?b.last.ts||'':'';
   return tb>ta?1:-1;
@@ -512,68 +514,101 @@ function rChat(){
 
  var withMsgs = all.filter(function(x){return x.last;});
  var noMsgs   = all.filter(function(x){return !x.last;});
+ var totalUnread = all.reduce(function(s,x){return s+x.unread;},0);
 
+ // ── Search bar
  var html = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">'
-  +'<div class="search-wrap" style="flex:1"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
-  +'<input class="search-inp" id="chat-search-inp" placeholder="Buscar conversa..." oninput="_filterChatList(this.value)"/></div>'
+  +'<div class="search-wrap" style="flex:1">'
+  +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
+  +'<input class="search-inp" id="chat-search-inp" placeholder="Buscar paciente..." oninput="_filterChatList(this.value)"/>'
+  +'</div>'
+  +(totalUnread?'<span style="background:#ef4444;color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:2px 10px;flex-shrink:0">'+totalUnread+' não lida'+(totalUnread>1?'s':'')+'</span>':'')
   +'</div>';
 
- if(!withMsgs.length && !noMsgs.length){
+ if(!pats.length){
   return html+'<div class="card" style="text-align:center;padding:48px 20px">'
    +'<div style="font-size:48px;margin-bottom:12px">💬</div>'
    +'<div style="font-weight:800;font-size:15px;color:var(--n8);margin-bottom:6px">Nenhum paciente cadastrado</div>'
-   +'<div style="font-size:12px;color:var(--n4)">Cadastre pacientes para iniciar conversas</div></div>';
+   +'<div style="font-size:12px;color:var(--n4);margin-bottom:16px">Cadastre pacientes para iniciar conversas</div>'
+   +'<button class="btn btn-p" onclick="goP(\'pat\',document.getElementById(\'ni-pat\'))">+ Novo Paciente</button></div>';
  }
 
  html += '<div id="chat-list-wrap">';
 
- // Conversations with messages
+ // ── Active conversations
  if(withMsgs.length){
+  html += '<div style="font-size:11px;font-weight:700;color:var(--n4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding:0 2px">Conversas</div>';
   withMsgs.forEach(function(x){
-   var p=x.p, last=x.last, unread=x.unread;
-   var preview = last ? (last.role==='nutri'?'Você: ':p.n.split(' ')[0]+': ')+last.txt : '';
-   if(preview.length>55) preview=preview.slice(0,55)+'…';
-   var initials = p.n ? p.n.split(' ').slice(0,2).map(function(w){return w[0];}).join('') : '?';
-   html+='<div class="chat-row" data-name="'+escHtml(p.n.toLowerCase())+'" onclick="openChat('+p.id+')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;margin-bottom:6px;border:1.5px solid var(--n1);background:var(--n0);transition:all .15s" '
-    +'onmouseover="this.style.borderColor=\'var(--g4)\';this.style.background=\'var(--g0)\'" '
-    +'onmouseout="this.style.borderColor=\'var(--n1)\';this.style.background=\'var(--n0)\'">'
-    +'<div class="av '+(p.av||'a1')+'" style="width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;position:relative">'
-    +initials
-    +(unread?'<span style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;background:#ef4444;border-radius:50%;border:2px solid var(--n0)"></span>':'')
-    +'</div>'
-    +'<div style="flex:1;min-width:0">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
-    +'<span style="font-weight:700;font-size:13px;color:var(--n9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(p.n)+'</span>'
-    +'<span style="font-size:10px;color:var(--n4);flex-shrink:0;margin-left:8px">'+(last&&last.time?last.time:'')+'</span></div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:center">'
-    +'<span style="font-size:11.5px;color:'+(unread?'var(--n8)':'var(--n4)')+';font-weight:'+(unread?'600':'400')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(preview)+'</span>'
-    +(unread?'<span style="background:#ef4444;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 7px;flex-shrink:0;margin-left:6px">'+unread+'</span>':'')
-    +'</div></div></div>';
+   html += _chatRow(x, true);
   });
  }
 
- // Patients without messages — start conversation
- if(noMsgs.length){
-  html+='<div style="margin-top:'+(withMsgs.length?'16px':'0')+'">'
-   +'<div style="font-size:11px;font-weight:700;color:var(--n4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding:0 4px">'
-   +(withMsgs.length?'Sem conversa ainda':'Iniciar conversa')+'</div>';
-  noMsgs.forEach(function(x){
-   var p=x.p;
-   var initials = p.n ? p.n.split(' ').slice(0,2).map(function(w){return w[0];}).join('') : '?';
-   html+='<div class="chat-row" data-name="'+escHtml(p.n.toLowerCase())+'" onclick="openChat('+p.id+')" '
-    +'style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:4px;transition:background .15s" '
-    +'onmouseover="this.style.background=\'var(--n1)\'" onmouseout="this.style.background=\'\'">'
-    +'<div class="av '+(p.av||'a1')+'" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">'+initials+'</div>'
-    +'<span style="font-size:12.5px;font-weight:600;color:var(--n7);flex:1">'+escHtml(p.n)+'</span>'
-    +'<span style="font-size:11px;color:var(--g4);font-weight:600">Iniciar →</span>'
-    +'</div>';
-  });
-  html+='</div>';
- }
+ // ── All patients (to start new conversation)
+ var label = withMsgs.length ? 'Todos os pacientes' : 'Pacientes';
+ html += '<div style="font-size:11px;font-weight:700;color:var(--n4);text-transform:uppercase;letter-spacing:.05em;margin:'+(withMsgs.length?'20px':'0')+'px 0 8px;padding:0 2px">'+label+'</div>';
 
- html+='</div>';
+ all.forEach(function(x){
+  html += _chatRow(x, false);
+ });
+
+ html += '</div>';
  return html;
 }
+
+function _chatRow(x, compact){
+ var p=x.p, last=x.last, unread=x.unread;
+ var initials = p.n ? p.n.split(' ').slice(0,2).map(function(w){return w[0].toUpperCase();}).join('') : '?';
+ var preview = last ? (last.role==='nutri'?'Você: ':p.n.split(' ')[0]+': ')+last.txt : 'Toque para iniciar conversa';
+ if(preview.length>58) preview=preview.slice(0,58)+'…';
+
+ return '<div class="chat-row" data-name="'+escHtml(p.n.toLowerCase())+'" onclick="openChat('+p.id+')" '
+  +'style="display:flex;align-items:center;gap:12px;padding:'+(compact?'12px 14px':'10px 12px')+';border-radius:12px;cursor:pointer;margin-bottom:6px;'
+  +'border:1.5px solid '+(unread?'var(--g3)':last?'var(--n1)':'var(--n1)')+';'
+  +'background:'+(unread?'var(--g0)':last?'var(--n0)':'transparent')+';transition:all .15s" '
+  +'onmouseover="this.style.borderColor=\'var(--g4)\';this.style.background=\'var(--g0)\'" '
+  +'onmouseout="this.style.borderColor=\''+(unread?'var(--g3)':last?'var(--n1)':'var(--n1)')+'\';this.style.background=\''+(unread?'var(--g0)':last?'var(--n0)':'transparent')+'\';">'
+
+  // Avatar with unread dot
+  +'<div class="av '+(p.av||'a1')+'" style="width:'+(compact?'46':'38')+'px;height:'+(compact?'46':'38')+'px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:'+(compact?'15':'12')+'px;font-weight:800;flex-shrink:0;position:relative">'
+  +initials
+  +(unread?'<span style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;background:#ef4444;border-radius:50%;border:2px solid var(--n0)"></span>':'')
+  +'</div>'
+
+  // Content
+  +'<div style="flex:1;min-width:0">'
+  +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(last?'3':'0')+'px">'
+  +'<span style="font-weight:'+(unread?'700':'600')+';font-size:'+(compact?'13':'12.5')+'px;color:var(--n9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(p.n)+'</span>'
+  +(last?'<span style="font-size:10px;color:var(--n4);flex-shrink:0;margin-left:8px">'+last.time+'</span>':'')
+  +'</div>'
+  +(last||!compact
+   ?'<div style="display:flex;justify-content:space-between;align-items:center">'
+   +'<span style="font-size:11.5px;color:'+(unread?'var(--n7)':last?'var(--n4)':'var(--g4)')+';font-weight:'+(unread?'600':'400')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:'+(last?'normal':'italic')+'">'+escHtml(preview)+'</span>'
+   +(unread?'<span style="background:#ef4444;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 7px;flex-shrink:0;margin-left:6px">'+unread+'</span>':'')
+   +'</div>':'')
+  +'</div>'
+
+  // Chat icon on right for no-message rows
+  +(!last?'<svg width="16" height="16" viewBox="0 0 24 24" fill="var(--g4)" style="flex-shrink:0"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>':'')
+  +'</div>';
+}
+
+function _filterChatList(q){
+ var rows = document.querySelectorAll('.chat-row');
+ rows.forEach(function(el){
+  var name = el.getAttribute('data-name')||'';
+  el.style.display = (!q||name.includes(q.toLowerCase())) ? '' : 'none';
+ });
+ // Also hide section labels if all rows hidden
+}
+
+function _updateChatBadge(){
+ var total = pats.reduce(function(s,p){
+  return s+(p.msgs||[]).filter(function(m){return m.role==='pac'&&!m.read;}).length;
+ },0);
+ var badge=document.getElementById('nb-chat');
+ if(badge){badge.textContent=total;badge.style.display=total>0?'':'none';}
+}
+
 
 function _filterChatList(q){
  var rows = document.querySelectorAll('.chat-row');
