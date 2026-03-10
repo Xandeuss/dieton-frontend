@@ -363,58 +363,81 @@ function _clearAllNotifs(){
 // CHAT — mensagens nutricionista ↔ paciente
 // ════════════════════════════════════════════════════════════
 function openChat(patId){
- var p=patId?pats.find(function(x){return x.id===patId;}):selPat||pats[0];
- if(!p){showToast('Selecione um paciente','w');return;}
- if(!p.msgs)p.msgs=[];
- // Mark all patient messages as read
- var hadUnread=false;
+ var p = patId ? pats.find(function(x){return x.id===patId;}) : selPat||pats[0];
+ if(!p){showToast('Paciente não encontrado','w');return;}
+ if(!p.msgs) p.msgs = [];
+ // Store who we're chatting with
+ window._chatPat = p;
+ // Mark patient messages as read
+ var hadUnread = false;
  p.msgs.forEach(function(m){if(m.role==='pac'&&!m.read){m.read=true;hadUnread=true;}});
  if(hadUnread){DB.save();_updateChatBadge();}
- var title=document.getElementById('chat-title');
- if(title)title.textContent='💬 '+p.n;
+ // Set modal title
+ var title = document.getElementById('chat-title');
+ if(title) title.textContent = '💬 ' + p.n;
+ // Render messages
  _renderChat(p);
  openM('m-chat');
  setTimeout(function(){
-  var inp=document.getElementById('chat-input');
-  if(inp)inp.focus();
-  var box=document.getElementById('chat-msgs');
-  if(box)box.scrollTop=box.scrollHeight;
- },150);
+  var inp = document.getElementById('chat-input');
+  if(inp) inp.focus();
+  var box = document.getElementById('chat-msgs');
+  if(box) box.scrollTop = box.scrollHeight;
+ }, 150);
 }
+
 
 
 function _renderChat(p){
- var box=document.getElementById('chat-msgs');if(!box)return;
- var msgs=p.msgs||[];
+ var box = document.getElementById('chat-msgs');
+ if(!box) return;
+ var msgs = p ? (p.msgs||[]) : [];
  if(!msgs.length){
-  box.innerHTML='<div style="text-align:center;color:var(--n4);font-size:12px;padding:20px">Nenhuma mensagem ainda.<br>Inicie a conversa!</div>';
+  box.innerHTML = '<div style="text-align:center;padding:32px 20px">'
+   +'<div style="font-size:40px;margin-bottom:12px">💬</div>'
+   +'<div style="font-weight:700;font-size:13px;color:var(--n7);margin-bottom:6px">Iniciar conversa com '+escHtml((p&&p.n)||'paciente')+'</div>'
+   +'<div style="font-size:11.5px;color:var(--n4)">Digite uma mensagem abaixo para começar</div>'
+   +'</div>';
   return;
  }
- box.innerHTML=msgs.map(function(m){
-  var isNutri=(m.role==='nutri');
-  return'<div style="display:flex;justify-content:'+(isNutri?'flex-end':'flex-start')+'">'
-   +'<div style="max-width:75%;padding:8px 12px;border-radius:'+(isNutri?'14px 14px 4px 14px':'14px 14px 14px 4px')+';background:'+(isNutri?'var(--g4)':'#fff')+';color:'+(isNutri?'#fff':'var(--n8)')+';border:1.5px solid '+(isNutri?'var(--g4)':'var(--n2)')+';font-size:12.5px;line-height:1.5">'
+ box.innerHTML = msgs.map(function(m){
+  var isNutri = (m.role==='nutri');
+  return '<div style="display:flex;justify-content:'+(isNutri?'flex-end':'flex-start')+';margin-bottom:4px">'
+   +'<div style="max-width:78%;padding:9px 13px;border-radius:'+(isNutri?'16px 16px 4px 16px':'16px 16px 16px 4px')+';"'
+   +' style="background:'+(isNutri?'var(--g4)':'var(--n1)')+';">'
+   +'<div style="background:'+(isNutri?'var(--g4)':'var(--n1)')+';color:'+(isNutri?'#fff':'var(--n8)')+';border:1.5px solid '+(isNutri?'transparent':'var(--n2)')+';'
+   +'padding:9px 13px;border-radius:'+(isNutri?'16px 16px 4px 16px':'16px 16px 16px 4px')+';font-size:12.5px;line-height:1.5">'
    +escHtml(m.txt)
-   +'<div style="font-size:9px;opacity:.6;margin-top:3px;text-align:right">'+m.time+'</div>'
+   +'<div style="font-size:9px;opacity:.55;margin-top:4px;text-align:right">'+m.time+'</div>'
    +'</div></div>';
  }).join('');
- box.scrollTop=box.scrollHeight;
+ box.scrollTop = box.scrollHeight;
 }
 
+
 function sendChatMsg(){
- var inp=document.getElementById('chat-input');if(!inp||!inp.value.trim())return;
- var p=selPat||pats[0];if(!p)return;
- if(!p.msgs)p.msgs=[];
- var now=new Date();
- var timeStr=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
- p.msgs.push({role:'nutri',txt:inp.value.trim(),time:timeStr,ts:now.toISOString()});
- inp.value='';
+ var inp = document.getElementById('chat-input');
+ if(!inp || !inp.value.trim()) return;
+ var p = window._chatPat || selPat || pats[0];
+ if(!p){showToast('Nenhum paciente selecionado','w');return;}
+ if(!p.msgs) p.msgs = [];
+ var now = new Date();
+ var timeStr = now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+ p.msgs.push({
+  role:'nutri',
+  txt: inp.value.trim(),
+  time: timeStr,
+  ts: now.toISOString(),
+  read: true
+ });
+ inp.value = '';
  DB.save();
  _renderChat(p);
- // Auto-response placeholder for patient side
- var box=document.getElementById('chat-msgs');
- if(box)box.scrollTop=box.scrollHeight;
+ _updateChatBadge();
+ var box = document.getElementById('chat-msgs');
+ if(box) box.scrollTop = box.scrollHeight;
 }
+
 // ════════════════════════════════════════════════════════════
 // LEMBRETES AUTOMÁTICOS
 // ════════════════════════════════════════════════════════════
@@ -3204,7 +3227,7 @@ function goP(id,btn){
  var days=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
  var months=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
  sub.textContent=days[now.getDay()]+', '+now.getDate()+' de '+months[now.getMonth()]+' de '+now.getFullYear();
- var t={dash:'Dashboard',pat:'Pacientes',presc:'Prescrição Nutricional',week:'Plano Semanal',ev:'Acompanhamento',micro:'Micronutrientes',rec:'Recordatório 24h',ai:'IA Nutricional',notif:'Notificações',tpl:'Templates de Plano',anam:'Anamnese Clínica',busca:'Busca Global','pac-diary':'Diário do Paciente',supl:'Suplementação',psupl:'Minha Suplementação',fin:'Financeiro',agenda:'Agenda',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Minhas Tarefas',pev:'Minha Evolução','diary-pro':'Diário Visual',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Tarefas',pev:'Minha Evolução'};
+ var t={dash:'Dashboard',pat:'Pacientes',presc:'Prescrição Nutricional',week:'Plano Semanal',ev:'Acompanhamento',micro:'Micronutrientes',rec:'Recordatório 24h',ai:'IA Nutricional',notif:'Notificações',tpl:'Templates de Plano',anam:'Anamnese Clínica',busca:'Busca Global','pac-diary':'Diário do Paciente',supl:'Suplementação',psupl:'Minha Suplementação',fin:'Financeiro',agenda:'Agenda',chat:'Mensagens',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Minhas Tarefas',pev:'Minha Evolução','diary-pro':'Diário Visual',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Tarefas',pev:'Minha Evolução'};
  document.getElementById('tb-title').textContent=t[id]||id;
  var pages={
   dash:rDash,pat:rPat,agenda:rAgenda,presc:rPresc,week:rWeek,ev:rEv,micro:rMicro,rec:rRec,ai:rAI,notif:rNotif,tpl:rTpl,'pac-diary':rPacDiary,'diary-pro':rDiaryPro,
@@ -8681,7 +8704,7 @@ function goP(id,btn){
  var days=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
  var months=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
  sub.textContent=days[now.getDay()]+', '+now.getDate()+' de '+months[now.getMonth()]+' de '+now.getFullYear();
- var t={dash:'Dashboard',pat:'Pacientes',presc:'Prescrição Nutricional',week:'Plano Semanal',ev:'Acompanhamento',micro:'Micronutrientes',rec:'Recordatório 24h',ai:'IA Nutricional',notif:'Notificações',tpl:'Templates de Plano',anam:'Anamnese Clínica',busca:'Busca Global','pac-diary':'Diário do Paciente',supl:'Suplementação',psupl:'Minha Suplementação',fin:'Financeiro',agenda:'Agenda',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Minhas Tarefas',pev:'Minha Evolução','diary-pro':'Diário Visual',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Tarefas',pev:'Minha Evolução'};
+ var t={dash:'Dashboard',pat:'Pacientes',presc:'Prescrição Nutricional',week:'Plano Semanal',ev:'Acompanhamento',micro:'Micronutrientes',rec:'Recordatório 24h',ai:'IA Nutricional',notif:'Notificações',tpl:'Templates de Plano',anam:'Anamnese Clínica',busca:'Busca Global','pac-diary':'Diário do Paciente',supl:'Suplementação',psupl:'Minha Suplementação',fin:'Financeiro',agenda:'Agenda',chat:'Mensagens',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Minhas Tarefas',pev:'Minha Evolução','diary-pro':'Diário Visual',pdash:'Início',pplan:'Meu Plano Alimentar',pdiary:'Diário Alimentar',ptask:'Tarefas',pev:'Minha Evolução'};
  document.getElementById('tb-title').textContent=t[id]||id;
  var pages={
   dash:rDash,pat:rPat,agenda:rAgenda,presc:rPresc,week:rWeek,ev:rEv,micro:rMicro,rec:rRec,ai:rAI,notif:rNotif,tpl:rTpl,'pac-diary':rPacDiary,'diary-pro':rDiaryPro,

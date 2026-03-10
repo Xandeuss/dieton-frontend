@@ -1,7 +1,7 @@
-// DietOn Service Worker v2.0
+// DietOn Service Worker v2.1
 // Cache-first for static assets, network-first for API calls
 
-const CACHE_NAME = 'dieton-v2.0';
+const CACHE_NAME = 'dieton-v2.1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
