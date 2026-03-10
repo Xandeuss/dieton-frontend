@@ -1193,36 +1193,63 @@
   </div>
 
   <!-- iOS/Safari: instruções manuais -->
-  <div id="pwa-ios" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid #e5e7eb;border-radius:20px 20px 0 0;padding:20px 20px 32px;box-shadow:0 -8px 32px rgba(0,0,0,.12);z-index:9990">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <img src="/icons/icon-192.png" style="width:40px;height:40px;border-radius:10px"/>
+  <div id="pwa-ios" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid #e5e7eb;border-radius:20px 20px 0 0;padding:20px 20px 40px;box-shadow:0 -12px 40px rgba(0,0,0,.18);z-index:9990">
+    <!-- Handle bar -->
+    <div style="width:36px;height:4px;background:#e5e7eb;border-radius:99px;margin:0 auto 18px"></div>
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="/icons/icon-192.png" style="width:48px;height:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.15)"/>
         <div>
-          <div style="font-weight:800;font-size:14px;color:#111">Instalar DietOn</div>
-          <div style="font-size:11px;color:#6b7280">Adicionar à tela de início</div>
+          <div style="font-weight:800;font-size:15px;color:#111">Instalar DietOn</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:1px">Acesse como app nativo no iPhone</div>
         </div>
       </div>
-      <button onclick="pwaDismiss()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:22px;padding:0;line-height:1">×</button>
+      <button onclick="pwaDismiss()" style="background:#f3f4f6;border:none;cursor:pointer;color:#6b7280;font-size:16px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">×</button>
     </div>
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div style="display:flex;align-items:center;gap:12px;background:#f9fafb;border-radius:12px;padding:12px">
-        <div style="font-size:22px">1️⃣</div>
-        <div style="font-size:12.5px;color:#374151">Toque no botão <strong>Compartilhar</strong>
-          <svg style="vertical-align:middle;margin:0 2px" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-          na barra do Safari</div>
+
+    <!-- Steps -->
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+
+      <div style="display:flex;align-items:center;gap:14px;background:#f8faff;border:1.5px solid #dbeafe;border-radius:14px;padding:13px 14px">
+        <div style="width:32px;height:32px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:2px">Toque em Compartilhar</div>
+          <div style="font-size:11.5px;color:#4b7bb5">Botão <strong>⬆</strong> na barra inferior do Safari</div>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;background:#f9fafb;border-radius:12px;padding:12px">
-        <div style="font-size:22px">2️⃣</div>
-        <div style="font-size:12.5px;color:#374151">Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong></div>
+
+      <div style="display:flex;align-items:center;gap:14px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:14px;padding:13px 14px">
+        <div style="width:32px;height:32px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#14532d;margin-bottom:2px">Adicionar à Tela de Início</div>
+          <div style="font-size:11.5px;color:#16a34a">Role o menu e toque nessa opção</div>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;background:#f9fafb;border-radius:12px;padding:12px">
-        <div style="font-size:22px">3️⃣</div>
-        <div style="font-size:12.5px;color:#374151">Toque em <strong>"Adicionar"</strong> no canto superior direito</div>
+
+      <div style="display:flex;align-items:center;gap:14px;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:14px;padding:13px 14px">
+        <div style="width:32px;height:32px;background:#e85a0a;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:#7c2d12;margin-bottom:2px">Toque em "Adicionar"</div>
+          <div style="font-size:11.5px;color:#c2410c">Canto superior direito da tela</div>
+        </div>
       </div>
+
+    </div>
+
+    <!-- Arrow pointing to Safari bottom bar -->
+    <div style="text-align:center;color:#9ca3af;font-size:11px;margin-top:4px">
+      ↓ O botão Compartilhar fica aqui em baixo ↓
     </div>
   </div>
   <!-- Overlay iOS -->
-  <div id="pwa-ios-overlay" onclick="pwaDismiss()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9989"></div>
+  <div id="pwa-ios-overlay" onclick="pwaDismiss()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9989;backdrop-filter:blur(2px)"></div>
 
 </div><!-- /#app -->
 
