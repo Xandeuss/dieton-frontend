@@ -2199,213 +2199,6 @@ var USERS = [
 ];
 
 // TACO — amostra representativa de 80 alimentos (agrupados por categoria)
-var FOOD_DB = [
-// Carnes
-{id:1,n:'Frango grelhado (peito)',e:'🍗',cat:'Carnes',p:31.5,c:0,g:3.6,k:165,fe:1.0,ca:11,vc:0,va:18,zn:1.0,b12:0.3,fb:0},
-{id:2,n:'Carne bovina (patinho)',e:'🥩',cat:'Carnes',p:28,c:0,g:5,k:163,fe:2.5,ca:5,vc:0,va:0,zn:4.2,b12:2.0,fb:0},
-{id:3,n:'Salmão grelhado',e:'🐟',cat:'Peixes',p:25,c:0,g:12,k:208,fe:0.8,ca:12,vc:0,va:50,zn:0.7,b12:3.2,fb:0},
-{id:4,n:'Atum em água (lata)',e:'🐟',cat:'Peixes',p:26,c:0,g:1,k:117,fe:1.3,ca:8,vc:0,va:0,zn:0.6,b12:2.5,fb:0},
-{id:5,n:'Tilápia grelhada',e:'🐠',cat:'Peixes',p:26,c:0,g:2.7,k:129,fe:0.6,ca:13,vc:0,va:10,zn:0.5,b12:1.8,fb:0},
-{id:6,n:'Ovo inteiro cozido',e:'🥚',cat:'Ovos',p:13,c:1.1,g:9.5,k:143,fe:1.8,ca:50,vc:0,va:160,zn:1.1,b12:1.1,fb:0},
-{id:7,n:'Clara de ovo',e:'🥚',cat:'Ovos',p:11,c:0.7,g:0.2,k:48,fe:0.1,ca:7,vc:0,va:0,zn:0.03,b12:0.1,fb:0},
-{id:8,n:'Carne suína (lombo)',e:'🥩',cat:'Carnes',p:26,c:0,g:7,k:171,fe:1.0,ca:10,vc:0.6,va:0,zn:2.0,b12:0.8,fb:0},
-{id:9,n:'Frango (coxa/sobrecoxa)',e:'🍗',cat:'Carnes',p:24,c:0,g:10,k:190,fe:1.2,ca:15,vc:0,va:30,zn:1.4,b12:0.3,fb:0},
-{id:10,n:'Sardinha em óleo',e:'🐟',cat:'Peixes',p:20,c:0,g:14,k:208,fe:3.1,ca:350,vc:0,va:40,zn:1.3,b12:8.0,fb:0},
-// Grãos e cereais
-{id:11,n:'Arroz branco cozido',e:'🍚',cat:'Cereais',p:2.5,c:28,g:0.2,k:128,fe:0.3,ca:5,vc:0,va:0,zn:0.4,b12:0,fb:0.4},
-{id:12,n:'Arroz integral cozido',e:'🍚',cat:'Cereais',p:2.6,c:26,g:0.9,k:124,fe:0.5,ca:10,vc:0,va:0,zn:0.6,b12:0,fb:1.8},
-{id:13,n:'Feijão preto cozido',e:'🫘',cat:'Leguminosas',p:6.8,c:14,g:0.5,k:77,fe:1.7,ca:23,vc:0,va:0,zn:0.8,b12:0,fb:6.5},
-{id:14,n:'Feijão carioca cozido',e:'🫘',cat:'Leguminosas',p:5.4,c:13.6,g:0.4,k:77,fe:2.0,ca:27,vc:0,va:0,zn:0.7,b12:0,fb:6.1},
-{id:15,n:'Lentilha cozida',e:'🫘',cat:'Leguminosas',p:9,c:20,g:0.4,k:116,fe:3.3,ca:19,vc:1.5,va:8,zn:1.3,b12:0,fb:7.9},
-{id:16,n:'Grão-de-bico cozido',e:'🫘',cat:'Leguminosas',p:8.9,c:27,g:2.6,k:164,fe:2.9,ca:49,vc:1.3,va:4,zn:1.5,b12:0,fb:7.6},
-{id:17,n:'Aveia em flocos',e:'🌾',cat:'Cereais',p:13,c:66,g:7,k:394,fe:4.7,ca:54,vc:0,va:0,zn:3.1,b12:0,fb:9.1},
-{id:18,n:'Quinoa cozida',e:'🌾',cat:'Cereais',p:4.4,c:21,g:1.9,k:120,fe:1.5,ca:17,vc:0,va:1,zn:1.1,b12:0,fb:2.8},
-{id:19,n:'Macarrão integral cozido',e:'🍝',cat:'Cereais',p:4.7,c:26,g:0.5,k:124,fe:1.1,ca:14,vc:0,va:0,zn:0.9,b12:0,fb:2.5},
-{id:20,n:'Pão integral',e:'🍞',cat:'Cereais',p:8,c:45,g:3,k:247,fe:2.5,ca:70,vc:0,va:0,zn:1.4,b12:0,fb:5.6},
-{id:21,n:'Tapioca (goma)',e:'🫓',cat:'Cereais',p:0.3,c:86,g:0.1,k:345,fe:0.4,ca:16,vc:0,va:0,zn:0.2,b12:0,fb:0},
-{id:22,n:'Batata-doce cozida',e:'🍠',cat:'Tubérculos',p:1.4,c:26,g:0.1,k:110,fe:0.6,ca:30,vc:19,va:961,zn:0.3,b12:0,fb:3.3},
-{id:23,n:'Batata inglesa cozida',e:'🥔',cat:'Tubérculos',p:2,c:17,g:0.1,k:77,fe:0.3,ca:5,vc:13,va:0,zn:0.3,b12:0,fb:1.8},
-{id:24,n:'Mandioca cozida',e:'🧆',cat:'Tubérculos',p:0.7,c:30,g:0.2,k:125,fe:0.3,ca:18,vc:13,va:1,zn:0.3,b12:0,fb:1.8},
-// Laticínios
-{id:25,n:'Leite integral (copo)',e:'🥛',cat:'Laticínios',p:3.1,c:4.8,g:3.2,k:61,fe:0.1,ca:113,vc:0.9,va:46,zn:0.4,b12:0.4,fb:0},
-{id:26,n:'Leite desnatado (copo)',e:'🥛',cat:'Laticínios',p:3.4,c:4.9,g:0.2,k:35,fe:0.1,ca:120,vc:0.9,va:50,zn:0.4,b12:0.4,fb:0},
-{id:27,n:'Iogurte natural integral',e:'🫙',cat:'Laticínios',p:3.5,c:4.7,g:3,k:61,fe:0.1,ca:121,vc:0.6,va:29,zn:0.5,b12:0.4,fb:0},
-{id:28,n:'Iogurte grego integral',e:'🫙',cat:'Laticínios',p:9,c:4,g:5,k:97,fe:0.1,ca:110,vc:0,va:20,zn:0.5,b12:0.5,fb:0},
-{id:29,n:'Queijo cottage',e:'🧀',cat:'Laticínios',p:11,c:3.4,g:4.3,k:98,fe:0.1,ca:60,vc:0,va:45,zn:0.5,b12:0.4,fb:0},
-{id:30,n:'Queijo mussarela',e:'🧀',cat:'Laticínios',p:22,c:2.2,g:17,k:253,fe:0.2,ca:505,vc:0,va:180,zn:2.9,b12:0.8,fb:0},
-{id:31,n:'Queijo ricota',e:'🧀',cat:'Laticínios',p:11.3,c:3,g:9.5,k:143,fe:0.4,ca:207,vc:0,va:120,zn:1.2,b12:0.3,fb:0},
-{id:32,n:'Whey protein (scoop)',e:'💪',cat:'Suplementos',p:24,c:3,g:1.5,k:122,fe:0.2,ca:100,vc:0,va:0,zn:0.8,b12:0.5,fb:0},
-// Vegetais
-{id:33,n:'Brócolis cozido',e:'🥦',cat:'Vegetais',p:2.8,c:4.5,g:0.4,k:34,fe:1.0,ca:41,vc:64,va:96,zn:0.4,b12:0,fb:2.6},
-{id:34,n:'Espinafre cozido',e:'🥬',cat:'Vegetais',p:2.9,c:3.6,g:0.3,k:23,fe:3.6,ca:136,vc:17,va:942,zn:0.8,b12:0,fb:2.4},
-{id:35,n:'Cenoura crua',e:'🥕',cat:'Vegetais',p:0.9,c:9.6,g:0.2,k:41,fe:0.3,ca:33,vc:6,va:835,zn:0.2,b12:0,fb:2.8},
-{id:36,n:'Tomate',e:'🍅',cat:'Vegetais',p:0.9,c:3.9,g:0.2,k:18,fe:0.3,ca:10,vc:21,va:42,zn:0.2,b12:0,fb:1.2},
-{id:37,n:'Abóbora cozida',e:'🎃',cat:'Vegetais',p:0.5,c:7.5,g:0.1,k:33,fe:0.6,ca:14,vc:8,va:426,zn:0.1,b12:0,fb:0.5},
-{id:38,n:'Couve-manteiga crua',e:'🥬',cat:'Vegetais',p:1.9,c:4.9,g:0.5,k:32,fe:0.7,ca:104,vc:71,va:309,zn:0.2,b12:0,fb:2.0},
-{id:39,n:'Abobrinha cozida',e:'🥒',cat:'Vegetais',p:1.2,c:3.5,g:0.4,k:22,fe:0.4,ca:15,vc:9,va:10,zn:0.3,b12:0,fb:1.2},
-{id:40,n:'Pepino',e:'🥒',cat:'Vegetais',p:0.7,c:2.9,g:0.1,k:13,fe:0.3,ca:14,vc:3,va:5,zn:0.2,b12:0,fb:0.5},
-{id:41,n:'Alface',e:'🥗',cat:'Vegetais',p:1.4,c:2.2,g:0.2,k:15,fe:0.4,ca:35,vc:18,va:370,zn:0.2,b12:0,fb:2.1},
-{id:42,n:'Beterraba cozida',e:'🫀',cat:'Vegetais',p:1.9,c:10,g:0.1,k:46,fe:0.8,ca:16,vc:4,va:2,zn:0.4,b12:0,fb:2.0},
-{id:43,n:'Chuchu cozido',e:'🥦',cat:'Vegetais',p:0.8,c:3.8,g:0.1,k:20,fe:0.4,ca:13,vc:7,va:4,zn:0.2,b12:0,fb:1.7},
-{id:44,n:'Repolho cru',e:'🥬',cat:'Vegetais',p:1.4,c:5.8,g:0.1,k:28,fe:0.5,ca:40,vc:51,va:5,zn:0.2,b12:0,fb:2.5},
-{id:45,n:'Vagem cozida',e:'🫘',cat:'Vegetais',p:1.8,c:6.1,g:0.3,k:31,fe:0.7,ca:37,vc:12,va:41,zn:0.2,b12:0,fb:2.7},
-// Frutas
-{id:46,n:'Banana prata',e:'🍌',cat:'Frutas',p:1.4,c:26,g:0.1,k:110,fe:0.4,ca:8,vc:22,va:5,zn:0.2,b12:0,fb:2.0},
-{id:47,n:'Maçã fuji',e:'🍎',cat:'Frutas',p:0.3,c:13.8,g:0.4,k:57,fe:0.1,ca:4,vc:5,va:3,zn:0.05,b12:0,fb:1.3},
-{id:48,n:'Laranja pera',e:'🍊',cat:'Frutas',p:0.8,c:11.5,g:0.1,k:47,fe:0.3,ca:22,vc:53,va:11,zn:0.1,b12:0,fb:1.1},
-{id:49,n:'Mamão papaia',e:'🍈',cat:'Frutas',p:0.5,c:10.4,g:0.1,k:46,fe:0.4,ca:20,vc:73,va:47,zn:0.1,b12:0,fb:1.8},
-{id:50,n:'Manga',e:'🥭',cat:'Frutas',p:0.4,c:14.9,g:0.2,k:64,fe:0.2,ca:9,vc:36,va:38,zn:0.1,b12:0,fb:1.6},
-{id:51,n:'Uva Itália',e:'🍇',cat:'Frutas',p:0.7,c:17.3,g:0.5,k:79,fe:0.3,ca:9,vc:7,va:3,zn:0.1,b12:0,fb:0.9},
-{id:52,n:'Morango',e:'🍓',cat:'Frutas',p:0.8,c:7.7,g:0.3,k:34,fe:0.4,ca:16,vc:68,va:1,zn:0.2,b12:0,fb:2.3},
-{id:53,n:'Melancia',e:'🍉',cat:'Frutas',p:0.6,c:7.4,g:0.1,k:33,fe:0.2,ca:8,vc:7,va:28,zn:0.1,b12:0,fb:0.4},
-{id:54,n:'Abacate',e:'🥑',cat:'Frutas',p:1.2,c:8.5,g:14.6,k:168,fe:0.6,ca:13,vc:10,va:7,zn:0.6,b12:0,fb:6.7},
-{id:55,n:'Kiwi',e:'🥝',cat:'Frutas',p:1.1,c:15.8,g:0.6,k:64,fe:0.3,ca:34,vc:93,va:4,zn:0.1,b12:0,fb:2.1},
-// Gorduras e oleaginosas
-{id:56,n:'Azeite de oliva (col.)',e:'🫒',cat:'Gorduras',p:0,c:0,g:14,k:119,fe:0.1,ca:1,vc:0,va:0,zn:0,b12:0,fb:0},
-{id:57,n:'Amendoim torrado',e:'🥜',cat:'Oleaginosas',p:25.8,c:20.1,g:44.2,k:567,fe:2.0,ca:54,vc:0,va:0,zn:3.3,b12:0,fb:8.5},
-{id:58,n:'Castanha-do-pará',e:'🌰',cat:'Oleaginosas',p:14,c:12,g:61,k:643,fe:2.4,ca:160,vc:0.7,va:0,zn:4.1,b12:0,fb:7.5},
-{id:59,n:'Amêndoas',e:'🌰',cat:'Oleaginosas',p:21,c:22,g:49,k:579,fe:3.7,ca:264,vc:0,va:0,zn:3.1,b12:0,fb:12.5},
-{id:60,n:'Nozes',e:'🌰',cat:'Oleaginosas',p:15,c:14,g:65,k:654,fe:2.9,ca:98,vc:1.3,va:0,zn:3.1,b12:0,fb:6.7},
-{id:61,n:'Pasta de amendoim (col.)',e:'🥜',cat:'Gorduras',p:7,c:6,g:16,k:188,fe:0.6,ca:17,vc:0,va:0,zn:0.9,b12:0,fb:1.9},
-{id:62,n:'Coco ralado seco',e:'🥥',cat:'Oleaginosas',p:2.7,c:6.4,g:36,k:354,fe:2.4,ca:14,vc:1.5,va:0,zn:0.9,b12:0,fb:9.0},
-// Laticínios adicionais
-{id:63,n:'Requeijão cremoso (col.)',e:'🧀',cat:'Laticínios',p:1.8,c:1.8,g:7.5,k:84,fe:0.1,ca:32,vc:0,va:55,zn:0.3,b12:0.2,fb:0},
-// Bebidas
-{id:64,n:'Leite de amêndoas (copo)',e:'🥛',cat:'Bebidas',p:1.5,c:3,g:3,k:42,fe:0.7,ca:188,vc:0,va:75,zn:0.1,b12:0,fb:0.5},
-{id:65,n:'Suco de laranja (natural)',e:'🍊',cat:'Bebidas',p:0.7,c:10.4,g:0.2,k:45,fe:0.2,ca:11,vc:50,va:10,zn:0.1,b12:0,fb:0.2},
-// Outros
-{id:66,n:'Mel (col.)',e:'🍯',cat:'Outros',p:0.3,c:17,g:0,k:64,fe:0.1,ca:2,vc:0.1,va:0,zn:0.1,b12:0,fb:0},
-{id:67,n:'Linhaça (col.)',e:'🌿',cat:'Sementes',p:1.5,c:2.5,g:3.5,k:46,fe:0.5,ca:25,vc:0.1,va:0,zn:0.5,b12:0,fb:2.5},
-{id:68,n:'Chia (col.)',e:'🌿',cat:'Sementes',p:1.7,c:3.7,g:2.9,k:46,fe:1.0,ca:92,vc:0.4,va:1,zn:0.5,b12:0,fb:3.9},
-{id:69,n:'Inhame cozido',e:'🧆',cat:'Tubérculos',p:1.5,c:24,g:0.1,k:102,fe:0.5,ca:17,vc:17,va:7,zn:0.2,b12:0,fb:4.1},
-{id:70,n:'Ervilha cozida',e:'🫘',cat:'Leguminosas',p:5.2,c:14,g:0.3,k:80,fe:1.5,ca:25,vc:14,va:38,zn:1.2,b12:0,fb:5.1},
-{id:71,n:'Edamame',e:'🫘',cat:'Leguminosas',p:11.9,c:8.9,g:5.2,k:122,fe:2.3,ca:63,vc:9,va:8,zn:1.4,b12:0,fb:5.2},
-{id:72,n:'Tofu firme',e:'🧊',cat:'Proteínas',p:8,c:2,g:4.5,k:76,fe:1.8,ca:201,vc:0,va:0,zn:0.8,b12:0,fb:0.3},
-{id:73,n:'Tempeh',e:'🧆',cat:'Proteínas',p:19,c:9,g:11,k:193,fe:2.7,ca:111,vc:0,va:0,zn:1.7,b12:0,fb:0},
-{id:74,n:'Pão de forma branco',e:'🍞',cat:'Cereais',p:7.8,c:50,g:3,k:264,fe:2.2,ca:35,vc:0,va:0,zn:0.7,b12:0,fb:2.0},
-{id:75,n:'Biscoito de arroz',e:'🍘',cat:'Cereais',p:2,c:20,g:0.5,k:92,fe:0.2,ca:4,vc:0,va:0,zn:0.3,b12:0,fb:0.4},
-{id:76,n:'Proteína texturizada de soja (PTS)',e:'💪',cat:'Proteínas',p:52,c:30,g:1,k:341,fe:9.6,ca:276,vc:0,va:0,zn:2.5,b12:0,fb:17},
-{id:77,n:'Canjiquinha cozida',e:'🌽',cat:'Cereais',p:2.0,c:26,g:0.6,k:118,fe:0.4,ca:5,vc:0,va:0,zn:0.4,b12:0,fb:2.2},
-{id:78,n:'Farinha de aveia (col.)',e:'🌾',cat:'Cereais',p:2.2,c:11,g:1.2,k:66,fe:0.8,ca:9,vc:0,va:0,zn:0.5,b12:0,fb:1.5},
-{id:79,n:'Couve-flor cozida',e:'🥦',cat:'Vegetais',p:2.1,c:3.5,g:0.2,k:22,fe:0.3,ca:16,vc:46,va:1,zn:0.2,b12:0,fb:2.0},
-{id:80,n:'Berinjela cozida',e:'🍆',cat:'Vegetais',p:0.8,c:5.5,g:0.2,k:26,fe:0.2,ca:6,vc:1.5,va:1,zn:0.2,b12:0,fb:2.5}
-];
-
-var SUBS = {
- 'Frango grelhado (peito)':[{n:'Peru grelhado',e:'🦃'},{n:'Tofu firme',e:'🧊'},{n:'Atum em água (lata)',e:'🐟'},{n:'Clara de ovo',e:'🥚'},{n:'Tempeh',e:'🧆'}],
- 'Arroz branco cozido':[{n:'Arroz integral cozido',e:'🍚'},{n:'Quinoa cozida',e:'🌾'},{n:'Batata-doce cozida',e:'🍠'},{n:'Canjiquinha cozida',e:'🌽'},{n:'Macarrão integral cozido',e:'🍝'}],
- 'Feijão preto cozido':[{n:'Feijão carioca cozido',e:'🫘'},{n:'Lentilha cozida',e:'🫘'},{n:'Grão-de-bico cozido',e:'🫘'},{n:'Ervilha cozida',e:'🫘'}],
- 'Leite integral (copo)':[{n:'Leite desnatado (copo)',e:'🥛'},{n:'Iogurte natural integral',e:'🫙'},{n:'Leite de amêndoas (copo)',e:'🥛'}],
- 'Iogurte natural integral':[{n:'Iogurte grego integral',e:'🫙'},{n:'Leite integral (copo)',e:'🥛'},{n:'Queijo cottage',e:'🧀'}],
- 'Banana prata':[{n:'Maçã fuji',e:'🍎'},{n:'Mamão papaia',e:'🍈'},{n:'Manga',e:'🥭'},{n:'Morango',e:'🍓'}],
- 'Aveia em flocos':[{n:'Farinha de aveia (col.)',e:'🌾'},{n:'Quinoa cozida',e:'🌾'},{n:'Granola natural',e:'🌾'}],
- 'Azeite de oliva (col.)':[{n:'Abacate',e:'🥑'},{n:'Castanha-do-pará',e:'🌰'},{n:'Pasta de amendoim (col.)',e:'🥜'}]
-};
-
-var RDA = {fe:{n:'Ferro',un:'mg',ref:14,ico:'🩸'},ca:{n:'Cálcio',un:'mg',ref:1000,ico:'🦴'},vc:{n:'Vit C',un:'mg',ref:75,ico:'🍊'},va:{n:'Vit A',un:'µg',ref:700,ico:'🥕'},zn:{n:'Zinco',un:'mg',ref:8,ico:'💊'},b12:{n:'Vit B12',un:'µg',ref:2.4,ico:'⚡'},fb:{n:'Fibras',un:'g',ref:25,ico:'🌿'}};
-
-// MEAL TEMPLATES
-var TEMPLATES = [
- {id:1,name:'Emagrecimento 1600kcal',desc:'Déficit calórico moderado, alto teor proteico, baixo carboidrato',kcal:1600,meals:[
-  {name:'Café da manhã',em:'☀️',items:[{fid:17,qty:40},{fid:27,qty:150},{fid:55,qty:100}]},
-  {name:'Almoço',em:'🍽️',items:[{fid:1,qty:120},{fid:12,qty:80},{fid:14,qty:80},{fid:33,qty:80}]},
-  {name:'Lanche',em:'🥛',items:[{fid:28,qty:150},{fid:47,qty:120}]},
-  {name:'Jantar',em:'🌙',items:[{fid:3,qty:120},{fid:39,qty:100},{fid:22,qty:100}]},
-  {name:'Ceia',em:'🌙',items:[{fid:7,qty:60}]}
- ]},
- {id:2,name:'Hipertrofia 2800kcal',desc:'Superávit calórico, alta proteína, carboidratos estratégicos',kcal:2800,meals:[
-  {name:'Café da manhã',em:'☀️',items:[{fid:6,qty:150},{fid:17,qty:60},{fid:46,qty:120},{fid:27,qty:200}]},
-  {name:'Pré-treino',em:'⚡',items:[{fid:22,qty:150},{fid:32,qty:30}]},
-  {name:'Almoço',em:'🍽️',items:[{fid:2,qty:180},{fid:11,qty:120},{fid:13,qty:100},{fid:35,qty:80}]},
-  {name:'Pós-treino',em:'💪',items:[{fid:32,qty:40},{fid:46,qty:100}]},
-  {name:'Jantar',em:'🌙',items:[{fid:1,qty:150},{fid:18,qty:80},{fid:33,qty:80}]},
-  {name:'Ceia',em:'🌙',items:[{fid:29,qty:100},{fid:68,qty:15}]}
- ]},
- {id:3,name:'Manutenção saudável',desc:'Equilíbrio entre macros, foco em micronutrientes e fibras',kcal:2000,meals:[
-  {name:'Café da manhã',em:'☀️',items:[{fid:17,qty:40},{fid:27,qty:150},{fid:47,qty:150}]},
-  {name:'Almoço',em:'🍽️',items:[{fid:1,qty:100},{fid:11,qty:80},{fid:14,qty:80},{fid:33,qty:60},{fid:36,qty:60}]},
-  {name:'Lanche',em:'🥛',items:[{fid:28,qty:150},{fid:57,qty:25}]},
-  {name:'Jantar',em:'🌙',items:[{fid:3,qty:120},{fid:12,qty:80},{fid:42,qty:80}]},
-  {name:'Ceia',em:'🌙',items:[{fid:29,qty:80}]}
- ]}
-];
-
-// PATIENTS
-var pats = [
- {id:1,n:'Fernanda Lima',age:28,sex:'F',w:68.4,h:165,bmi:25.1,fat:28,wStart:75,goal:'Emagrecimento',cond:'SOP, resistência à insulina',alerg:'Glúten',agua:1.8,prog:72,last:'12/02/2026',av:'a4',i:'FL',st:'tg',stxt:'Em dia',exams:{gli:98,col:185,vitd:24,hem:12.1,fer:22,tgo:18,tgp:22,tsh:2.1},historico:[
-  {data:'05/03/2026',peso:68.4,imc:25.1,cintura:82,fat:28.0,obs:'Progresso consistente'},
-  {data:'05/02/2026',peso:70.1,imc:25.8,cintura:84,fat:29.2,obs:'Boa adesão ao plano'},
-  {data:'05/01/2026',peso:71.8,imc:26.4,cintura:86,fat:30.1,obs:'Início do programa'},
-  {data:'05/12/2025',peso:73.2,imc:26.9,cintura:88,fat:31.3,obs:'Avaliação inicial'},
-  {data:'05/11/2025',peso:75.0,imc:27.6,cintura:90,fat:32.5,obs:'Cadastro'}
- ],diary:[
-  {data:'05/03/2026',refeicoes:[{n:'Café da manhã',items:['Aveia 40g','Iogurte grego 150g','Morango 100g'],k:380},{n:'Almoço',items:['Frango 120g','Arroz integral 80g','Feijão 80g','Salada verde'],k:520},{n:'Lanche',items:['Iogurte grego 150g','Kiwi 80g'],k:210},{n:'Jantar',items:['Salmão 120g','Batata-doce 100g','Brócolis 80g'],k:430}],total:1540},
-  {data:'04/03/2026',refeicoes:[{n:'Café da manhã',items:['Ovos mexidos 2un','Pão integral 1 fatia','Café preto'],k:310},{n:'Almoço',items:['Frango 120g','Arroz 80g','Feijão 80g','Salada'],k:510},{n:'Lanche',items:['Banana 1un','Pasta amendoim 1col'],k:290},{n:'Jantar',items:['Tilápia 120g','Abobrinha refogada','Tomate'],k:280}],total:1390}
- ],plans:[]},
- {id:2,n:'Carlos Mendes',age:35,sex:'M',w:88.2,h:178,bmi:27.8,fat:22,wStart:90,goal:'Hipertrofia',cond:'Saudável',alerg:'',agua:2.5,prog:55,last:'29/01/2026',av:'a3',i:'CM',st:'ty',stxt:'Pendente',exams:{gli:92,col:170,vitd:35,hem:15.2,fer:85,tgo:22,tgp:28,tsh:1.8},historico:[
-  {data:'05/03/2026',peso:88.2,imc:27.8,cintura:90,fat:22.0,obs:'Ganho de massa'},
-  {data:'05/01/2026',peso:88.5,imc:27.9,cintura:91,fat:22.8,obs:'Início do programa'}
- ],diary:[],plans:[],appointments:[]},
- {id:3,n:'Ana Rodrigues',age:42,sex:'F',w:72.0,h:162,bmi:27.4,fat:32,wStart:78,goal:'Saúde geral',cond:'Hipertensão leve',alerg:'',agua:2.0,prog:88,last:'02/03/2026',av:'a2',i:'AR',st:'tg',stxt:'Em dia',exams:{gli:105,col:210,vitd:28,hem:13.0,fer:40,tgo:25,tgp:30,tsh:3.2},historico:[
-  {data:'02/03/2026',peso:72.0,imc:27.4,cintura:86,fat:32,obs:'Melhorou pressão'},
-  {data:'02/01/2026',peso:74.5,imc:28.4,cintura:89,fat:33.5,obs:'Início do protocolo'}
- ],diary:[],plans:[],appointments:[]},
- {id:4,n:'Pedro Alves',age:19,sex:'M',w:75.0,h:182,bmi:22.6,fat:14,wStart:72,goal:'Hipertrofia',cond:'Saudável',alerg:'',agua:3.0,prog:40,last:'10/01/2026',av:'a5',i:'PA',st:'tr',stxt:'Alerta',exams:{gli:88,col:145,vitd:42,hem:15.8,fer:95,tgo:18,tgp:20,tsh:1.5},historico:[
-  {data:'10/01/2026',peso:75.0,imc:22.6,cintura:78,fat:14,obs:'Boa disposição'}
- ],diary:[],plans:[],appointments:[]},
- {id:5,n:'Maria Santos',age:55,sex:'F',w:65.0,h:158,bmi:26.0,fat:36,wStart:68,goal:'Saúde geral',cond:'Diabetes tipo 2, dislipidemia',alerg:'Lactose',agua:1.5,prog:65,last:'25/02/2026',av:'a6',i:'MS',st:'ty',stxt:'Atenção',exams:{gli:142,col:230,vitd:18,hem:11.5,fer:15,tgo:28,tgp:35,tsh:4.8},historico:[
-  {data:'25/02/2026',peso:65.0,imc:26.0,cintura:88,fat:36,obs:'Glicemia controlando'},
-  {data:'25/01/2026',peso:66.2,imc:26.5,cintura:89,fat:37,obs:'Início do protocolo'}
- ],diary:[],plans:[],appointments:[]},
- {id:6,n:'João Costa',age:48,sex:'M',w:95.0,h:175,bmi:31.0,fat:28,wStart:97,goal:'Emagrecimento',cond:'Apneia do sono',alerg:'',agua:2.2,prog:30,last:'15/02/2026',av:'a7',i:'JC',st:'ty',stxt:'Atenção',exams:{gli:110,col:195,vitd:22,hem:15.0,fer:70,tgo:32,tgp:40,tsh:2.8},historico:[
-  {data:'15/02/2026',peso:95.0,imc:31.0,cintura:105,fat:28,obs:'Início do programa'}
- ],diary:[],plans:[],appointments:[]},
- {id:7,n:'Lucia Ferreira',age:31,sex:'F',w:58.0,h:160,bmi:22.7,fat:24,wStart:60,goal:'Manutenção',cond:'Ansiedade',alerg:'',agua:2.0,prog:90,last:'28/02/2026',av:'a8',i:'LF',st:'tg',stxt:'Em dia',exams:{gli:85,col:165,vitd:38,hem:12.8,fer:35,tgo:20,tgp:18,tsh:1.9},historico:[
-  {data:'28/02/2026',peso:58.0,imc:22.7,cintura:72,fat:24,obs:'Mantendo bem'}
- ],diary:[],plans:[],appointments:[]},
- {id:8,n:'Roberto Lima',age:62,sex:'M',w:78.0,h:170,bmi:27.0,fat:25,wStart:80,goal:'Saúde geral',cond:'Artrite, colesterol alto',alerg:'Amendoim',agua:1.8,prog:78,last:'01/03/2026',av:'a1',i:'RL',st:'tg',stxt:'Em dia',exams:{gli:95,col:245,vitd:20,hem:14.2,fer:60,tgo:24,tgp:26,tsh:2.5},historico:[
-  {data:'01/03/2026',peso:78.0,imc:27.0,cintura:94,fat:25,obs:'Colesterol melhorou'},
-  {data:'01/01/2026',peso:80.0,imc:27.7,cintura:97,fat:26,obs:'Início do protocolo'}
- ],diary:[],plans:[],appointments:[]},
- {id:9,n:'Bianca Souza',age:26,sex:'F',w:54.0,h:163,bmi:20.3,fat:20,wStart:54,goal:'Hipertrofia',cond:'Amenorréia funcional',alerg:'',agua:2.2,prog:62,last:'03/03/2026',av:'a2',i:'BS',st:'tg',stxt:'Em dia',
-  anamnese:{sono:6.5,agua:2.2,intestino:'Normal (1×/dia)',tabagismo:'Não',stress:'Alto',ativ:'Muito ativo',treino:'5×/semana — musculação',historico_dieta:'Passou por período restritivo, agora em recuperação',queixas:'Cansaço após treinos, cabelo fraco',meds:'Suplemento ferro',pref:'Dieta com bastante proteína, não gosta de peixe'},
-  exams:{gli:82,col:155,vitd:32,hem:11.8,fer:18,tgo:18,tgp:20,tsh:2.1},historico:[
-  {data:'03/03/2026',peso:54.0,imc:20.3,cintura:68,fat:20,obs:'Boa evolução'},
-  {data:'03/01/2026',peso:53.0,imc:19.9,cintura:67,fat:19.5,obs:'Início do protocolo'}
- ],diary:[],plans:[],appointments:[]},
- {id:10,n:'Tomás Vieira',age:44,sex:'M',w:102.0,h:180,bmi:31.5,fat:30,wStart:106,goal:'Emagrecimento',cond:'Síndrome metabólica, resistência insulínica',alerg:'Frutos do mar',agua:1.5,prog:45,last:'28/02/2026',av:'a3',i:'TV',st:'ty',stxt:'Atenção',
-  anamnese:{sono:5.5,agua:1.5,intestino:'Irregular',tabagismo:'Ex-fumante',stress:'Muito alto',ativ:'Sedentário',treino:'Caminhada 2×/semana',historico_dieta:'Diversas dietas com efeito sanfona, nunca sustentou por mais de 3 meses',queixas:'Fadiga, refluxo, ronco',meds:'Metformina 850mg, Omeprazol 20mg',pref:'Prefere almoço tradicional, não consegue jantar cedo'},
-  exams:{gli:128,col:220,vitd:15,hem:15.5,fer:90,tgo:45,tgp:52,tsh:3.5},historico:[
-  {data:'28/02/2026',peso:102.0,imc:31.5,cintura:110,fat:30,obs:'Iniciou atividade'},
-  {data:'28/01/2026',peso:104.0,imc:32.1,cintura:112,fat:31,obs:'Início do protocolo'},
-  {data:'28/12/2025',peso:106.0,imc:32.7,cintura:114,fat:32,obs:'Avaliação inicial'}
- ],diary:[],plans:[],appointments:[]},
- {id:11,n:'Isabela Nunes',age:33,sex:'F',w:61.0,h:165,bmi:22.4,fat:26,wStart:61,goal:'Saúde geral',cond:'SOP, hipotireoidismo subclínico',alerg:'Glúten',agua:2.5,prog:80,last:'04/03/2026',av:'a6',i:'IN',st:'tg',stxt:'Em dia',
-  anamnese:{sono:7,agua:2.5,intestino:'Normal (1×/dia)',tabagismo:'Não',stress:'Moderado',ativ:'Moderadamente ativo',treino:'Yoga + caminhada 3×/sem',historico_dieta:'Dieta sem glúten há 2 anos, melhora dos sintomas',queixas:'Irregular menstrual, inchaço abdominal, queda de cabelo',meds:'Levotiroxina 50mcg, Mio-inositol 2g',pref:'Come fora no almoço, prefere jantares práticos'},
-  exams:{gli:95,col:185,vitd:24,hem:12.5,fer:28,tgo:22,tgp:25,tsh:4.2},historico:[
-  {data:'04/03/2026',peso:61.0,imc:22.4,cintura:75,fat:26,obs:'TSH melhorou'},
-  {data:'04/01/2026',peso:62.0,imc:22.8,cintura:77,fat:27,obs:'Início do protocolo'}
- ],diary:[],plans:[],appointments:[]},
- {id:12,n:'Gustavo Prado',age:17,sex:'M',w:68.0,h:175,bmi:22.2,fat:15,wStart:64,goal:'Hipertrofia',cond:'Saudável',alerg:'',agua:2.8,prog:70,last:'02/03/2026',av:'a5',i:'GP',st:'tg',stxt:'Em dia',
-  anamnese:{sono:8,agua:2.8,intestino:'Normal (1×/dia)',tabagismo:'Não',stress:'Baixo',ativ:'Muito ativo',treino:'Musculação 4×/semana + futebol',historico_dieta:'Sem histórico de dieta, come bastante mas não seletivo',queixas:'Quer ganhar massa mas sem gordura',meds:'Nenhum',pref:'Come na escola, precisa de lanches práticos'},
-  exams:{gli:85,col:148,vitd:45,hem:16.0,fer:100,tgo:16,tgp:18,tsh:1.6},historico:[
-  {data:'02/03/2026',peso:68.0,imc:22.2,cintura:80,fat:15,obs:'Bom ganho muscular'},
-  {data:'02/01/2026',peso:64.0,imc:20.9,cintura:78,fat:14,obs:'Início do protocolo'}
- ],diary:[],plans:[],appointments:[]}
-];
-
-var WEEK = [
- {n:'Domingo',meals:[{n:'Café',items:[{e:'🌾',n:'Aveia',k:160},{e:'🫙',n:'Iogurte grego',k:97}]},{n:'Almoço',items:[{e:'🍗',n:'Frango grelhado',k:200},{e:'🍚',n:'Arroz integral',k:125},{e:'🫘',n:'Feijão',k:77},{e:'🥦',n:'Brócolis',k:35}]},{n:'Jantar',items:[{e:'🥚',n:'Omelete',k:200},{e:'🥗',n:'Salada mista',k:45}]}]},
- {n:'Segunda',meals:[{n:'Café',items:[{e:'🍞',n:'Pão integral',k:124},{e:'🥚',n:'Ovo cozido',k:143},{e:'🍎',n:'Maçã',k:57}]},{n:'Almoço',items:[{e:'🥩',n:'Patinho grelhado',k:163},{e:'🍚',n:'Arroz integral',k:125},{e:'🫘',n:'Feijão carioca',k:77},{e:'🥕',n:'Cenoura refogada',k:41}]},{n:'Lanche',items:[{e:'🫙',n:'Iogurte grego',k:97}]},{n:'Jantar',items:[{e:'🐟',n:'Atum c/ legumes',k:180}]}]},
- {n:'Terça',meals:[{n:'Café',items:[{e:'🌾',n:'Aveia com banana',k:200},{e:'🥛',n:'Leite desnatado',k:70}]},{n:'Almoço',items:[{e:'🍗',n:'Frango grelhado',k:200},{e:'🍝',n:'Macarrão integral',k:124},{e:'🥦',n:'Salada verde',k:30}]},{n:'Lanche',items:[{e:'🌰',n:'Castanha-do-pará 2un',k:65}]},{n:'Jantar',items:[{e:'🐠',n:'Tilápia grelhada',k:129},{e:'🍠',n:'Batata-doce',k:110}]}]},
- {n:'Quarta',meals:[{n:'Café',items:[{e:'🫓',n:'Tapioca recheada',k:220},{e:'🫙',n:'Iogurte',k:97}]},{n:'Almoço',items:[{e:'🥩',n:'Carne bovina',k:163},{e:'🍚',n:'Arroz',k:128},{e:'🫘',n:'Lentilha',k:116},{e:'🍅',n:'Salada',k:25}]},{n:'Lanche',items:[{e:'🍓',n:'Frutas mistas',k:70}]},{n:'Jantar',items:[{e:'🍗',n:'Frango desfiado',k:180},{e:'🥦',n:'Legumes no vapor',k:50}]}]},
- {n:'Quinta',meals:[{n:'Café',items:[{e:'🌾',n:'Aveia',k:160},{e:'🥚',n:'Ovos mexidos',k:143}]},{n:'Almoço',items:[{e:'🐟',n:'Salmão',k:208},{e:'🌾',n:'Quinoa',k:120},{e:'🥬',n:'Espinafre refogado',k:23}]},{n:'Lanche',items:[{e:'🧀',n:'Queijo cottage',k:98},{e:'🍎',n:'Maçã',k:57}]},{n:'Jantar',items:[{e:'🥚',n:'Omelete de claras',k:120},{e:'🫀',n:'Beterraba',k:46}]}]},
- {n:'Sexta',meals:[{n:'Café',items:[{e:'🍞',n:'Pão integral',k:124},{e:'🥑',n:'Abacate',k:160},{e:'☕',n:'Café s/ açúcar',k:5}]},{n:'Almoço',items:[{e:'🍗',n:'Frango grelhado',k:200},{e:'🍚',n:'Arroz integral',k:125},{e:'🫘',n:'Feijão preto',k:77},{e:'🥗',n:'Salada',k:30}]},{n:'Lanche',items:[{e:'🥜',n:'Mix de oleaginosas',k:180}]},{n:'Jantar',items:[{e:'🥩',n:'Patinho grelhado',k:163},{e:'🥔',n:'Batata cozida',k:77}]}]},
- {n:'Sábado',meals:[{n:'Café',items:[{e:'🌾',n:'Granola',k:200},{e:'🥛',n:'Leite',k:61},{e:'🍌',n:'Banana',k:110}]},{n:'Almoço',items:[{e:'🍗',n:'Frango assado',k:200},{e:'🍚',n:'Arroz',k:128},{e:'🫘',n:'Feijão',k:77},{e:'🥕',n:'Legumes variados',k:60}]},{n:'Lanche',items:[{e:'🍊',n:'Laranja',k:47}]},{n:'Jantar',items:[{e:'🐟',n:'Peixe grelhado',k:170},{e:'🥗',n:'Salada completa',k:80}]}]}
-];
-
-// ─── STATE ───
-var cu=null,selPat=null,meals=[],taskCt=10,prescGoal=0,mP=0,mC=0,mF=0,macroMode='gkg',formula='mf';
 var templates=[...TEMPLATES],notifs=[];
 var tasks=[
  {id:1,text:'Beber 2L de água por dia',cat:'s',done:true},
@@ -2696,73 +2489,108 @@ function afterRender(id){
 
 // ─── DASHBOARD ───
 function rDash(){
- var alerts=pats.filter(function(p){return p.st==='tr'||(p.exams&&(p.exams.vitd<25||p.exams.gli>120));}).length;
+ var alerts = pats.filter(function(p){return p.st==='tr'||(p.exams&&(p.exams.vitd<25||p.exams.gli>120));}).length;
+ var now = new Date();
+ var todayStr = now.toISOString().slice(0,10);
+ var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
  // Real stats
- var now=new Date();
- var todayStr=now.toISOString().slice(0,10);
- var monthStart=new Date(now.getFullYear(),now.getMonth(),1);
- var todayAppts=[],monthAppts=0,nextAppts=[];
+ var todayAppts=[], monthAppts=0, nextAppts=[];
  pats.forEach(function(p){
   (p.appointments||[]).forEach(function(a){
-   var d=new Date(a.isoDate||a.date||'');
-   var ds=(a.isoDate||a.date||'').slice(0,10);
-   if(ds===todayStr)todayAppts.push({p:p.n,a:a});
-   if(d>=monthStart&&d<=now)monthAppts++;
-   if(d>now)nextAppts.push({p:p.n,a:a,d:d});
+   var d = new Date(a.isoDate||a.date||'');
+   var ds = (a.isoDate||a.date||'').slice(0,10);
+   if(ds===todayStr) todayAppts.push({p:p.n, a:a});
+   if(d>=monthStart && d<=now) monthAppts++;
+   if(d>now) nextAppts.push({p:p.n, a:a, d:d});
   });
  });
  nextAppts.sort(function(a,b){return a.d-b.d;});
- var receita=(cu&&cu.financeiro||[]).reduce(function(s,r){return s+(r.status==='pago'?r.valor:0);},0);
- var pendente=(cu&&cu.financeiro||[]).reduce(function(s,r){return s+(r.status==='pendente'?r.valor:0);},0);
- // New patients this month
- var newPats=pats.filter(function(p){
-  var d=new Date(p.since||p.dataCadastro||'');
-  return d>=monthStart;
- }).length;
- var smartAlertCount=0;try{smartAlertCount=_generateSmartAlerts().length;}catch(e){}
 
- return`
- <div class="kpi-row">
-  <div class="kpi kpi-g"><div class="kpi-top"><div class="kpi-ico ki-g"><svg viewBox="0 0 24 24" fill="#16a34a"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><span class="kpi-bdg kbd-g">${newPats>0?'↑ +'+newPats+' novo'+(newPats>1?'s':''):'—'}</span></div><div class="kpi-n">${pats.length}</div><div class="kpi-l">Pacientes Ativos</div><div class="kpi-ft kft-g">${newPats>0?'<strong>+'+newPats+'</strong> novos este mês':'Nenhum novo este mês'}</div></div>
-  <div class="kpi kpi-b"><div class="kpi-top"><div class="kpi-ico ki-b"><svg viewBox="0 0 24 24" fill="#1d4ed8"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div><span class="kpi-bdg kbd-b">${todayAppts.length>0?todayAppts.length+' hoje':'—'}</span></div><div class="kpi-n">${monthAppts}</div><div class="kpi-l">Consultas/Mês</div><div class="kpi-ft kft-b">${todayAppts.length>0?'<strong>'+todayAppts.length+'</strong> consulta(s) hoje':'Nenhuma consulta hoje'}</div></div>
-  <div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div><span class="kpi-bdg kbd-y">${pendente>0?'R$ '+pendente.toFixed(0)+' pend.':'—'}</span></div><div class="kpi-n">R$ ${receita.toFixed(0)}</div><div class="kpi-l">Receita do Mês</div><div class="kpi-ft kft-y">${pendente>0?'<strong>R$ '+pendente.toFixed(0)+'</strong> pendente':'Sem pendências'}</div></div>
-  <div class="kpi kpi-r" onclick="goP('notif',document.getElementById('ni-notif'))" style="cursor:pointer"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><span class="kpi-bdg kbd-r">${alerts+smartAlertCount>0?'Ativo':''}</span></div><div class="kpi-n">${alerts+smartAlertCount}</div><div class="kpi-l">Alertas Clínicos</div><div class="kpi-ft kft-r">${alerts+smartAlertCount>0?'<strong>Ver alertas</strong> →':'Nenhum alerta'}</div></div>
- </div>
+ var receita = (cu&&cu.financeiro||[]).reduce(function(s,r){return s+(r.status==='pago'?r.valor:0);},0);
+ var pendente = (cu&&cu.financeiro||[]).reduce(function(s,r){return s+(r.status==='pendente'?r.valor:0);},0);
+ var newPats = pats.filter(function(p){return new Date(p.since||p.dataCadastro||'')>=monthStart;}).length;
+ var smartAlertCount = 0;
+ try{smartAlertCount = _generateSmartAlerts().length;}catch(e){}
 
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-  <div class="card"><div class="ch" style="margin-bottom:12px"><span class="ct">Consultas (8 semanas)</span><span class="cs">${monthAppts} este mês</span></div><div class="bchart" id="bchart"></div></div>
-  <div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span><span style="font-family:var(--jk);font-size:9px;font-weight:700;color:#c4420a;background:#fdd0a8;padding:3px 9px;border-radius:99px">${todayAppts.length} consulta${todayAppts.length!==1?'s':''}</span></div>
-   ${todayAppts.length===0
-     ? '<div style="text-align:center;padding:24px 0;color:var(--n4);font-size:12.5px">📅 Nenhuma consulta hoje</div>'
-     : todayAppts.slice(0,4).map(function(item){
-         var a=item.a;
-         return '<div class="ag-item"><div class="ag-time">'+(a.time||'—')+'</div><div class="ag-bar" style="background:#e85a0a"></div><div style="flex:1;min-width:0"><div class="ag-nm">'+escHtml(item.p)+'</div><div class="ag-tp">'+escHtml(a.type||'Consulta')+'</div></div><span class="tag '+(a.status==='done'?'tg':a.status==='cancel'?'tr':'ty')+'">'+(a.status==='done'?'Concluído':a.status==='cancel'?'Cancelado':'Pendente')+'</span></div>';
-       }).join('')
-   }
-   ${nextAppts.length>0?'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--n1);font-size:11px;color:var(--n5)">Próxima: <strong style="color:var(--n8)">'+escHtml(nextAppts[0].p)+'</strong> em '+(nextAppts[0].d).toLocaleDateString('pt-BR')+'</div>':''}
-  </div>
- </div>
+ // Build KPI row
+ var kpiRow = '<div class="kpi-row">'
+  +'<div class="kpi kpi-g"><div class="kpi-top"><div class="kpi-ico ki-g"><svg viewBox="0 0 24 24" fill="#16a34a"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>'
+  +'<span class="kpi-bdg kbd-g">'+(newPats>0?'↑ +'+newPats+' novo'+(newPats>1?'s':''):'—')+'</span></div>'
+  +'<div class="kpi-n">'+pats.length+'</div><div class="kpi-l">Pacientes Ativos</div>'
+  +'<div class="kpi-ft kft-g">'+(newPats>0?'<strong>+'+newPats+'</strong> novos este mês':'Nenhum novo este mês')+'</div></div>'
 
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-  <div class="card">
-   <div class="ch"><span class="ct">Aderência dos Pacientes</span><button class="btn btn-ghost btn-sm" onclick="goP('ev',document.getElementById('ni-ev'))">Ver todos →</button></div>
-   <div id="adh-chart"></div>
-  </div>
-  <div class="card">
-   <div class="ch"><span class="ct">Pacientes com Alertas</span><button class="btn btn-ghost btn-sm" onclick="goP('notif',document.getElementById('ni-notif'))">Ver alertas →</button></div>
-   ${(function(){
-     var al=[];try{al=_buildSmartAlerts();}catch(e){}
-     if(!al.length) return '<div style="text-align:center;padding:24px;color:var(--n5);font-size:12.5px">✅ Nenhum alerta clínico ativo</div>';
-     return al.slice(0,4).map(function(a){
-       return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--n1)">'
-        +'<div style="width:32px;height:32px;border-radius:8px;background:'+(a.c==='r'?'#fef2f2':a.c==='y'?'#fffbeb':'#eff6ff')+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">'+(a.ic||'⚠️')+'</div>'
-        +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--n8)">'+escHtml(a.p||'')+'</div>'
-        +'<div style="font-size:11px;color:var(--n5);margin-top:2px">'+escHtml(a.t||'')+'</div></div>'
-        +'<button onclick="openPatById('+a.pid+')" style="font-size:10px;border:1px solid var(--n2);background:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--g5);font-weight:700">Ver</button></div>';
-     }).join('');
-   })()}
-  </div>
- </div>`;
+  +'<div class="kpi kpi-b"><div class="kpi-top"><div class="kpi-ico ki-b"><svg viewBox="0 0 24 24" fill="#1d4ed8"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-2 .9-2 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>'
+  +'<span class="kpi-bdg kbd-b">'+(todayAppts.length>0?todayAppts.length+' hoje':'—')+'</span></div>'
+  +'<div class="kpi-n">'+monthAppts+'</div><div class="kpi-l">Consultas/Mês</div>'
+  +'<div class="kpi-ft kft-b">'+(todayAppts.length>0?'<strong>'+todayAppts.length+'</strong> consulta(s) hoje':'Nenhuma consulta hoje')+'</div></div>'
+
+  +'<div class="kpi kpi-y"><div class="kpi-top"><div class="kpi-ico ki-y"><svg viewBox="0 0 24 24" fill="#a16207"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>'
+  +'<span class="kpi-bdg kbd-y">'+(pendente>0?'R$ '+pendente.toFixed(0)+' pend.':'—')+'</span></div>'
+  +'<div class="kpi-n">R$ '+receita.toFixed(0)+'</div><div class="kpi-l">Receita do Mês</div>'
+  +'<div class="kpi-ft kft-y">'+(pendente>0?'<strong>R$ '+pendente.toFixed(0)+'</strong> pendente':'Sem pendências')+'</div></div>'
+
+  +'<div class="kpi kpi-r" onclick="goP(\'notif\',document.getElementById(\'ni-notif\'))" style="cursor:pointer"><div class="kpi-top"><div class="kpi-ico ki-r"><svg viewBox="0 0 24 24" fill="#b91c1c"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>'
+  +'<span class="kpi-bdg kbd-r">'+(alerts+smartAlertCount>0?'Ativo':'')+'</span></div>'
+  +'<div class="kpi-n">'+(alerts+smartAlertCount)+'</div><div class="kpi-l">Alertas Clínicos</div>'
+  +'<div class="kpi-ft kft-r">'+(alerts+smartAlertCount>0?'<strong>Ver alertas</strong> →':'Nenhum alerta')+'</div></div>'
+  +'</div>';
+
+ // Build today's agenda
+ var agendaItems = '';
+ if(todayAppts.length===0){
+  agendaItems = '<div style="text-align:center;padding:24px 0;color:var(--n4);font-size:12.5px">📅 Nenhuma consulta hoje</div>';
+ } else {
+  todayAppts.slice(0,4).forEach(function(item){
+   var a=item.a;
+   var statusTag = a.status==='done'?'tg':a.status==='cancel'?'tr':'ty';
+   var statusTxt = a.status==='done'?'Concluído':a.status==='cancel'?'Cancelado':'Pendente';
+   agendaItems += '<div class="ag-item">'
+    +'<div class="ag-time">'+(a.time||'—')+'</div>'
+    +'<div class="ag-bar" style="background:#e85a0a"></div>'
+    +'<div style="flex:1;min-width:0"><div class="ag-nm">'+escHtml(item.p)+'</div>'
+    +'<div class="ag-tp">'+escHtml(a.type||'Consulta')+'</div></div>'
+    +'<span class="tag '+statusTag+'">'+statusTxt+'</span></div>';
+  });
+ }
+ if(nextAppts.length>0){
+  agendaItems += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--n1);font-size:11px;color:var(--n5)">'
+   +'Próxima: <strong style="color:var(--n8)">'+escHtml(nextAppts[0].p)+'</strong> em '
+   +nextAppts[0].d.toLocaleDateString('pt-BR')+'</div>';
+ }
+
+ // Build alerts section
+ var alertItems = '';
+ try{
+  var al = _buildSmartAlerts();
+  if(!al||!al.length){
+   alertItems = '<div style="text-align:center;padding:24px;color:var(--n5);font-size:12.5px">✅ Nenhum alerta clínico ativo</div>';
+  } else {
+   al.slice(0,4).forEach(function(a){
+    var bg = a.c==='r'?'#fef2f2':a.c==='y'?'#fffbeb':'#eff6ff';
+    alertItems += '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--n1)">'
+     +'<div style="width:32px;height:32px;border-radius:8px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">'+(a.ic||'⚠️')+'</div>'
+     +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--n8)">'+escHtml(a.p||'')+'</div>'
+     +'<div style="font-size:11px;color:var(--n5);margin-top:2px">'+escHtml(a.t||'')+'</div></div>'
+     +'<button onclick="openPatById('+a.pid+')" style="font-size:10px;border:1px solid var(--n2);background:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--g5);font-weight:700">Ver</button></div>';
+   });
+  }
+ }catch(e){
+  alertItems = '<div style="text-align:center;padding:24px;color:var(--n5);font-size:12.5px">✅ Nenhum alerta clínico ativo</div>';
+ }
+
+ return kpiRow
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
+  +'<div class="card"><div class="ch" style="margin-bottom:12px"><span class="ct">Consultas (8 semanas)</span><span class="cs">'+monthAppts+' este mês</span></div><div class="bchart" id="bchart"></div></div>'
+  +'<div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span>'
+  +'<span style="font-family:var(--jk);font-size:9px;font-weight:700;color:#c4420a;background:#fdd0a8;padding:3px 9px;border-radius:99px">'+todayAppts.length+' consulta'+(todayAppts.length!==1?'s':'')+'</span></div>'
+  +agendaItems+'</div>'
+  +'</div>'
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'
+  +'<div class="card"><div class="ch"><span class="ct">Aderência dos Pacientes</span><button class="btn btn-ghost btn-sm" onclick="goP(\'ev\',document.getElementById(\'ni-ev\'))">Ver todos →</button></div><div id="adh-chart"></div></div>'
+  +'<div class="card"><div class="ch"><span class="ct">Pacientes com Alertas</span><button class="btn btn-ghost btn-sm" onclick="goP(\'notif\',document.getElementById(\'ni-notif\'))">Ver alertas →</button></div>'
+  +alertItems+'</div>'
+  +'</div>';
 }
 function buildBChart(){
  var now=new Date();var data=[];var labels=[];
@@ -2794,7 +2622,7 @@ function buildBChart(){
   return'<div class="bcc"><div class="bct"><div class="bcb '+cls+'" style="height:'+Math.round(v/mx*100)+'%" data-v="'+v+' consultas"></div></div><span class="bcl">'+labels[i]+'</span></div>';
  }).join('');
  // recent pats
- var el2=document.getElementById('d-recent');if(!el2)return;
+ var el2=document.getElementById('d-recent');if(!el2){return;}
  el2.innerHTML=pats.slice(0,5).map(function(p){
   return'<div style="display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:var(--r);cursor:pointer;transition:background .13s" onmouseover="this.style.background=\'var(--n0)\'" onmouseout="this.style.background=\'transparent\'" onclick="selPat=pats.find(function(x){return x.id==='+p.id+'});goP(\'ev\',document.getElementById(\'ni-ev\'))">'
    +'<div class="pac-av '+p.av+'" style="width:34px;height:34px;border-radius:50%;font-size:11px">'+p.i+'</div>'
