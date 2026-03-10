@@ -2920,8 +2920,11 @@ function goP(id,btn){
   pev:'',
   psupl:''
  };
- var _helpBtn='<button class="btn btn-ghost btn-sm" onclick="showTour()" style="font-size:11px">📖 Tutorial</button>';
+ var _helpBtn='<button id="dark-toggle" class="btn btn-ghost btn-sm" onclick="toggleDark()" style="font-size:16px;padding:4px 8px" title="Alternar modo escuro">🌙</button><button class="btn btn-ghost btn-sm" onclick="showTour()" style="font-size:11px">📖 Tutorial</button>';
   ri.innerHTML=_helpBtn+(rbts[id]||'');
+ // Sync dark toggle icon with current state
+ var _dt=document.getElementById('dark-toggle');
+ if(_dt) _dt.textContent=document.body.classList.contains('dark')?'☀️':'🌙';
  if(pages[id]){pg.innerHTML=pages[id]();setTimeout(function(){afterRender(id);},50);}
 }
 
@@ -5209,10 +5212,10 @@ function saveMeas(){
 
 
 function toggleDark(){
- document.body.classList.toggle('dark');
+ var isDark=document.body.classList.toggle('dark');
  var btn=document.getElementById('dark-toggle');
- if(btn)btn.textContent=document.body.classList.contains('dark')?'☀️':'🌙';
- try{localStorage.setItem('dieton_dark',document.body.classList.contains('dark')?'1':'0');}catch(e){}
+ if(btn) btn.textContent=isDark?'☀️':'🌙';
+ try{ localStorage.setItem('dieton_dark', isDark?'1':'0'); }catch(ex){}
 }
 // Restore dark mode preference
 (function(){try{if(localStorage.getItem('dieton_dark')==='1')document.body.classList.add('dark');}catch(e){}})();

@@ -37,6 +37,51 @@ body.dark .ni:hover{background:rgba(255,255,255,.07)}
 body.dark .ni.on{background:rgba(232,90,10,.2);color:var(--g3)}
 .sr-item:hover{background:var(--n0)!important;border-color:var(--g4)!important}
 
+
+/* ── DARK MODE — complementos ── */
+body.dark .sidebar,
+body.dark .sb{background:#140a04;border-color:#2e2218}
+body.dark .topbar,
+body.dark .tb{background:#1a1410;border-bottom-color:#2e2218}
+body.dark .btn-ghost{background:rgba(255,255,255,.06);color:var(--n7);border-color:#3d2e1f}
+body.dark .btn-ghost:hover{background:rgba(255,255,255,.12)}
+body.dark .btn-s{background:#2e2218;color:var(--n7);border-color:#3d2e1f}
+body.dark .search-wrap{background:#2e2218;border-color:#3d2e1f}
+body.dark .search-inp{background:transparent;color:var(--n9)}
+body.dark .search-inp::placeholder{color:var(--n4)}
+body.dark .tag{opacity:.9}
+body.dark .pac-card{background:#231a14;border-color:#2e2218}
+body.dark .pac-card:hover{border-color:var(--g4);background:#2a1e16}
+body.dark .plan-ver{background:#2e2218;border-color:#3d2e1f}
+body.dark .plan-ver.active{background:#3a2010;border-color:var(--g4)}
+body.dark .week-cell{background:#231a14;border-color:#2e2218}
+body.dark .week-cell:hover{background:#2e2218}
+body.dark .cal-day{background:#231a14;border-color:#2e2218;color:var(--n7)}
+body.dark .cal-day.today{background:#3a2010;border-color:var(--g4)}
+body.dark .cal-day.other-month{opacity:.35}
+body.dark .modal-box,
+body.dark .modal-lg{background:#231a14;border-color:#2e2218}
+body.dark .modal-hd,
+body.dark .mh{background:#2e2218;border-color:#3d2e1f}
+body.dark .fsec{background:#2e2218;color:var(--n6);border-color:#3d2e1f}
+body.dark .ev-m{background:#2e2218;border-color:#3d2e1f}
+body.dark .kpi-card{background:#231a14;border-color:#2e2218}
+body.dark .fin-row{border-color:#2e2218}
+body.dark .fin-row:hover{background:#2a1e16}
+body.dark table th{background:#2e2218;color:var(--n6);border-color:#3d2e1f}
+body.dark table td{border-color:#2e2218;color:var(--n7)}
+body.dark table tr:hover td{background:#2a1e16}
+body.dark .pv-badge{background:#3d2e1f!important;color:var(--n6)!important}
+body.dark .sr-item{background:#231a14;border-color:#2e2218}
+body.dark .m-body{background:#231a14}
+body.dark #chat-msgs{background:#1a1410}
+body.dark .page{background:#1a1410}
+body.dark h1,body.dark h2,body.dark h3{color:var(--n8)}
+body.dark .lbl{color:var(--n6)}
+body.dark hr{border-color:#2e2218}
+body.dark #pwa-prompt,body.dark #pwa-ios{background:#231a14;border-color:#2e2218}
+body.dark #pwa-ios .step-box{background:#2e2218}
+
 /* ── MODAL PERFIL ── */
 .prof-photo-wrap{position:relative;width:90px;height:90px;margin:0 auto 16px;cursor:pointer}
 .prof-photo-wrap img,.prof-photo-wrap .av-lg{width:90px;height:90px;border-radius:50%;object-fit:cover;display:block;font-size:28px;font-weight:800;font-family:var(--jk);display:flex;align-items:center;justify-content:center}
