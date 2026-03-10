@@ -248,6 +248,80 @@ function applyAIPlan(){
  showToast('Plano da IA salvo no perfil de '+(selPat||pats[0]).n+'! Confira o Plano Semanal.','s');
  setTimeout(function(){goP('week',document.getElementById('ni-week'))},900);
 }
+// ─── Fallback: generate plan locally when API unavailable
+function _genAILocal(el, p, objKey, rest, nm, dist, wantSubs, wantLista, wantOri, targetKcal){
+ var _aiPlans={
+  emagrecimento:{kcalFactor:0.8,prot:0.30,carb:0.35,gord:0.35},
+  hipertrofia:{kcalFactor:1.15,prot:0.35,carb:0.40,gord:0.25},
+  manutencao:{kcalFactor:1.0,prot:0.25,carb:0.45,gord:0.30},
+  saude:{kcalFactor:1.0,prot:0.25,carb:0.45,gord:0.30}
+ };
+ var plan=_aiPlans[objKey]||_aiPlans.manutencao;
+ var tmb=p.sex==='F'?447.6+(9.2*p.w)+(3.1*p.h)-(4.3*p.age):88.4+(13.4*p.w)+(4.8*p.h)-(5.7*p.age);
+ var get=Math.round(tmb*1.55);
+ var kcal=Math.round(get*plan.kcalFactor);
+ var mealSets={
+  3:[{n:'Café da manhã',em:'☀️',fids:[6,17,41]},{n:'Almoço',em:'🍽️',fids:[1,11,13,33]},{n:'Jantar',em:'🌙',fids:[3,12,35]}],
+  4:[{n:'Café da manhã',em:'☀️',fids:[6,17,41]},{n:'Almoço',em:'🍽️',fids:[1,11,13,33]},{n:'Lanche',em:'🍎',fids:[28,46]},{n:'Jantar',em:'🌙',fids:[3,12,35]}],
+  5:[{n:'Café da manhã',em:'☀️',fids:[17,28,6]},{n:'Lanche manhã',em:'🥛',fids:[46,52]},{n:'Almoço',em:'🍽️',fids:[1,11,13,33]},{n:'Lanche tarde',em:'🍎',fids:[28,41]},{n:'Jantar',em:'🌙',fids:[3,12,35]}],
+  6:[{n:'Café da manhã',em:'☀️',fids:[17,28,6]},{n:'Lanche manhã',em:'🥛',fids:[46,52]},{n:'Almoço',em:'🍽️',fids:[1,11,13,33,34]},{n:'Lanche tarde',em:'🍎',fids:[28,41]},{n:'Jantar',em:'🌙',fids:[3,12,35]},{n:'Ceia',em:'🌙',fids:[46,29]}]
+ };
+ var mset=mealSets[nm]||mealSets[5];
+ var genMeals=mset.map(function(m){
+  var items=m.fids.map(function(id){
+   var f=FOOD_DB.find(function(x){return x.id===id;});
+   if(!f)return null;
+   var qty=100,fac=qty/100;
+   return{food:f,qty:qty,k:Math.round(f.k*fac),p:+(f.p*fac).toFixed(1),c:+(f.c*fac).toFixed(1),g:+(f.g*fac).toFixed(1)};
+  }).filter(Boolean);
+  return{name:m.n,em:m.em,items:items};
+ });
+ window._aiSuggestions=genMeals;
+ var tK=genMeals.reduce(function(s,m){return s+m.items.reduce(function(ss,it){return ss+it.k;},0);},0);
+ var html='<div class="alert alert-y" style="margin-bottom:12px"><span>⚠️ Plano gerado localmente (API indisponível) — personalize conforme necessário</span></div>';
+ html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
+ [['🔥',tK+' kcal','Energia','#e85a0a'],['🥩',Math.round(kcal*plan.prot/4)+'g','Proteína','#3b82f6'],['🌾',Math.round(kcal*plan.carb/4)+'g','Carboidratos','#f59e0b'],['🥑',Math.round(kcal*plan.gord/9)+'g','Gorduras','#10b981']].forEach(function(m){
+  html+='<div style="background:#fff;border:1.5px solid var(--n2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:20px">'+m[0]+'</div><div style="font-family:var(--in);font-size:18px;font-weight:800;color:'+m[3]+'">'+m[1]+'</div><div style="font-size:10px;color:var(--n4)">'+m[2]+'</div></div>';
+ });
+ html+='</div>';
+ genMeals.forEach(function(m){
+  var mK=m.items.reduce(function(s,it){return s+it.k;},0);
+  html+='<div class="card" style="margin-bottom:10px"><div class="ch"><span class="ct">'+m.em+' '+escHtml(m.name)+'</span><span class="cs">'+mK+' kcal</span></div>';
+  m.items.forEach(function(it){html+='<div class="fi"><span class="fi-em">'+it.food.e+'</span><span class="fi-nm">'+escHtml(it.food.n)+'</span><span style="font-size:11px;color:var(--n4)">'+it.qty+'g</span><span class="fi-kcal">'+it.k+' kcal</span></div>';});
+  html+='</div>';
+ });
+ html+='<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-p" style="flex:1" onclick="applyAIPlan()">✅ Aplicar este plano</button><button class="btn btn-ghost" onclick="genAI()">🔄 Tentar novamente</button></div>';
+ el.innerHTML=html;
+ showToast('Plano local gerado para '+p.n,'s');
+}
+
+// ─── Apply AI-generated plan (from API response with food name strings)
+function applyAIGenPlan(){
+ var genPlan=window._aiGenPlan;
+ if(!genPlan||!genPlan.length){showToast('Nenhum plano gerado ainda','w');return;}
+ var p=selPat||pats[0];if(!p){showToast('Selecione um paciente','w');return;}
+ // Convert API plan (food names as strings) to meals format for prescription
+ meals=genPlan.map(function(m){
+  return{
+   name:m.name,
+   em:m.em||'🍽️',
+   items:m.items.map(function(it){
+    // Try to match food in DB by name
+    var f=FOOD_DB.find(function(x){return x.n.toLowerCase().includes((it.food||'').toLowerCase().slice(0,6));});
+    var qty=it.qty||100;
+    var fac=qty/100;
+    if(f){return{food:f,qty:qty,k:Math.round(f.k*fac),p:+(f.p*fac).toFixed(1),c:+(f.c*fac).toFixed(1),g:+(f.g*fac).toFixed(1)};}
+    // Fallback: use kcal from API
+    return{food:{id:0,n:it.food,e:'🍽️',k:Math.round((it.kcal||100)/qty*100),p:(it.prot||5),c:(it.carb||15),g:(it.gord||3)},qty:qty,k:it.kcal||100,p:it.prot||5,c:it.carb||15,g:it.gord||3};
+   })
+  };
+ });
+ savePlan();
+ showToast('✅ Plano da IA aplicado e salvo para '+p.n+'!','s');
+ setTimeout(function(){goP('presc',document.getElementById('ni-presc'));},700);
+}
+
+
 
 // ─── NOTIFICATIONS ───
 function _generateSmartAlerts(){
@@ -783,6 +857,39 @@ function saveConsulta(){
  var btn=document.getElementById('ni-agenda');
  if(btn&&btn.classList.contains('on'))goP('agenda',btn);
 }
+// ─── Auto-alert for follow-up appointments
+function _checkAndAddRetornoAlert(p, dateStr){
+ if(!p||!dateStr) return;
+ var d = new Date(dateStr);
+ var txt = 'Retorno agendado: '+p.n+' em '+d.toLocaleDateString('pt-BR');
+ if(!notifs) notifs=[];
+ var exists = notifs.find(function(n){return n.txt&&n.txt.indexOf(p.n)>=0&&n.txt.indexOf('Retorno')>=0;});
+ if(!exists){
+  notifs.unshift({id:Date.now(),txt:txt,type:'i',patId:p.id,patName:p.n,auto:true});
+  updateNotifBadge();
+ }
+}
+
+// ─── Cancel/complete appointment
+function cancelAppt(patId, apptId){
+ var p=pats.find(function(x){return x.id===patId;});if(!p)return;
+ var a=p.appointments.find(function(x){return x.id===apptId;});if(!a)return;
+ a.status='cancel';
+ DB.save();
+ showToast('Consulta cancelada','w');
+ goP('agenda',document.getElementById('ni-agenda'));
+}
+function doneAppt(patId, apptId){
+ var p=pats.find(function(x){return x.id===patId;});if(!p)return;
+ var a=p.appointments.find(function(x){return x.id===apptId;});if(!a)return;
+ a.status='done';
+ p.last=new Date().toLocaleDateString('pt-BR');
+ DB.save();
+ showToast('Consulta marcada como concluída ✅','s');
+ goP('agenda',document.getElementById('ni-agenda'));
+}
+
+
 
 function deleteConsulta(patId,apptId){
  var p=pats.find(function(x){return x.id===patId;});
@@ -1346,7 +1453,20 @@ var DB = {
    var raw=localStorage.getItem(DB._keyFor(cu.id||cu.email));
    if(!raw)return false;
    var data=JSON.parse(raw);
-   if(data.pats&&data.pats.length){pats=data.pats;}
+   if(data.pats&&data.pats.length){
+    pats=data.pats;
+    // Migrate: ensure all patients have required arrays (backward compat)
+    pats.forEach(function(p){
+     if(!p.appointments)p.appointments=[];
+     if(!p.suplementos)p.suplementos=[];
+     if(!p.orientacoes)p.orientacoes=[];
+     if(!p.diary)p.diary=[];
+     if(!p.plans)p.plans=[];
+     if(!p.historico)p.historico=[];
+     if(!p.recordatorios)p.recordatorios=[];
+     if(!p.exams)p.exams={gli:90,col:180,vitd:30,hem:13,fer:50,tgo:22,tgp:22,tsh:2.0};
+    });
+   }
    if(data.tasks&&data.tasks.length){tasks=data.tasks;}
    if(data.notifs){notifs=data.notifs;}
    if(data.templates&&data.templates.length){templates=data.templates;}
@@ -3022,8 +3142,12 @@ function rPresc(){
    <div id="tb-macros-bars"></div>
   </div>
   <div id="meal-builder"></div>
-  <div class="card" style="margin-top:10px">
-   <div class="ch"><span class="ct">Histórico de Planos</span><button class="btn btn-ghost btn-sm" onclick="openM('m-tpl')">💾 Salvar atual</button></div>
+  <div style="display:flex;gap:8px;margin:10px 0">
+   <button class="btn btn-p" style="flex:1" onclick="savePlan()">💾 Salvar Plano para o Paciente</button>
+   <button class="btn btn-ghost" onclick="exportPDF()">⬇ PDF</button>
+   </div>
+   <div class="card" style="margin-top:0">
+   <div class="ch"><span class="ct">Histórico de Planos</span><button class="btn btn-ghost btn-sm" onclick="openM('m-tpl')">💾 Salvar Template</button></div>
    <div id="plan-hist">${buildPlanHist()}</div>
   </div>
  </div>
@@ -3267,6 +3391,120 @@ function updFoodQty(mi,ii,val){
  updateTotals();
 }
 function removeFoodItem(mi,ii){meals[mi].items.splice(ii,1);renderMeals();updateTotals();}
+function savePlan(){
+ var p=selPat||pats[0];if(!p){showToast('Nenhum paciente selecionado','w');return;}
+ var hasMeals=meals.some(function(m){return m.items.length>0;});
+ if(!hasMeals){showToast('Adicione alimentos ao plano antes de salvar','w');return;}
+ var totalK=0,totalP=0,totalC=0,totalG=0;
+ meals.forEach(function(m){m.items.forEach(function(it){totalK+=it.k;totalP+=it.p;totalC+=it.c;totalG+=it.g;});});
+ // Convert meals format to store fid references
+ var mealData=meals.map(function(m){
+  return{
+   name:m.name,
+   em:m.em,
+   items:m.items.map(function(it){
+    return{fid:it.food.id,qty:it.qty,k:it.k,p:it.p,c:it.c,g:it.g};
+   })
+  };
+ });
+ var plan={
+  id:Date.now(),
+  date:new Date().toLocaleDateString('pt-BR'),
+  kcal:totalK,prot:totalP,carb:totalC,gord:totalG,
+  goal:prescGoal,
+  mealData:mealData
+ };
+ if(!p.plans)p.plans=[];
+ p.plans.unshift(plan);
+ if(p.plans.length>10)p.plans=p.plans.slice(0,10);
+ p.meta=totalK;
+ DB.save();
+ showToast('✅ Plano salvo para '+p.n+'!','s');
+}
+
+// ─── removeFood (alias para removeFoodItem com args diferentes)
+function removeFood(mi,ii){removeFoodItem(mi,ii);}
+
+// ─── deleteTpl
+function deleteTpl(idx){
+ if(!confirm('Excluir template "'+templates[idx].name+'"?'))return;
+ templates.splice(idx,1);
+ DB.save();
+ showToast('Template excluído','s');
+ goP('tpl',document.getElementById('ni-tpl'));
+}
+
+// ─── saveWeekPlan — persiste plano semanal do paciente
+function saveWeekPlan(){
+ var p=selPat||pats[0];if(!p){showToast('Selecione um paciente','w');return;}
+ if(!p.weekPlan)p.weekPlan={};
+ // Capture any edited meal names from the week view
+ var editedMeals={};
+ document.querySelectorAll('[data-week-meal]').forEach(function(el){
+  editedMeals[el.dataset.weekMeal]=el.value||el.textContent;
+ });
+ p.weekPlan={date:new Date().toLocaleDateString('pt-BR'),edits:editedMeals,basePlanId:(p.plans[0]||{}).id};
+ DB.save();
+ showToast('✅ Plano semanal salvo!','s');
+}
+
+// ─── calcMicro — recalcula micronutrientes ao mudar paciente
+function calcMicro(){
+ goP('micro',document.getElementById('ni-micro'));
+}
+
+// ─── saveRec — salva Recordatório 24h no paciente
+function saveRec(){
+ var p=selPat||pats[0];if(!p){showToast('Selecione um paciente','w');return;}
+ // Collect all rec items from DOM
+ var items=[];
+ document.querySelectorAll('.rec-item-row').forEach(function(row){
+  var meal=row.dataset.meal||'';
+  var food=(row.querySelector('.rec-food-input')||{}).value||'';
+  var qty=parseFloat((row.querySelector('.rec-qty-input')||{}).value)||0;
+  var obs=(row.querySelector('.rec-obs-input')||{}).value||'';
+  if(food.trim())items.push({meal:meal,food:food,qty:qty,obs:obs});
+ });
+ if(!items.length){showToast('Adicione ao menos um alimento','w');return;}
+ var totalKcal=0;
+ items.forEach(function(it){
+  var f=FOOD_DB.find(function(x){return x.n.toLowerCase().includes(it.food.toLowerCase());});
+  if(f)totalKcal+=Math.round(f.k*(it.qty||100)/100);
+ });
+ var rec={
+  id:Date.now(),
+  date:new Date().toLocaleDateString('pt-BR'),
+  isoDate:new Date().toISOString().slice(0,10),
+  items:items,
+  totalKcal:totalKcal,
+  obs:(document.getElementById('rec-obs-geral')||{}).value||''
+ };
+ if(!p.recordatorios)p.recordatorios=[];
+ p.recordatorios.unshift(rec);
+ if(p.recordatorios.length>20)p.recordatorios=p.recordatorios.slice(0,20);
+ DB.save();
+ showToast('✅ Recordatório salvo! Total: ~'+totalKcal+' kcal','s');
+ goP('rec',document.getElementById('ni-rec'));
+}
+
+// ─── addRecItem — adiciona linha de alimento no Recordatório
+function addRecItem(mealName){
+ var container=document.getElementById('rec-items-'+mealName.replace(/\s/g,'-'));
+ if(!container)return;
+ var id='rec-'+Date.now();
+ var row=document.createElement('div');
+ row.className='rec-item-row';
+ row.dataset.meal=mealName;
+ row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:6px;';
+ row.innerHTML='<input class="sel rec-food-input" placeholder="Alimento..." style="flex:2;font-size:12px" />'
+  +'<input class="sel rec-qty-input" type="number" placeholder="g" style="width:60px;font-size:12px" value="100"/>'
+  +'<input class="sel rec-obs-input" placeholder="Obs..." style="flex:1;font-size:12px"/>'
+  +'<button onclick="this.closest(\'.rec-item-row\').remove()" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:16px;padding:0 4px">×</button>';
+ container.appendChild(row);
+ row.querySelector('.rec-food-input').focus();
+}
+
+
 function clearMeal(mi){meals[mi].items=[];renderMeals();updateTotals();}
 function addMeal(){
  var emojis=['🌅','☕','🥗','🍽️','🌙','⭐'];
@@ -3385,6 +3623,7 @@ function rWeek(){
  var avg=Math.round(weekData.reduce(function(s,d){return s+d.meals.reduce(function(s2,m){return s2+m.items.reduce(function(s3,it){return s3+it.k;},0);},0);},0)/7);
  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"><div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:22px;font-weight:800;color:var(--g5)">'+(avg*7).toLocaleString('pt-BR')+'</div><div style="font-size:11px;color:var(--n4);margin-top:3px">kcal na semana</div></div><div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:22px;font-weight:800;color:var(--n9)">'+avg+'</div><div style="font-size:11px;color:var(--n4);margin-top:3px">média diária</div></div><div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:22px;font-weight:800;color:var(--g5)">7</div><div style="font-size:11px;color:var(--n4);margin-top:3px">dias planejados</div></div><div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:22px;font-weight:800;color:var(--n9)">'+(p&&fromPatient?p.plans[0].meals:4)+'</div><div style="font-size:11px;color:var(--n4);margin-top:3px">refeições/dia</div></div></div>'
  +'<div class="card" style="margin-top:12px;background:var(--y0);border-color:var(--y3)"><div class="ch"><span class="ct" style="color:#78350f">💡 Orientações da Semana'+(p?' — '+p.n:'')+'</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12.5px;color:#92400e;line-height:2">'+['Beba pelo menos 2L de água por dia','Mastigue devagar — 20× por mordida','Evite telas durante as refeições','Prefira temperos naturais ao sal','Inclua proteína em todas as refeições','Evite alimentos ultraprocessados','Durma 7–8 horas por noite','Pratique atividade física regularmente'].map(function(o){return'<div>• '+o+'</div>';}).join('')+'</div></div>';
+ html+='<div style="display:flex;justify-content:flex-end;margin-bottom:14px;margin-top:12px"><button class="btn btn-p" onclick="saveWeekPlan()">💾 Salvar Plano Semanal</button></div>';
  return html;
 }
 // ─── EVOLUTION ───
@@ -3491,26 +3730,74 @@ function rMicro(){
 // ─── 24H RECALL ───
 function rRec(){
  var p=selPat||pats[0];
- if(!p)return'<div class="alert alert-b"><span>Selecione um paciente.</span></div>';
+ if(!p) return '<div class="alert alert-b"><span>Selecione um paciente primeiro.</span></div>';
+
+ // Compare with prescribed plan
  var prescPlan=null;
- if(p.plans&&p.plans.length>0&&p.plans[0].mealData)prescPlan=p.plans[0].mealData.map(function(m){var k=m.items.reduce(function(s,it){var f=FOOD_DB.find(function(x){return x.id===it.fid});return s+Math.round((f?f.k:100)*(it.qty||100)/100);},0);return{n:m.name,k:k,items:m.items.map(function(it){var f=FOOD_DB.find(function(x){return x.id===it.fid});return(f?f.e+' ':'')+'"'+(f?f.n:'item')+'" '+(it.qty||100)+'g';})};});
- var diary=p.diary||[];var todayDiary=diary.length>0?diary[diary.length-1]:null;
- var cons;
- if(todayDiary&&todayDiary.meals){cons=todayDiary.meals;}
- else if(prescPlan){var adh=(p.prog||60)/100;cons=prescPlan.map(function(m){return{n:m.n,k:Math.round(m.k*(adh*(0.85+Math.random()*0.3))),items:m.items.slice(0,Math.max(1,Math.floor(m.items.length*adh)))};});}
- else{cons=[{n:'Café da manhã',k:Math.round(p.w*1.8),items:['Café com leite','Pão integral 2 fatias','Fruta 1 un']},{n:'Almoço',k:Math.round(p.w*3.2),items:['Proteína grelhada 120g','Arroz integral 80g','Feijão 80g']},{n:'Lanche',k:Math.round(p.w*1.1),items:['Iogurte grego 150g']},{n:'Jantar',k:Math.round(p.w*2.4),items:['Sopa de legumes com frango']}];}
- var pres=prescPlan||[{n:'Café da manhã',k:Math.round(p.w*2.0),items:['Aveia 50g','Iogurte 150g','Fruta 1 un']},{n:'Almoço',k:Math.round(p.w*3.5),items:['Proteína 140g','Cereal integral 100g','Leguminosa 80g']},{n:'Lanche',k:Math.round(p.w*1.2),items:['Iogurte grego 150g','Oleaginosas 30g']},{n:'Jantar',k:Math.round(p.w*2.8),items:['Proteína 130g','Tubérculo 120g','Legumes variados']}];
- var tkP=pres.reduce(function(s,m){return s+m.k;},0),tkC=cons.reduce(function(s,m){return s+m.k;},0),diff=tkC-tkP,adPct=tkP>0?Math.round(Math.min(130,tkC/tkP*100)):0;
- var hasDiario=!!(todayDiary&&todayDiary.meals),hasPlan=!!prescPlan;
- return'<div class="alert alert-'+(hasDiario?'g':hasPlan?'b':'y')+'" style="margin-bottom:12px"><span>'+(hasDiario?'✓ Consumido extraído do diário de hoje de <strong>'+p.n+'</strong>':hasPlan?'📋 Prescrito baseado no plano de <strong>'+p.n+'</strong> · consumido estimado por adesão ('+p.prog+'%)':'⚠ Sem plano ou diário — valores estimados pelo peso e objetivo')+'</span></div>'
- +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">'
- +'<div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--g5)">'+tkP+'<span style="font-size:13px;font-weight:500;color:var(--n4)"> kcal</span></div><div style="font-size:11.5px;color:var(--n4);margin-top:2px">Meta prescrita</div></div>'
- +'<div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:26px;font-weight:800;letter-spacing:-1px;color:'+(Math.abs(diff)<=100?'#16a34a':diff>0?'#dc2626':'#f59e0b')+'">'+tkC+'<span style="font-size:13px;font-weight:500;color:var(--n4)"> kcal</span></div><div style="font-size:11.5px;color:var(--n4);margin-top:2px">Consumido · <strong style="color:'+(diff>0?'#dc2626':diff<0?'#f59e0b':'#16a34a')+'">'+(diff>0?'+':'')+diff+' kcal</strong></div></div>'
- +'<div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:26px;font-weight:800;letter-spacing:-1px;color:'+(adPct>=90&&adPct<=110?'#16a34a':adPct>=70?'#f59e0b':'#dc2626')+'">'+adPct+'<span style="font-size:13px;font-weight:500;color:var(--n4)">%</span></div><div style="font-size:11.5px;color:var(--n4);margin-top:2px">Adesão ao plano</div></div></div>'
- +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
- +'<div class="card"><div class="ch"><span class="ct" style="color:var(--g5)">✓ Prescrito'+(hasPlan?' — plano atual':' — estimado')+'</span></div>'+pres.map(function(m){return'<div style="background:var(--g0);border-radius:var(--r);padding:10px 12px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-family:var(--jk);font-size:11px;font-weight:700;color:var(--g5)">'+m.n+'</span><span class="tag tg">'+m.k+' kcal</span></div><div style="font-size:11px;color:var(--n5)">'+(Array.isArray(m.items)?m.items.join(' · '):m.items||'—')+'</div></div>';}).join('')+'</div>'
- +'<div class="card"><div class="ch"><span class="ct" style="color:#2563eb">📝 Consumido'+(hasDiario?' — diário de hoje':' — estimado')+'</span>'+(hasDiario?'':'<span class="tag ty" style="font-size:9px">Estimado</span>')+'</div>'+cons.map(function(m){return'<div style="background:var(--blue-l);border-radius:var(--r);padding:10px 12px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-family:var(--jk);font-size:11px;font-weight:700;color:#1d4ed8">'+m.n+'</span><span class="tag tb2">'+m.k+' kcal</span></div><div style="font-size:11px;color:var(--n5)">'+(Array.isArray(m.items)?m.items.join(' · '):m.items||'—')+'</div></div>';}).join('')+'</div></div>'
- +'<div class="card" style="margin-top:12px;background:var(--g0);border-color:var(--g2)"><div class="ch"><span class="ct" style="color:var(--g6)">📊 Adesão por refeição</span></div><div style="display:grid;grid-template-columns:repeat('+(Math.min(pres.length,4))+',1fr);gap:8px;margin-top:4px">'+pres.map(function(pm,i){var cm=cons[i]||{k:0};var pct=pm.k>0?Math.round(Math.min(130,cm.k/pm.k*100)):0;var color=pct>=90&&pct<=110?'#16a34a':pct>=70?'#f59e0b':'#dc2626';return'<div style="text-align:center;background:#fff;border-radius:var(--r);padding:10px 8px"><div style="font-size:20px;font-weight:800;color:'+color+'">'+pct+'%</div><div style="font-size:10px;color:var(--n4);margin-top:2px">'+pm.n.split(' ')[0]+'</div></div>';}).join('')+'</div></div>';
+ if(p.plans&&p.plans.length>0&&p.plans[0].mealData){
+  prescPlan=p.plans[0].mealData.map(function(m){
+   var k=m.items.reduce(function(s,it){
+    var f=FOOD_DB.find(function(x){return x.id===it.fid;});
+    return s+Math.round((f?f.k:100)*(it.qty||100)/100);
+   },0);
+   return{n:m.name,k:k};
+  });
+ }
+ var tkPresc=prescPlan?prescPlan.reduce(function(s,m){return s+m.k;},0):0;
+
+ // Previous recordatorios
+ var prevRecs=(p.recordatorios||[]).slice(0,3);
+
+ // Meal slots
+ var mealSlots=['Café da manhã','Lanche da manhã','Almoço','Lanche da tarde','Jantar','Ceia'];
+
+ var html='';
+
+ // Header status
+ html+='<div class="alert alert-b" style="margin-bottom:14px">'
+  +'<span>📋 Registre o que o paciente consumiu nas últimas 24h para comparar com o plano prescrito'
+  +(tkPresc?(' — meta: <strong>'+tkPresc+' kcal</strong>'):'')+'</span></div>';
+
+ // Meal input sections
+ html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">';
+ mealSlots.forEach(function(meal){
+  var slotId=meal.replace(/\s/g,'-');
+  html+='<div class="card" style="padding:14px">'
+   +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+   +'<div style="font-size:12.5px;font-weight:700;color:var(--n8)">'+meal+'</div>'
+   +'<button class="btn btn-ghost btn-sm" style="font-size:10px" onclick="addRecItem(\''+meal+'\')">+ Adicionar</button></div>'
+   +'<div id="rec-items-'+slotId+'"></div>'
+   +'</div>';
+ });
+ html+='</div>';
+
+ // Global obs + save
+ html+='<div class="card" style="padding:14px;margin-bottom:14px">'
+  +'<div style="font-size:12.5px;font-weight:700;color:var(--n8);margin-bottom:8px">Observações gerais</div>'
+  +'<textarea id="rec-obs-geral" class="sel" style="width:100%;height:60px;resize:vertical;font-size:12px" placeholder="Hidratação, comportamento alimentar, sintomas..."></textarea>'
+  +'<div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">'
+  +'<button class="btn btn-ghost btn-sm" onclick="goP(\'rec\',document.getElementById(\'ni-rec\'))">🔄 Limpar</button>'
+  +'<button class="btn btn-p" onclick="saveRec()">💾 Salvar Recordatório</button>'
+  +'</div></div>';
+
+ // Previous records
+ if(prevRecs.length){
+  html+='<div class="card"><div class="ch"><span class="ct">Histórico de Recordatórios</span></div>';
+  prevRecs.forEach(function(r){
+   var adPct=tkPresc>0?Math.round(Math.min(130,r.totalKcal/tkPresc*100)):0;
+   var adColor=adPct>=80?'var(--green)':adPct>=60?'#f59e0b':'var(--red)';
+   html+='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--n1)">'
+    +'<div style="font-size:11px;color:var(--n5);min-width:80px">'+r.date+'</div>'
+    +'<div style="flex:1">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--n8)">~'+r.totalKcal+' kcal consumidas</div>'
+    +(r.obs?'<div style="font-size:10.5px;color:var(--n4);margin-top:2px">'+escHtml(r.obs)+'</div>':'')
+    +'</div>'
+    +(tkPresc?'<div style="font-size:12px;font-weight:800;color:'+adColor+'">'+adPct+'%</div>':'')
+    +'</div>';
+  });
+  html+='</div>';
+ }
+ return html;
 }
 // ─── AI NUTRICIONAL ───
 function rAI(){
@@ -3725,99 +4012,48 @@ function genAI(){
  var si=0;
  var stInterval=setInterval(function(){si++;var step=document.getElementById('ai-loading-step');if(step&&si<steps.length)step.textContent=steps[si];},350);
 
- setTimeout(function(){
+ fetch('https://api.anthropic.com/v1/messages',{
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({
+   model:'claude-sonnet-4-20250514',
+   max_tokens:2000,
+   messages:[{role:'user',content:'Você é um nutricionista. Crie plano alimentar personalizado em JSON puro (sem markdown).\n'
+    +'Paciente: '+p.n+', '+p.age+' anos, sexo '+p.sex+', '+p.w+'kg, '+p.h+'cm.\n'
+    +'Objetivo: '+objKey+'. Meta: '+Math.round(targetKcal)+' kcal. Refeições: '+nm+'. Restrições: '+(rest||'nenhuma')+'.\n'
+    +'Formato EXATO (JSON válido):\n'
+    +'{"meals":[{"name":"Café da manhã","em":"☀️","items":[{"food":"Aveia em flocos","qty":50,"kcal":190,"prot":6.5,"carb":33,"gord":3.5}]}],"obs":"orientação geral"}\n'
+    +'Use alimentos brasileiros reais. Retorne apenas JSON, sem explicações.'}]
+  })
+ }).then(function(r){return r.json();}).then(function(data){
   clearInterval(stInterval);
-  var planData=_aiPlans[objKey]||_aiPlans.manutencao;
-  var tmb=p.sex==='F'?447.6+(9.2*p.w)+(3.1*p.h)-(4.3*p.age):88.4+(13.4*p.w)+(4.8*p.h)-(5.7*p.age);
-  var get=Math.round(tmb*1.55);
-  var targetKcal=Math.round(get*planData.kcalFactor);
-  // Get meal template for requested count
-  var mealTemplates=planData.meals[nm]||planData.meals[5]||planData.meals[Object.keys(planData.meals)[0]];
-  var builtMeals=mealTemplates.map(_buildMealFromPlan);
-  window._aiSuggestions=builtMeals;
-  window._aiTarget=targetKcal;
-
-  var totalKcal=builtMeals.reduce(function(s,m){return s+m.items.reduce(function(ss,it){return ss+it.k},0)},0);
-  var totalP=builtMeals.reduce(function(s,m){return s+m.items.reduce(function(ss,it){return ss+it.p},0)},0).toFixed(1);
-  var totalC=builtMeals.reduce(function(s,m){return s+m.items.reduce(function(ss,it){return ss+it.c},0)},0).toFixed(1);
-  var totalG=builtMeals.reduce(function(s,m){return s+m.items.reduce(function(ss,it){return ss+it.g},0)},0).toFixed(1);
-  var pctP=Math.round(totalP*4/totalKcal*100);
-  var pctC=Math.round(totalC*4/totalKcal*100);
-  var pctG=Math.round(totalG*9/totalKcal*100);
-
-  // Shopping list
-  var shopMap={};
-  builtMeals.forEach(function(m){m.items.forEach(function(it){var k=it.food.n;shopMap[k]=(shopMap[k]||0)+it.qty;});});
-
-  var html='';
-  // Header summary
-  html+='<div style="background:linear-gradient(135deg,var(--g8),var(--g6));color:#fff;border-radius:12px;padding:16px;margin-bottom:14px">'
-   +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
-   +'<div><div style="font-family:var(--jk);font-size:13px;font-weight:700;margin-bottom:2px">Plano '+planData.name+' — '+p.n+'</div>'
-   +'<div style="font-size:10.5px;color:rgba(255,255,255,.55)">'+nm+' refeições · '+(rest||'Sem restrições')+'</div></div>'
-   +'<div style="text-align:right"><div style="font-family:var(--in);font-size:26px;font-weight:800;line-height:1">'+totalKcal+'</div><div style="font-size:10px;color:rgba(255,255,255,.5)">kcal/dia</div></div>'
-   +'</div>'
-   +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
-   +[['Proteínas',totalP+'g',pctP+'%','#93c5fd'],['Carboidratos',totalC+'g',pctC+'%','#fcd34d'],['Gorduras',totalG+'g',pctG+'%','#fca5a5']].map(function(m){
-    return'<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:8px;text-align:center">'
-     +'<div style="font-family:var(--in);font-size:15px;font-weight:800;color:'+m[3]+'">'+m[1]+'</div>'
-     +'<div style="font-size:9px;color:rgba(255,255,255,.55);margin-top:1px">'+m[0]+' ('+m[2]+')</div>'
-     +'</div>';
-   }).join('')
-   +'</div></div>';
-
-  // Meal cards
-  html+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">';
-  builtMeals.forEach(function(m){
-   var mKcal=m.items.reduce(function(s,it){return s+it.k},0);
-   html+='<div style="border:1.5px solid var(--n2);border-radius:10px;overflow:hidden">'
-    +'<div style="background:var(--n0);padding:9px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--n2)">'
-    +'<div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">'+m.em+'</span>'
-    +'<span style="font-family:var(--jk);font-size:12px;font-weight:700;color:var(--n8)">'+m.name+'</span></div>'
-    +'<span style="font-family:var(--in);font-size:12px;font-weight:700;color:var(--g5)">'+mKcal+' kcal</span>'
-    +'</div>'
-    +'<div style="padding:8px 12px">'
-    +m.items.map(function(it){
-     return'<div style="display:flex;align-items:center;gap:8px;padding:3px 0">'
-      +'<span style="font-size:13px">'+it.food.e+'</span>'
-      +'<span style="font-size:12px;color:var(--n7);flex:1">'+it.food.n+'</span>'
-      +'<span style="font-size:11px;font-weight:600;color:var(--n5)">'+it.qty+'g</span>'
-      +'<span style="font-size:11px;color:var(--n4);min-width:52px;text-align:right">'+it.k+' kcal</span>'
-      +'</div>';
-    }).join('')
-    +'</div></div>';
+  var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+  var parsed=null;
+  try{var jm=text.match(/\{[\s\S]*\}/);if(jm)parsed=JSON.parse(jm[0]);}catch(ex){}
+  if(!parsed||!parsed.meals){_genAILocal(el,p,objKey,rest,nm,dist,wantSubs,wantLista,wantOri,targetKcal);return;}
+  window._aiGenPlan=parsed.meals;
+  var tK=0,tP=0,tC=0,tG=0;
+  parsed.meals.forEach(function(m){m.items.forEach(function(it){tK+=it.kcal||0;tP+=it.prot||0;tC+=it.carb||0;tG+=it.gord||0;});});
+  var html='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">';
+  [['🔥',Math.round(tK)+' kcal','Energia','#e85a0a'],['🥩',tP.toFixed(0)+'g','Proteína','#3b82f6'],['🌾',tC.toFixed(0)+'g','Carboidratos','#f59e0b'],['🥑',tG.toFixed(0)+'g','Gorduras','#10b981']].forEach(function(m){
+   html+='<div style="background:#fff;border:1.5px solid var(--n2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:20px">'+m[0]+'</div><div style="font-family:var(--in);font-size:18px;font-weight:800;color:'+m[3]+'">'+m[1]+'</div><div style="font-size:10px;color:var(--n4)">'+m[2]+'</div></div>';
   });
-  html+='</div>';
-
-  // Orientações clínicas
-  if(wantOrient){
-   html+='<div style="background:var(--y0);border:1.5px solid var(--y3);border-radius:10px;padding:12px;margin-bottom:12px">'
-    +'<div style="font-family:var(--jk);font-size:11px;font-weight:700;color:#7c4a00;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">💡 Orientações Clínicas</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'
-    +planData.tips.map(function(t){return'<div style="display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:#92400e;line-height:1.5"><span style="color:var(--g4);font-weight:700;flex-shrink:0">→</span>'+t+'</div>';}).join('')
-    +'</div></div>';
-  }
-
-  // Lista de compras
-  if(wantLista){
-   var items=Object.keys(shopMap);
-   html+='<div style="border:1.5px solid var(--n2);border-radius:10px;padding:12px;margin-bottom:12px">'
-    +'<div style="font-family:var(--jk);font-size:11px;font-weight:700;color:var(--n6);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">🛒 Lista de Compras Semanal</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">'
-    +items.map(function(name){return'<div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--n6);padding:2px 0"><span style="width:6px;height:6px;border-radius:50%;background:var(--g4);flex-shrink:0"></span>'+name+' <span style="color:var(--n4)">~'+Math.round(shopMap[name]*7/100*10)/10+'kg/sem</span></div>';}).join('')
-    +'</div></div>';
-  }
-
-  // Action buttons
-  html+='<div style="display:flex;gap:8px">'
-   +'<button class="btn btn-p" style="flex:1" onclick="applyAIPlan()">✅ Salvar e aplicar plano</button>'
-   +'<button class="btn btn-s btn-sm" onclick="exportAIPlanPDF()">📄 Exportar PDF</button>'
-   +'<button class="btn btn-ghost btn-sm" onclick="genAI()">🔄 Regerar</button>'
-   +'</div>';
-
+  html+='</div><div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#166534">🤖 Gerado com IA (Claude AI) — revise antes de aplicar</div>';
+  parsed.meals.forEach(function(m){
+   var mK=m.items.reduce(function(s,it){return s+(it.kcal||0);},0);
+   html+='<div class="card" style="margin-bottom:10px"><div class="ch"><span class="ct">'+(m.em||'🍽️')+' '+escHtml(m.name)+'</span><span class="cs">'+mK+' kcal</span></div>';
+   m.items.forEach(function(it){html+='<div class="fi"><span class="fi-nm">'+escHtml(it.food)+'</span><span style="font-size:11px;color:var(--n4)">'+it.qty+'g · P:'+it.prot+'g C:'+it.carb+'g G:'+it.gord+'g</span><span class="fi-kcal">'+it.kcal+' kcal</span></div>';});
+   html+='</div>';
+  });
+  if(parsed.obs)html+='<div class="alert alert-g"><span>💡 '+escHtml(parsed.obs)+'</span></div>';
+  html+='<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-p" style="flex:1" onclick="applyAIGenPlan()">✅ Aplicar este plano</button><button class="btn btn-ghost" onclick="genAI()">🔄 Gerar novamente</button></div>';
   el.innerHTML=html;
-  showToast('Plano gerado para '+p.n+'!','s');
- },2400);
+  showToast('Plano gerado com IA para '+p.n+'!','s');
+ }).catch(function(){
+  clearInterval(stInterval);
+  _genAILocal(el,p,objKey,rest,nm,dist,wantSubs,wantLista,wantOri,targetKcal);
+ });
+
 }
 
 function genAIQuick(){
@@ -3898,7 +4134,7 @@ function rTpl(){
  }
  html+=templates.map(function(t,i){
   var totalKcal=0,totalProt=0,totalCarb=0,totalGord=0;
-  (t.meals||[]).forEach(function(meal){
+  (t.mealData||[]).forEach(function(meal){
    (meal.items||[]).forEach(function(it){
     var f=FOOD_DB.find(function(x){return x.id===it.fid;});
     if(f){var fac=(it.qty||100)/100;totalKcal+=Math.round(f.k*fac);totalProt+=+(f.p*fac).toFixed(1);totalCarb+=+(f.c*fac).toFixed(1);totalGord+=+(f.g*fac).toFixed(1);}
@@ -3916,12 +4152,12 @@ function rTpl(){
    +'</div>'
    // Meal list preview
    +'<div style="font-size:11px;color:var(--n5);margin-bottom:12px;display:flex;flex-wrap:wrap;gap:4px">'
-   +(t.meals||[]).map(function(m){return '<span style="background:var(--n1);border-radius:6px;padding:2px 7px">'+(m.em||'🍽️')+' '+(m.name||m.n||'')+'</span>';}).join('')
+   +(t.mealData||[]).map(function(m){return '<span style="background:var(--n1);border-radius:6px;padding:2px 7px">'+(m.em||'🍽️')+' '+(m.name||m.n||'')+'</span>';}).join('')
    +'</div>'
    +'<div style="display:flex;gap:6px">'
    +'<button class="btn btn-p btn-sm" style="flex:1" onclick="applyTpl('+t.id+');goP(\'presc\',document.getElementById(\'ni-presc\'))">📋 Usar no Plano</button>'
    +'<button class="btn btn-ghost btn-sm" onclick="duplicateTpl('+i+')" title="Duplicar">⧉</button>'
-   +'<button class="btn btn-danger btn-sm" onclick="templates.splice('+i+',1);DB.save();goP(\'tpl\',null)">🗑</button>'
+   +'<button class="btn btn-danger btn-sm" onclick="deleteTpl('+i+')">🗑</button>'
    +'</div></div>';
  }).join('');
  html+='</div>';
@@ -4080,10 +4316,14 @@ function rPPlan(){
  if(!p) return '<div style="padding:60px;text-align:center;color:var(--n4)">Nenhum paciente encontrado.</div>';
  var planSrc = p.plans&&p.plans.length ? p.plans[0].mealData : (p.meals||[]);
  if(!planSrc||!planSrc.length){
-  return '<div style="padding:60px;text-align:center"><div style="font-size:48px;margin-bottom:16px">🥗</div>'
-   +'<div style="font-weight:800;font-size:15px;color:var(--n7);margin-bottom:8px">Plano alimentar ainda não disponível</div>'
-   +'<div style="font-size:12.5px;color:var(--n4)">Aguarde seu nutricionista prescrever o plano alimentar.</div></div>';
+  planSrc = [
+   {name:'Café da manhã',em:'☀️',items:[{fid:6,qty:150},{fid:11,qty:50}]},
+   {name:'Almoço',em:'🍽️',items:[{fid:1,qty:120},{fid:11,qty:80},{fid:13,qty:80}]},
+   {name:'Lanche',em:'🍎',items:[{fid:41,qty:1},{fid:19,qty:30}]},
+   {name:'Jantar',em:'🌙',items:[{fid:3,qty:120},{fid:12,qty:80}]}
+  ];
  }
+ var _planIsDemo = !(p.plans&&p.plans.length>0);
  var today = new Date().getDay();
  // Build weekly view from plan (repeat same plan for 7 days with small variation note)
  var dayNames = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
@@ -4097,6 +4337,7 @@ function rPPlan(){
   });
  });
  // Macros summary
+ html += _planIsDemo ? '<div class="alert alert-y" style="margin-bottom:14px"><span>📋 Plano modelo — seu nutricionista ainda não prescreveu um plano personalizado.</span></div>' : '';
  html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">';
  [['🔥',totalKcal+' kcal','Energia','#e85a0a'],
   ['🥩',totalProt.toFixed(0)+'g','Proteína','#3b82f6'],
@@ -4396,7 +4637,14 @@ function savePat(){
   exams:{gli:gn('np-gli')||90,col:gn('np-col')||180,vitd:gn('np-vitd')||30,hem:gn('np-hem')||13,fer:gn('np-fer')||50,tgo:gn('np-tgo')||22,tgp:gn('np-tgp')||22,tsh:gn('np-tsh')||2.0},
   historico:[{data:todayStr,peso:peso,imc:bmi,cintura:gn('np-cin')||80,fat:gn('np-fat')||20,obs:'Cadastro inicial'}],
   diary:[],
-  plans:[]
+  plans:[],
+  appointments:[],
+  suplementos:[],
+  orientacoes:[],
+  tel:g('np-tel')||'',
+  email:g('np-email')||'',
+  obs:g('np-obs')||'',
+  since:new Date().toISOString().slice(0,10)
  };
 
  pats.push(newPat);
