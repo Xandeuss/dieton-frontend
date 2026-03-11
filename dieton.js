@@ -757,7 +757,6 @@ function rPat(){
   <div class="search-wrap" style="flex:1;min-width:180px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="search-inp" id="pat-q" placeholder="Buscar paciente…" oninput="filterPats(this.value)"/></div>
   <select class="sel" style="width:auto" id="pat-gf" onchange="filterPats(document.getElementById('pat-q').value)"><option value="">Todos os objetivos</option><option>Emagrecimento</option><option>Hipertrofia</option><option>Manutenção</option><option>Saúde geral</option><option>Condição clínica</option></select>
   <select class="sel" style="width:auto" id="pat-sf" onchange="filterPats(document.getElementById('pat-q').value)"><option value="">Todos os status</option><option value="tg">Em dia</option><option value="ty">Atenção</option><option value="tr">Alerta</option></select>
-  <button class="btn btn-p btn-sm" onclick="openM('m-pat')" style="white-space:nowrap">+ Novo Paciente</button>
  </div>
  <div class="pat-grid" id="pat-grid">${buildPatGrid(pats)}</div>`;
 }
