@@ -1120,3 +1120,33 @@ body.dark [style*="border-color:#e5e7eb"]{border-color:var(--n2)!important}
 body.dark [style*="border-top:1.5px solid #e5e7eb"]{border-color:var(--n2)!important}
 body.dark [style*="background:var(--n0)"]{background:var(--n0)!important}
 body.dark [style*="background:var(--n1)"]{background:var(--n1)!important}
+
+/* ── PRESCRIÇÃO MOBILE FIXES ── */
+@media(max-width:768px){
+ /* Food results list — bigger touch targets */
+ .fr{padding:10px 12px!important;min-height:48px!important;touch-action:manipulation}
+ .fr:active{background:var(--g0)!important}
+
+ /* Food search panel — full width, comfortable spacing */
+ #food-results{max-height:200px!important;-webkit-overflow-scrolling:touch}
+
+ /* Add-food controls — stack vertically on small screens */
+ #add-meal-sel{min-height:44px!important;font-size:14px!important}
+ #add-qty{min-height:44px!important;font-size:14px!important;text-align:center}
+
+ /* Prescrição layout — ensure food panel comes first on mobile */
+ .presc-layout{display:flex!important;flex-direction:column!important;gap:12px!important}
+ .presc-layout>div:nth-child(2){order:-1}
+
+ /* Preview box after selecting food */
+ .preview-box{margin-top:8px}
+
+ /* Meal builder items — bigger remove buttons */
+ .meal-blk .btn-sm{min-height:36px!important;min-width:36px!important}
+}
+
+@media(max-width:480px){
+ #food-results{max-height:160px!important}
+ .fr{padding:12px!important}
+}
+

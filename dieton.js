@@ -1043,16 +1043,18 @@ function rPresc() {
    <select class="sel" id="food-cat" style="margin-bottom:8px" onchange="searchFood()"><option value="">Todas as categorias</option>${[...new Set(FOOD_DB.map(function (f) { return f.cat }))].map(function (c) { return '<option>' + c + '</option>' }).join('')}</select>
    <div class="search-wrap" style="margin-bottom:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="search-inp" id="food-q" placeholder="Buscar alimento…" oninput="searchFood()"/></div>
    <div style="font-size:10px;color:var(--n4);margin-bottom:5px" id="food-count"></div>
-   <div id="food-results" style="max-height:220px;overflow-y:auto"></div>
+   <div id="food-results" style="max-height:180px;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
    <div class="preview-box" id="food-preview"></div>
-   <div style="display:flex;gap:7px;align-items:center;margin-top:8px">
-    <select class="sel" id="add-meal-sel" style="flex:1">${meals.map(function (m, i) { return '<option value="' + i + '">' + m.em + ' ' + m.name + '</option>' }).join('')}</select>
-    <input class="inp" id="add-qty" type="number" value="100" style="width:70px"/>
-    <span style="font-size:11px;color:var(--n4)">g</span>
-   </div>
-   <div style="margin-top:7px;display:flex;gap:6px">
-    <button class="btn btn-p btn-sm" style="flex:1" onclick="addFood()">+ Adicionar à Refeição</button>
-    <button class="btn btn-ghost btn-sm" onclick="showSubs()">⇄ Substituições</button>
+   <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+    <div style="display:flex;gap:7px;align-items:center">
+     <select class="sel" id="add-meal-sel" style="flex:1;min-height:40px;font-size:13px">${meals.map(function (m, i) { return '<option value="' + i + '">' + m.em + ' ' + m.name + '</option>' }).join('')}</select>
+     <input class="inp" id="add-qty" type="number" value="100" inputmode="decimal" style="width:72px;min-height:40px;font-size:13px;text-align:center"/>
+     <span style="font-size:11px;color:var(--n4);flex-shrink:0">g</span>
+    </div>
+    <div style="display:flex;gap:6px">
+     <button class="btn btn-p" style="flex:1;padding:11px 8px;font-size:13px;font-weight:700;min-height:44px;touch-action:manipulation" onclick="addFood()">+ Adicionar à Refeição</button>
+     <button class="btn btn-ghost btn-sm" style="min-height:44px;touch-action:manipulation" onclick="showSubs()">⇄ Subst.</button>
+    </div>
    </div>
    <details style="margin-top:10px">
     <summary style="font-size:12px;font-weight:600;color:var(--g5);cursor:pointer;font-family:var(--jk)">+ Alimento personalizado</summary>
@@ -1167,21 +1169,49 @@ function updatePizza() {
   if (leg) leg.innerHTML = pcts.map(function (p, i) { return '<div class="pizza-lr"><div class="pizza-dot" style="background:' + colors[i] + '"></div><span class="pizza-lbl">' + labels[i] + '</span><span class="pizza-pct">' + (p * 100).toFixed(0) + '%</span></div>'; }).join('');
 }
 
-function searchFood() {
-  var q = (document.getElementById('food-q') || {}).value || '';
-  var cat = (document.getElementById('food-cat') || {}).value || '';
-  var res = FOOD_DB.filter(function (f) { return f.n.toLowerCase().includes(q.toLowerCase()) && (!cat || f.cat === cat) }).slice(0, 20);
-  var cnt = document.getElementById('food-count'); if (cnt) cnt.textContent = res.length + ' de ' + FOOD_DB.length + ' alimentos';
-  var el = document.getElementById('food-results'); if (!el) return;
-  el.innerHTML = res.map(function (f) { return '<div class="fr" id="fr-' + f.id + '" onclick="selectFood(' + f.id + ')">' + '<span style="font-size:14px">' + f.e + '</span>' + '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--n8)">' + f.n + '</div><div style="font-size:10.5px;color:var(--n4)">P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.g + 'g</div></div>' + '<span style="font-family:var(--in);font-size:11px;font-weight:700;color:var(--g5)">' + f.k + '</span><span style="font-size:10px;color:var(--n4)">kcal/100g</span></div>'; }).join('');
+function searchFood(){
+ var q=(document.getElementById('food-q')||{}).value||'';
+ var cat=(document.getElementById('food-cat')||{}).value||'';
+ var res=FOOD_DB.filter(function(f){return f.n.toLowerCase().includes(q.toLowerCase())&&(!cat||f.cat===cat);}).slice(0,30);
+ var cnt=document.getElementById('food-count');
+ if(cnt)cnt.textContent=res.length+' de '+FOOD_DB.length+' alimentos';
+ var el=document.getElementById('food-results');if(!el)return;
+ if(!res.length){
+  el.innerHTML='<div style="padding:16px;text-align:center;color:var(--n4);font-size:12px">Nenhum alimento encontrado</div>';
+  return;
+ }
+ el.innerHTML=res.map(function(f){
+  return '<div class="fr" id="fr-'+f.id+'" onclick="selectFood('+f.id+')" style="padding:10px 12px;min-height:48px;touch-action:manipulation;cursor:pointer">'
+   +'<span style="font-size:16px;flex-shrink:0">'+f.e+'</span>'
+   +'<div style="flex:1;min-width:0;margin:0 8px">'
+   +'<div style="font-size:13px;font-weight:600;color:var(--n8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+f.n+'</div>'
+   +'<div style="font-size:11px;color:var(--n4)">P:'+f.p+'g · C:'+f.c+'g · G:'+f.g+'g</div>'
+   +'</div>'
+   +'<div style="text-align:right;flex-shrink:0">'
+   +'<div style="font-size:12px;font-weight:700;color:var(--g5)">'+f.k+'</div>'
+   +'<div style="font-size:10px;color:var(--n4)">kcal/100g</div>'
+   +'</div></div>';
+ }).join('');
 }
 var _selFood = null;
-function selectFood(id) {
-  _selFood = FOOD_DB.find(function (f) { return f.id === id });
-  document.querySelectorAll('.fr').forEach(function (el) { el.classList.remove('sel') });
-  var el = document.getElementById('fr-' + id); if (el) el.classList.add('sel');
-  var pv = document.getElementById('food-preview');
-  if (pv && _selFood) { pv.style.display = 'block'; pv.innerHTML = '<strong>' + _selFood.e + ' ' + _selFood.n + '</strong> (por 100g) — ' + _selFood.k + ' kcal | P: ' + _selFood.p + 'g · C: ' + _selFood.c + 'g · G: ' + _selFood.g + 'g' + (_selFood.fb ? ' · Fibras: ' + _selFood.fb + 'g' : ''); }
+function selectFood(id){
+ _selFood=FOOD_DB.find(function(f){return f.id===id;});
+ document.querySelectorAll('.fr').forEach(function(el){el.classList.remove('sel');});
+ var el=document.getElementById('fr-'+id);
+ if(el) el.classList.add('sel');
+ var pv=document.getElementById('food-preview');
+ if(pv&&_selFood){
+  pv.style.display='block';
+  pv.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g0);border:1.5px solid var(--g3);border-radius:10px;margin-top:8px">'
+   +'<div style="flex:1;min-width:0">'
+   +'<div style="font-weight:700;font-size:13px;color:var(--n9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_selFood.e+' '+escHtml(_selFood.n)+'</div>'
+   +'<div style="font-size:11px;color:var(--n5);margin-top:2px">'+_selFood.k+' kcal · P:'+_selFood.p+'g · C:'+_selFood.c+'g · G:'+_selFood.g+'g</div>'
+   +'</div>'
+   +'<button class="btn btn-p" style="flex-shrink:0;padding:10px 14px;font-size:13px;font-weight:700;min-height:44px;touch-action:manipulation" onclick="addFood()">+ Adicionar</button>'
+   +'</div>';
+  // Scroll preview into view on mobile
+  setTimeout(function(){pv.scrollIntoView({block:'nearest',behavior:'smooth'});},80);
+ }
 }
 function addFood() {
   if (!_selFood) { showToast('Selecione um alimento primeiro', 'w'); return; }
