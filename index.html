@@ -969,7 +969,7 @@
 
   <!-- ── JavaScript Principal ── -->
   <script src="dieton.js?v=1.4"></script>
-  <script src="api.js?v=2.7"></script>
+  <script src="api.js?v=2.8"></script>
   <script>console.log("DietOn v1.3 inicializado");</script>
 
 
@@ -1154,28 +1154,1184 @@
   </div>
 
   <!-- ── Modal genérico ── -->
-  <div id="m-generic" class="modal" style="display:none">
-    <div class="modal-box" style="max-width:700px">
-      <div class="modal-hd">
-        <span class="m-title">Detalhes</span>
-        <button class="modal-close" onclick="closeM('m-generic')">×</button>
+  <div class="ov" id="m-generic" onclick="if(event.target===this)closeM('m-generic')">
+    <div class="modal" style="max-width:700px;width:96%">
+      <div class="mh">
+        <span class="mt">Detalhes</span>
+        <button class="mc" onclick="closeM('m-generic')">×</button>
       </div>
-      <div class="m-body" style="max-height:70vh;overflow-y:auto;padding:0 2px"></div>
+      <div id="m-generic-body" class="m-body" style="padding:16px"></div>
+    </div>
+  </div>TYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://dieton-backend-production-8126.up.railway.app https://cbggsjdstynhgzagubae.supabase.co https://cdn.jsdelivr.net; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>DietOn — Plataforma Clínica de Nutrição</title>
+  <meta name="description" content="Plataforma clínica de nutrição online — prescrição, acompanhamento e agenda." />
+  <meta name="theme-color" content="#e85a0a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="DietOn" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+  <!-- Fontes -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+  <!-- ── Estilos ── -->
+  <link rel="stylesheet" href="dieton.css" />
+</head>
+
+<body>
+
+  <!-- ══ LOGIN ══ -->
+  <div id="login">
+
+    <!-- LEFT: vivid green panel -->
+    <div class="ll">
+      <div class="ll-noise"></div>
+      <div class="ll-glow1"></div>
+      <div class="ll-glow2"></div>
+      <div class="ll-glow3"></div>
+      <div class="ll-dots"></div>
+      <div class="ll-inner">
+
+        <!-- top bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:11px"><svg width="46" height="46" viewBox="0 0 56 56"
+              xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;overflow:visible">
+              <defs>
+                <radialGradient id="LLb" cx="37%" cy="30%" r="68%" gradientUnits="objectBoundingBox">
+                  <stop offset="0%" stop-color="#ffaa50" />
+                  <stop offset="28%" stop-color="#f56818" />
+                  <stop offset="62%" stop-color="#d84200" />
+                  <stop offset="100%" stop-color="#962800" />
+                </radialGradient>
+                <radialGradient id="LLs" cx="72%" cy="76%" r="52%" gradientUnits="objectBoundingBox">
+                  <stop offset="0%" stop-color="rgba(60,8,0,.42)" />
+                  <stop offset="100%" stop-color="rgba(60,8,0,0)" />
+                </radialGradient>
+                <radialGradient id="LLh" cx="28%" cy="22%" r="38%" gradientUnits="objectBoundingBox">
+                  <stop offset="0%" stop-color="rgba(255,255,255,.75)" />
+                  <stop offset="45%" stop-color="rgba(255,255,255,.2)" />
+                  <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+                </radialGradient>
+                <linearGradient id="LLlf1" x1="10%" y1="0%" x2="90%" y2="100%">
+                  <stop offset="0%" stop-color="#88d040" />
+                  <stop offset="100%" stop-color="#3a6c10" />
+                </linearGradient>
+                <linearGradient id="LLlf2" x1="90%" y1="0%" x2="10%" y2="100%">
+                  <stop offset="0%" stop-color="#5aa025" />
+                  <stop offset="100%" stop-color="#2a5208" />
+                </linearGradient>
+                <linearGradient id="LLst" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4e7018" />
+                  <stop offset="100%" stop-color="#6e9028" />
+                </linearGradient>
+                <filter id="LLdr" x="-30%" y="-20%" width="160%" height="150%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="rgba(80,15,0,.32)" />
+                </filter>
+              </defs>
+              <!-- Stem -->
+              <path d="M28.5 17 C29.2 13.5 30.8 10.5 31.5 7" fill="none" stroke="url(#LLst)" stroke-width="2.4"
+                stroke-linecap="round" />
+              <!-- Sepals — back layer (darker) -->
+              <path d="M28 18 C24 13 16.5 12.5 16 17.5 C19.5 17 25 18 28 21 Z" fill="url(#LLlf2)" opacity=".8" />
+              <path d="M28 18 C32 13 39.5 12.5 40 17.5 C36.5 17 31 18 28 21 Z" fill="url(#LLlf2)" opacity=".8" />
+              <!-- Sepals — front layer (bright) -->
+              <path d="M28 18.5 C22.5 12.5 14 14 13.5 19.5 C18 18.5 24 20 28 23 Z" fill="url(#LLlf1)" />
+              <path d="M28 18.5 C33.5 12.5 42 14 42.5 19.5 C38 18.5 32 20 28 23 Z" fill="url(#LLlf1)" />
+              <!-- Calyx disc (crown center) -->
+              <ellipse cx="28" cy="19.5" rx="5" ry="2.3" fill="#4e8820" stroke="#2d5c10" stroke-width=".6" />
+              <!-- Fruit body + shadow filter -->
+              <g filter="url(#LLdr)">
+                <path d="M13 32 C13 21 19.5 15.5 28 15.5 C36.5 15.5 43 21 43 32
+             C43 41.5 37.5 49 28 49 C18.5 49 13 41.5 13 32 Z" fill="url(#LLb)" />
+                <path d="M13 32 C13 21 19.5 15.5 28 15.5 C36.5 15.5 43 21 43 32
+             C43 41.5 37.5 49 28 49 C18.5 49 13 41.5 13 32 Z" fill="url(#LLs)" />
+              </g>
+              <!-- Vertical crease left -->
+              <path d="M28 18 C27 25.5 25.5 35.5 25 44" fill="none" stroke="rgba(110,25,0,.17)" stroke-width="1.5"
+                stroke-linecap="round" />
+              <!-- Vertical crease right -->
+              <path d="M28 18 C29 25.5 30.5 35.5 31 44" fill="none" stroke="rgba(110,25,0,.17)" stroke-width="1.5"
+                stroke-linecap="round" />
+              <!-- Horizontal equator crease -->
+              <path d="M15 32.5 C19.5 31 24 30.5 28 30.5 C32 30.5 36.5 31 41 32.5" fill="none"
+                stroke="rgba(110,25,0,.12)" stroke-width="1.3" stroke-linecap="round" />
+              <!-- Specular highlight overlay -->
+              <path d="M13 32 C13 21 19.5 15.5 28 15.5 C36.5 15.5 43 21 43 32
+           C43 41.5 37.5 49 28 49 C18.5 49 13 41.5 13 32 Z" fill="url(#LLh)" />
+              <!-- Ground shadow ellipse -->
+              <ellipse cx="28" cy="49.5" rx="10.5" ry="2.5" fill="rgba(60,10,0,.13)" />
+            </svg>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <div
+                style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.03em;line-height:1">
+                Diet<span style="color:#ffb868">On</span></div>
+              <div
+                style="font-size:7.5px;font-weight:700;color:rgba(255,255,255,.38);letter-spacing:.14em;text-transform:uppercase;margin-top:2px">
+                DIETA ONLINE</div>
+            </div>
+          </div>
+          <div class="ll-badge">
+            <div class="ll-badge-dot"></div>
+
+          </div>
+        </div>
+
+        <!-- hero -->
+        <div class="ll-hero">
+          <div class="ll-kicker">Plataforma Dieta Online</div>
+          <h1>Nutrição clínica<br>com <em>precisão total</em>.</h1>
+          <p>Cálculo de TMB/GET, prescrição de planos personalizados, banco TACO completo, acompanhamento de evolução e
+            relatórios PDF profissionais.</p>
+          <div class="ll-pills">
+            <span class="ll-pill">📊 TACO 597 alimentos</span>
+            <span class="ll-pill">🤖 IA Nutricional</span>
+            <span class="ll-pill">📄 PDF Profissional</span>
+            <span class="ll-pill">📔 Diário do paciente</span>
+            <span class="ll-pill">🔬 Micronutrientes</span>
+            <span class="ll-pill">📈 Evolução</span>
+          </div>
+        </div>
+
+        <!-- stats -->
+        <div class="ll-stats">
+          <div class="ll-stat">
+            <div class="ll-stat-n">597<sup>+</sup></div>
+            <div class="ll-stat-l">Alimentos TACO</div>
+          </div>
+          <div class="ll-stat">
+            <div class="ll-stat-n">98<sup>%</sup></div>
+            <div class="ll-stat-l">Satisfação clínica</div>
+          </div>
+          <div class="ll-stat">
+            <div class="ll-stat-n">12<sup>+</sup></div>
+            <div class="ll-stat-l">Módulos clínicos</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: login form -->
+    <div class="lr">
+      <div class="lr-box">
+
+        <!-- header -->
+        <div id="lr-header" style="margin-bottom:28px">
+          <div style="display:flex;align-items:center;gap:13px;margin-bottom:22px">
+            <div style="display:flex;align-items:center;gap:12px"><svg width="52" height="52" viewBox="0 0 56 56"
+                xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;overflow:visible">
+                <defs>
+                  <radialGradient id="LRb" cx="37%" cy="30%" r="68%" gradientUnits="objectBoundingBox">
+                    <stop offset="0%" stop-color="#ffaa50" />
+                    <stop offset="28%" stop-color="#f56818" />
+                    <stop offset="62%" stop-color="#d84200" />
+                    <stop offset="100%" stop-color="#962800" />
+                  </radialGradient>
+                  <radialGradient id="LRs" cx="72%" cy="76%" r="52%" gradientUnits="objectBoundingBox">
+                    <stop offset="0%" stop-color="rgba(60,8,0,.42)" />
+                    <stop offset="100%" stop-color="rgba(60,8,0,0)" />
+                  </radialGradient>
+                  <radialGradient id="LRh" cx="28%" cy="22%" r="38%" gradientUnits="objectBoundingBox">
+                    <stop offset="0%" stop-color="rgba(255,255,255,.75)" />
+                    <stop offset="45%" stop-color="rgba(255,255,255,.2)" />
+                    <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+                  </radialGradient>
+                  <linearGradient id="LRlf1" x1="10%" y1="0%" x2="90%" y2="100%">
+                    <stop offset="0%" stop-color="#88d040" />
+                    <stop offset="100%" stop-color="#3a6c10" />
+                  </linearGradient>
+                  <linearGradient id="LRlf2" x1="90%" y1="0%" x2="10%" y2="100%">
+                    <stop offset="0%" stop-color="#5aa025" />
+                    <stop offset="100%" stop-color="#2a5208" />
+                  </linearGradient>
+                  <linearGradient id="LRst" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#4e7018" />
+                    <stop offset="100%" stop-color="#6e9028" />
+                  </linearGradient>
+                  <filter id="LRdr" x="-30%" y="-20%" width="160%" height="150%">
+                    <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="rgba(80,15,0,.32)" />
+                  </filter>
+                </defs>
+                <!-- Stem -->
+                <path d="M28.5 17 C29.2 13.5 30.8 10.5 31.5 7" fill="none" stroke="url(#LRst)" stroke-width="2.4"
+                  stroke-linecap="round" />
+                <!-- Sepals — back layer (darker) -->
+                <path d="M28 18 C24 13 16.5 12.5 16 17.5 C19.5 17 25 18 28 21 Z" fill="url(#LRlf2)" opacity=".8" />
+                <path d="M28 18 C32 13 39.5 12.5 40 17.5 C36.5 17 31 18 28 21 Z" fill="url(#LRlf2)" opacity=".8" />
+                <!-- Sepals — front layer (bright) -->
+                <path d="M28 18.5 C22.5 12.5 14 14 13.5 19.5 C18 18.5 24 20 28 23 Z" fill="url(#LRlf1)" />
+                <path d="M28 18.5 C33.5 12.5 42 14 42.5 19.5 C38 18.5 32 20 28 23 Z" fill="url(#LRlf1)" />
+                <!-- Calyx disc (crown center) -->
+                <ellipse cx="28" cy="19.5" rx="5" ry="2.3" fill="#4e8820" stroke="#2d5c10" stroke-width=".6" />
+                <!-- Fruit body + shadow filter -->
+                <g filter="url(#LRdr)">
+                  <path d="M13 32 C13 21 19.5 15.5 28 15.5 C36.5 15.5 43 21 43 32
+             C43 41.5 37.5 49 28 49 C18.5 49 13 41.5 13 32 Z" fill="url(#LRb)" />
+                  <path d="M13 32 C13 21 19.5 15.5 28 15.5 C36.5 15.5 43 21 43 32
+             C43 41.5 37.5 49 28 49 C18.5 49 13 41.5 13 32 Z" fill="url(#LRs)" />
+                </g>
+                <!-- Vertical crease left -->
+                <path d="M28 18 C27 25.5 25.5 35.5 25 44" fill="none" stroke="rgba(110,25,0,.17)" stroke-width="1.5"
+                  stroke-linecap="round" />
+                <!-- Vertical crease right -->
+                <path d="M28 18 C29 25.5 30.5 35.5 31 44" fill="none" stroke="rgba(110,25,0,.17)" stroke-width="1.5"
+                  stroke-linecap="round" />
+                <!-- Horizontal equator crease -->
+                <path d="M15 32.5 C19.5 31 24 30.5 28 30.5 C32 30.5 36.5 31 41 32.5" fill="none"
+                  stroke="rgba(110,25,0,.12)" stroke-width="1.3" stroke-linecap="round" />
+                <!-- Specular highlight overlay -->
+                <path d="M13 32 C13 21 19.5 15.5 28 15.5 C36.5 15.5 43 21 43 32
+           C43 41.5 37.5 49 28 49 C18.5 49 13 41.5 13 32 Z" fill="url(#LRh)" />
+                <!-- Ground shadow ellipse -->
+                <ellipse cx="28" cy="49.5" rx="10.5" ry="2.5" fill="rgba(60,10,0,.13)" />
+              </svg>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <div
+                  style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:24px;font-weight:800;color:#1f0d00;letter-spacing:-.03em;line-height:1">
+                  Diet<span style="color:#e85a0a">On</span></div>
+                <div
+                  style="font-size:8px;font-weight:700;color:rgba(100,40,0,.42);letter-spacing:.14em;text-transform:uppercase;margin-top:1px">
+                  DIETA ONLINE</div>
+              </div>
+            </div>
+          </div>
+          <div
+            style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:22px;font-weight:800;color:#111827;margin-bottom:6px;letter-spacing:-.015em">
+            Bem-vindo de volta</div>
+          <div style="font-size:13px;color:#6b7280;line-height:1.6">Acesse sua conta para continuar atendendo seus
+            pacientes</div>
+        </div>
+
+        <!-- tabs -->
+        <div class="seg-tabs">
+          <button class="seg-tab on" id="t-in" onclick="lTab('in')">Entrar</button>
+          <button class="seg-tab" id="t-up" onclick="lTab('up')">Criar conta</button>
+        </div>
+
+        <div id="f-in">
+          <div class="err-box" id="err-box">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            <span id="err-msg"></span>
+          </div>
+
+          <div class="fi-field">
+            <label class="fi-lbl">E-mail</label>
+            <div class="fi-wrap">
+              <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg></span>
+              <input type="email" id="inp-em" placeholder="seu&#64;email.com"
+                onkeydown="if(event.key==='Enter')doLogin()" />
+            </div>
+          </div>
+
+          <div class="fi-field">
+            <label class="fi-lbl">Senha</label>
+            <div class="fi-wrap">
+              <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg></span>
+              <input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password"
+                onkeydown="if(event.key==='Enter')doLogin()" />
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6b7280;cursor:pointer">
+              <input type="checkbox" checked style="accent-color:#05a84e" /> Lembrar de mim
+            </label>
+            <a href="#" onclick="doForgotPassword(); return false;"
+              style="font-size:12px;color:#05a84e;font-weight:700;text-decoration:none">Esqueceu a senha?</a>
+          </div>
+          <!-- Cloudflare Turnstile -->
+          <div style="margin-bottom:15px; display:flex; justify-content:center">
+            <div class="cf-turnstile" id="ts-login" data-sitekey="0x4AAAAAACoC1ss80dcAXgbv" data-theme="light"></div>
+          </div>
+          <button class="btn-main" id="login-btn" onclick="doLogin()">Entrar na plataforma →</button>
+
+          <div style="text-align:center;margin-top:18px;font-size:11.5px;color:#9ca3af">
+            Ao entrar, você concorda com os <a href="#" onclick="openTermos(event)"
+              style="color:#05a84e;font-weight:600">Termos de Uso</a>
+          </div>
+        </div>
+
+        <div id="f-up" style="display:none">
+
+          <!-- Sub-tabs Nutricionista / Paciente — padrão .seg-tabs do projeto -->
+          <div class="reg-tabs">
+            <button class="reg-tab on" id="up-tab-pro" onclick="upTab('pro')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" />
+              </svg>
+              Nutricionista
+            </button>
+            <button class="reg-tab" id="up-tab-pac" onclick="upTab('pac')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+              </svg>
+              Paciente
+            </button>
+          </div>
+
+          <!-- Erro de cadastro -->
+          <div class="err-box" id="err-up">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            <span id="err-up-msg"></span>
+          </div>
+
+          <!-- Sucesso de cadastro -->
+          <div class="reg-ok" id="ok-up">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14l-4-4 1.41-1.41L10 13.17l6.59-6.59L18 8l-8 8z" />
+            </svg>
+            <span id="ok-up-msg"></span>
+          </div>
+
+          <!-- ── FORMULÁRIO NUTRICIONISTA ── -->
+          <div id="up-pro">
+            <div class="fi-field">
+              <label class="fi-lbl">Nome completo</label>
+              <div class="fi-wrap">
+                <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg></span>
+                <input type="text" id="up-pro-nome" placeholder="Dra. Ana Paula" />
+              </div>
+            </div>
+
+            <div class="fi-field">
+              <label class="fi-lbl">E-mail profissional</label>
+              <div class="fi-wrap">
+                <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg></span>
+                <input type="email" id="up-pro-email" placeholder="email&#64;clinica.com.br" />
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="fi-field">
+                <label class="fi-lbl">Senha</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg></span>
+                  <input type="password" id="up-pro-pw" placeholder="Mín. 8 caracteres" autocomplete="new-password"
+                    oninput="checkPwStrength(this.value,'pw-strength-pro')" />
+                  <div id="pw-strength-pro"
+                    style="margin-top:5px;height:4px;border-radius:99px;background:#e5e7eb;overflow:hidden">
+                    <div id="pw-strength-pro-bar" style="height:4px;border-radius:99px;width:0;transition:all .3s">
+                    </div>
+                  </div>
+                  <div id="pw-strength-pro-txt" style="font-size:10.5px;margin-top:3px;color:#9ca3af"></div>
+                </div>
+              </div>
+              <div class="fi-field">
+                <label class="fi-lbl">Confirmar senha</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg></span>
+                  <input type="password" id="up-pro-pw2" placeholder="Repita a senha" autocomplete="new-password" />
+                </div>
+              </div>
+            </div>
+            <!-- Cloudflare Turnstile widget -->
+            <div style="margin-bottom:15px; display:flex; justify-content:center">
+              <div class="cf-turnstile" id="ts-reg-pro" data-sitekey="0x4AAAAAACoC1ss80dcAXgbv" data-theme="light">
+              </div>
+            </div>
+            <button class="btn-main" onclick="doRegisterPro()">Criar conta de nutricionista →</button>
+            <p style="text-align:center;margin-top:13px;font-size:11px;color:#9ca3af;font-family:var(--in)">Grátis por
+              14
+              dias · Sem cartão de crédito</p>
+          </div>
+
+          <!-- ── FORMULÁRIO PACIENTE ── -->
+          <div id="up-pac" style="display:none">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="fi-field">
+                <label class="fi-lbl">Nome completo</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg></span>
+                  <input type="text" id="up-pac-nome" placeholder="Maria Silva" />
+                </div>
+              </div>
+              <div class="fi-field">
+                <label class="fi-lbl">Data de nascimento</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <path d="M16 2v4M8 2v4M3 10h18" />
+                    </svg></span>
+                  <input type="date" id="up-pac-nasc" />
+                </div>
+              </div>
+            </div>
+            <div class="fi-field">
+              <label class="fi-lbl">E-mail</label>
+              <div class="fi-wrap">
+                <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg></span>
+                <input type="email" id="up-pac-email" placeholder="seu&#64;email.com" />
+              </div>
+            </div>
+            <div class="fi-field">
+              <label class="fi-lbl">Código do Nutricionista <span style="font-size:9px;color:var(--n4)">(fornecido pelo
+                  seu nutricionista)</span></label>
+              <div class="fi-wrap">
+                <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path
+                      d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                  </svg></span>
+                <input type="text" id="up-pac-code" placeholder="Ex: ANA-4821" style="text-transform:uppercase"
+                  oninput="this.value=this.value.toUpperCase()" />
+              </div>
+              <p class="fi-hint" id="pac-code-hint">Solicite o código ao seu nutricionista responsável.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="fi-field">
+                <label class="fi-lbl">Senha</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg></span>
+                  <input type="password" id="up-pac-pw" placeholder="Mín. 6 caracteres" autocomplete="new-password"
+                    oninput="checkPwStrength(this.value,'pw-strength-pac')" />
+                  <div id="pw-strength-pac"
+                    style="margin-top:5px;height:4px;border-radius:99px;background:#e5e7eb;overflow:hidden">
+                    <div id="pw-strength-pac-bar" style="height:4px;border-radius:99px;width:0;transition:all .3s">
+                    </div>
+                  </div>
+                  <div id="pw-strength-pac-txt" style="font-size:10.5px;margin-top:3px;color:#9ca3af"></div>
+                </div>
+              </div>
+              <div class="fi-field">
+                <label class="fi-lbl">Confirmar senha</label>
+                <div class="fi-wrap">
+                  <span class="fi-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg></span>
+                  <input type="password" id="up-pac-pw2" placeholder="Repita a senha" autocomplete="new-password" />
+                </div>
+              </div>
+            </div>
+            <!-- Cloudflare Turnstile widget -->
+            <div style="margin-bottom:15px; display:flex; justify-content:center">
+              <div class="cf-turnstile" id="ts-reg-pac" data-sitekey="0x4AAAAAACoC1ss80dcAXgbv" data-theme="light">
+              </div>
+            </div>
+            <button class="btn-main" onclick="doRegisterPac()">Criar conta de paciente →</button>
+            <p style="text-align:center;margin-top:13px;font-size:11px;color:#9ca3af;font-family:var(--in)">Acesso
+              gratuito · Vinculado ao seu nutricionista</p>
+          </div>
+
+        </div>
+
+      </div>
     </div>
   </div>
 
-  <!-- ── Modal Chat ── -->
-  <div id="m-chat" class="modal" style="display:none">
-    <div class="modal-box" style="max-width:480px;height:580px;display:flex;flex-direction:column">
-      <div class="modal-hd">
-        <span class="m-title" id="chat-title">Chat com paciente</span>
-        <button class="modal-close" onclick="closeM('m-chat')">×</button>
+  <!-- ══ APP ══ -->
+  <div id="app">
+    <div id="sb-overlay" onclick="closeSidebar()"></div>
+    <aside class="sb" id="sb">
+      <div class="sb-head">
+        <div class="logo">
+          <svg width="40" height="40" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"
+            style="flex-shrink:0;overflow:visible">
+            <defs>
+              <radialGradient id="SBb" cx="37%" cy="30%" r="68%" gradientUnits="objectBoundingBox">
+                <stop offset="0%" stop-color="#ffaa50" />
+                <stop offset="28%" stop-color="#f56818" />
+                <stop offset="62%" stop-color="#d84200" />
+                <stop offset="100%" stop-color="#962800" />
+              </radialGradient>
+              <radialGradient id="SBs" cx="72%" cy="76%" r="52%" gradientUnits="objectBoundingBox">
+                <stop offset="0%" stop-color="rgba(60,8,0,.42)" />
+                <stop offset="100%" stop-color="rgba(60,8,0,0)" />
+              </radialGradient>
+              <radialGradient id="SBh" cx="28%" cy="22%" r="38%" gradientUnits="objectBoundingBox">
+                <stop offset="0%" stop-color="rgba(255,255,255,.75)" />
+                <stop offset="45%" stop-color="rgba(255,255,255,.2)" />
+                <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+              </radialGradient>
+              <linearGradient id="SBlf1" x1="10%" y1="0%" x2="90%" y2="100%">
+                <stop offset="0%" stop-color="#88d040" />
+                <stop offset="100%" stop-color="#3a6c10" />
+              </linearGradient>
+              <linearGradient id="SBlf2" x1="90%" y1="0%" x2="10%" y2="100%">
+                <stop offset="0%" stop-color="#5aa025" />
+                <stop offset="100%" stop-color="#2a5208" />
+              </linearGradient>
+              <linearGradient id="SBst" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#4e7018" />
+                <stop offset="100%" stop-color="#6e9028" />
+              </linearGradient>
+              <filter id="SBdr" x="-30%" y="-20%" width="160%" height="150%">
+                <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="rgba(80,15,0,.32)" />
+              </filter>
+            </defs>
+            <!-- Stem -->
+            <path d="M28.5 17 C29.2 13.5 30.8 10.5 31.5 7" fill="none" stroke="url(#SBst)" stroke-width="2.4"
+              stroke-linecap="round" />
+            <!-- Sepals — back layer (darker) -->
+            <path d="M28 18 C24 13 16.5 12.5 16 17.5 C19.5 17 25 18 28 21 Z" fill="url(#SBlf2)" opacity=".8" />
+            <path d="M28 18 C32 13 39.5 12.5 40 17.5 C36.5 17 31 18 28 21 Z" fill="url(#SBlf2)" opacity=".8" />
+            <!-- Sepals — front layer (bright) -->
+            <path d="M28 18.5 C22.5 12.5 14 14 13.5 19.5 C18 18.5 24 20 28 23 Z" fill="url(#SBlf1)" />
+            <path d="M28 18.5 C33.5 12.5 42 14 42.5 19.5 C38 18.5 32 20 28 23 Z" fill="url(#SBlf1)" />
+            <!-- Calyx disc (crown center) -->
+            <ellipse cx="28" cy="19.5" rx="5" ry="2.3" fill="#4e8820" stroke="#2d5c10" stroke-width=".6" />
+            <!-- Fruit body + shadow filter -->
+            <g filter="url(#SBdr)">
+              <path d="M13 32 C13 21 19.5 15.5 28 15.5 C36.5 15.5 43 21 43 32
+             C43 41.5 37.5 49 28 49 C18.5 49 13 41.5 13 32 Z" fill="url(#SBb)" />
+              <path d="M13 32 C13 21 19.5 15.5 28 15.5 C36.5 15.5 43 21 43 32
+             C43 41.5 37.5 49 28 49 C18.5 49 13 41.5 13 32 Z" fill="url(#SBs)" />
+            </g>
+            <!-- Vertical crease left -->
+            <path d="M28 18 C27 25.5 25.5 35.5 25 44" fill="none" stroke="rgba(110,25,0,.17)" stroke-width="1.5"
+              stroke-linecap="round" />
+            <!-- Vertical crease right -->
+            <path d="M28 18 C29 25.5 30.5 35.5 31 44" fill="none" stroke="rgba(110,25,0,.17)" stroke-width="1.5"
+              stroke-linecap="round" />
+            <!-- Horizontal equator crease -->
+            <path d="M15 32.5 C19.5 31 24 30.5 28 30.5 C32 30.5 36.5 31 41 32.5" fill="none" stroke="rgba(110,25,0,.12)"
+              stroke-width="1.3" stroke-linecap="round" />
+            <!-- Specular highlight overlay -->
+            <path d="M13 32 C13 21 19.5 15.5 28 15.5 C36.5 15.5 43 21 43 32
+           C43 41.5 37.5 49 28 49 C18.5 49 13 41.5 13 32 Z" fill="url(#SBh)" />
+            <!-- Ground shadow ellipse -->
+            <ellipse cx="28" cy="49.5" rx="10.5" ry="2.5" fill="rgba(60,10,0,.13)" />
+          </svg>
+          <div style="display:flex;flex-direction:column;gap:1px">
+            <div
+              style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:16px;font-weight:800;color:#fff;letter-spacing:-.03em;line-height:1">
+              Diet<span style="color:#ffb868">On</span></div>
+            <div
+              style="font-size:7px;font-weight:700;color:rgba(255,255,255,.38);letter-spacing:.14em;text-transform:uppercase;margin-top:2px">
+              DIETA ONLINE</div>
+          </div>
+        </div>
       </div>
-      <div id="chat-msgs" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--n0)"></div>
-      <div style="padding:10px;border-top:1px solid var(--n2);display:flex;gap:8px">
-        <input id="chat-input" class="sel" placeholder="Digite uma mensagem..." style="flex:1;font-size:12.5px"
-          onkeydown="if(event.key==='Enter')sendChatMsg()"/>
-        <button class="btn btn-p" onclick="sendChatMsg()">Enviar</button>
+      <div class="sb-role" id="sb-role"></div>
+      <nav class="sb-nav" id="sb-nav"></nav>
+      <div class="sb-foot">
+        <!-- Linha 1: avatar + nome/bio (clicável para perfil) -->
+        <div class="sb-user" onclick="openProfile()" title="Editar perfil" style="margin-bottom:6px">
+          <div class="av" id="sb-av" style="flex-shrink:0"></div>
+          <div class="sb-uinfo" style="flex:1;min-width:0"><strong id="sb-name"></strong><span id="sb-email"></span>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="rgba(255,255,255,.25)" style="flex-shrink:0">
+            <path
+              d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+          </svg>
+        </div>
+        <!-- Linha 2: ações rápidas -->
+        <div style="display:flex;gap:4px;padding:0 2px">
+          <button onclick="DB.exportJSON()" title="Exportar backup"
+            style="flex:1;height:28px;border-radius:7px;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-size:9.5px;font-weight:600;transition:all .15s"
+            onmouseover="this.style.background='rgba(255,255,255,.12)';this.style.color='rgba(255,255,255,.85)'"
+            onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='rgba(255,255,255,.4)'"><svg
+              width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z" />
+            </svg>Backup</button>
+          <label title="Importar backup"
+            style="flex:1;height:28px;border-radius:7px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-size:9.5px;font-weight:600;transition:all .15s"
+            onmouseover="this.style.background='rgba(255,255,255,.12)';this.style.color='rgba(255,255,255,.85)'"
+            onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='rgba(255,255,255,.4)'"><svg
+              width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+            </svg>Importar<input type="file" accept=".json" style="display:none"
+              onchange="DB.importJSON(this.files[0])" /></label>
+          <button onclick="doLogout()" title="Sair"
+            style="flex:1;height:28px;border-radius:7px;border:none;background:rgba(220,38,38,.12);color:rgba(248,113,113,.7);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-size:9.5px;font-weight:600;transition:all .15s"
+            onmouseover="this.style.background='rgba(220,38,38,.25)';this.style.color='#fca5a5'"
+            onmouseout="this.style.background='rgba(220,38,38,.12)';this.style.color='rgba(248,113,113,.7)'"><svg
+              width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+            </svg>Sair</button>
+        </div>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button id="mob-menu-btn" onclick="toggleSidebar()" title="Menu"><svg viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg></button>
+          <div class="tb-mob-logo">Diet<em>On</em></div>
+          <div class="tb-left">
+            <h2 id="tb-title">Dashboard</h2>
+            <p id="tb-sub"></p>
+          </div>
+        </div>
+        <div class="tb-right" id="tb-right"></div>
+      </div>
+      <div class="page" id="pg"></div>
+    </div>
+  </div>
+
+  <!-- ══ MODALS ══ -->
+  <!-- PAT -->
+  <div class="ov" id="m-pat">
+    <div class="modal modal-lg">
+      <div class="mh">
+        <div class="mt">Cadastrar Paciente — Anamnese Completa</div><button class="mc"
+          onclick="closeM('m-pat')">×</button>
+      </div>
+      <div class="fsec">Dados Pessoais</div>
+      <div class="row2">
+        <div class="fld"><label class="lbl">Nome completo</label><input class="inp" id="np-nome"
+            placeholder="Nome completo" /></div>
+        <div class="fld"><label class="lbl">Data de nascimento</label><input class="inp" id="np-nasc" type="date" />
+        </div>
+      </div>
+      <div class="row3">
+        <div class="fld"><label class="lbl">Sexo</label><select class="sel" id="np-sex">
+            <option value="F">Feminino</option>
+            <option value="M">Masculino</option>
+          </select></div>
+        <div class="fld"><label class="lbl">Telefone</label><input class="inp" id="np-tel"
+            placeholder="(11) 99999-9999" /></div>
+        <div class="fld"><label class="lbl">E-mail</label><input class="inp" id="np-email" type="email" /></div>
+      </div>
+      <div class="fsec">Dados Antropométricos</div>
+      <div class="row4">
+        <div class="fld"><label class="lbl">Peso (kg)</label><input class="inp" id="np-peso" type="number" step="0.1" />
+        </div>
+        <div class="fld"><label class="lbl">Altura (cm)</label><input class="inp" id="np-alt" type="number" /></div>
+        <div class="fld"><label class="lbl">% Gordura</label><input class="inp" id="np-fat" type="number" step="0.1" />
+        </div>
+        <div class="fld"><label class="lbl">M. Magra (kg)</label><input class="inp" id="np-mm" type="number"
+            step="0.1" /></div>
+      </div>
+      <div class="row3">
+        <div class="fld"><label class="lbl">Cintura (cm)</label><input class="inp" id="np-cin" type="number"
+            step="0.1" /></div>
+        <div class="fld"><label class="lbl">Quadril (cm)</label><input class="inp" id="np-quad" type="number"
+            step="0.1" /></div>
+        <div class="fld"><label class="lbl">Pescoço (cm)</label><input class="inp" id="np-pesc" type="number"
+            step="0.1" /></div>
+      </div>
+      <div class="fsec">Histórico Clínico</div>
+      <div class="row2">
+        <div class="fld"><label class="lbl">Objetivo nutricional</label><select class="sel" id="np-obj">
+            <option>Emagrecimento</option>
+            <option>Hipertrofia</option>
+            <option>Manutenção</option>
+            <option>Saúde geral</option>
+            <option>Condição clínica</option>
+            <option>Gestante</option>
+            <option>Lactante</option>
+            <option>Idoso(a)</option>
+          </select></div>
+        <div class="fld"><label class="lbl">Nível de atividade</label><select class="sel" id="np-ativ">
+            <option>Sedentário</option>
+            <option>Levemente ativo</option>
+            <option>Moderadamente ativo</option>
+            <option>Muito ativo</option>
+            <option>Extremamente ativo (atleta)</option>
+          </select></div>
+      </div>
+      <div class="fld"><label class="lbl">Doenças / condições</label><input class="inp" id="np-cond"
+          placeholder="Ex: Diabetes tipo 2, Hipertensão, SOP…" /></div>
+      <div class="fld"><label class="lbl">Medicamentos em uso</label><input class="inp" id="np-meds"
+          placeholder="Ex: Metformina 500mg, Levotiroxina…" /></div>
+      <div class="fsec">Exames Laboratoriais</div>
+      <div class="row3">
+        <div class="fld"><label class="lbl">Glicemia (mg/dL)</label><input class="inp" id="np-gli" type="number" />
+        </div>
+        <div class="fld"><label class="lbl">Colesterol total</label><input class="inp" id="np-col" type="number" />
+        </div>
+        <div class="fld"><label class="lbl">TSH (µUI/mL)</label><input class="inp" id="np-tsh" type="number"
+            step="0.01" /></div>
+      </div>
+      <div class="row3">
+        <div class="fld"><label class="lbl">Hemoglobina (g/dL)</label><input class="inp" id="np-hem" type="number"
+            step="0.1" /></div>
+        <div class="fld"><label class="lbl">Vitamina D (ng/mL)</label><input class="inp" id="np-vitd" type="number"
+            step="0.1" /></div>
+        <div class="fld"><label class="lbl">Ferritina (ng/mL)</label><input class="inp" id="np-fer" type="number"
+            step="0.1" /></div>
+      </div>
+      <div class="row2">
+        <div class="fld"><label class="lbl">TGO (U/L)</label><input class="inp" id="np-tgo" type="number" /></div>
+        <div class="fld"><label class="lbl">TGP (U/L)</label><input class="inp" id="np-tgp" type="number" /></div>
+      </div>
+      <div class="fsec">Hábitos de Vida</div>
+      <div class="row4">
+        <div class="fld"><label class="lbl">Sono (h/noite)</label><input class="inp" id="np-sono" type="number"
+            step="0.5" placeholder="7.5" /></div>
+        <div class="fld"><label class="lbl">Água (L/dia)</label><input class="inp" id="np-agua" type="number" step="0.1"
+            placeholder="2.0" /></div>
+        <div class="fld"><label class="lbl">Hábito intestinal</label><select class="sel" id="np-int">
+            <option value="">Selecione</option>
+            <option>Normal (1×/dia)</option>
+            <option>Constipado</option>
+            <option>Diarreico</option>
+            <option>Irregular</option>
+          </select></div>
+        <div class="fld"><label class="lbl">Tabagismo</label><select class="sel">
+            <option value="N">Não</option>
+            <option>Ex-fumante</option>
+            <option>Sim</option>
+          </select></div>
+      </div>
+      <div class="fld"><label class="lbl">Alergias e intolerâncias</label><input class="inp" id="np-alerg"
+          placeholder="Ex: lactose, glúten, amendoim…" /></div>
+      <div class="fld"><label class="lbl">Preferências / restrições alimentares</label><textarea class="textarea"
+          id="np-pref" placeholder="Ex: não gosta de peixe, vegetariano, prefere comida caseira…"></textarea></div>
+      <div class="fld"><label class="lbl">Observações clínicas</label><textarea class="textarea" id="np-obs"
+          placeholder="Anotações gerais, contexto, histórico de dietas…"></textarea></div>
+      <div class="mf"><button class="btn btn-ghost" onclick="closeM('m-pat')">Cancelar</button><button
+          class="btn btn-p btn-lg" onclick="savePat()">Cadastrar Paciente</button></div>
+    </div>
+  </div>
+
+
+  <!-- PERFIL -->
+  <div class="ov" id="m-profile">
+    <div class="modal" style="max-width:420px">
+      <div class="mh">
+        <div class="mt" id="prof-title">Meu Perfil</div><button class="mc" onclick="closeM('m-profile')">×</button>
+      </div>
+
+      <!-- Foto de perfil -->
+      <div class="prof-photo-wrap" onclick="document.getElementById('prof-photo-inp').click()">
+        <div id="prof-av-display" class="av-lg av"
+          style="width:90px;height:90px;font-size:28px;font-weight:800;font-family:var(--jk);display:flex;align-items:center;justify-content:center;border-radius:50%">
+        </div>
+        <div class="prof-photo-overlay"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 15.2A3.2 3.2 0 0 1 8.8 12 3.2 3.2 0 0 1 12 8.8 3.2 3.2 0 0 1 15.2 12 3.2 3.2 0 0 1 12 15.2M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z" />
+          </svg><span>Alterar foto</span></div>
+        <input type="file" id="prof-photo-inp" accept="image/*" style="display:none"
+          onchange="loadProfilePhoto(this)" />
+      </div>
+
+      <div class="fld"><label class="lbl">Nome completo</label><input class="inp" id="prof-name"
+          placeholder="Seu nome" /></div>
+      <div class="fld"><label class="lbl">Frase / bio</label><input class="inp" id="prof-bio"
+          placeholder="Ex: Nutrição com ciência e cuidado ✨" maxlength="80" /></div>
+      <div class="fld"><label class="lbl">E-mail</label><input class="inp" id="prof-email" type="email"
+          placeholder="seu&#64;email.com" /></div>
+      <div id="prof-crn-section" style="display:none">
+        <div class="fld"><label class="lbl">CRN <span style="font-size:9px;color:var(--n4);font-weight:400">(opcional —
+              aparece no perfil público e nos relatórios PDF)</span></label>
+          <input class="inp" id="prof-crn" placeholder="Ex: CRN-3 12345" style="text-transform:uppercase"
+            oninput="this.value=this.value.toUpperCase()" />
+        </div>
+      </div>
+
+      <!-- Código de convite — só para nutricionista -->
+      <div id="prof-invite-section" style="display:none">
+        <div class="fsec" style="margin-top:4px">Código de Convite para Pacientes</div>
+        <div class="prof-invite">
+          <div style="font-size:11.5px;color:var(--n5);text-align:center;margin-bottom:4px">Compartilhe este código com
+            seus pacientes para que eles criem a conta e sejam vinculados a você</div>
+          <div class="prof-invite-code" id="prof-invite-code">—</div>
+          <div class="prof-invite-copy">
+            <button class="btn btn-s btn-sm" onclick="copyInviteCode()">📋 Copiar código</button>
+            <button class="btn btn-ghost btn-sm" onclick="regenInviteCode()">🔄 Gerar novo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mf" style="margin-top:16px">
+        <button class="btn btn-ghost" onclick="closeM('m-profile')">Cancelar</button>
+        <button class="btn btn-p" onclick="saveProfile()">Salvar perfil</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOVA CONSULTA -->
+  <div class="ov" id="m-consult">
+    <div class="modal" style="max-width:480px">
+      <div class="mh">
+        <div class="mt" id="cons-modal-title">Nova Consulta</div><button class="mc"
+          onclick="closeM('m-consult')">×</button>
+      </div>
+      <div class="fld"><label class="lbl">Paciente</label>
+        <select class="sel" id="cons-pat"></select>
+      </div>
+      <div class="row2">
+        <div class="fld"><label class="lbl">Data</label><input class="inp" type="date" id="cons-date" /></div>
+        <div class="fld"><label class="lbl">Horário</label><input class="inp" type="time" id="cons-time"
+            value="08:00" /></div>
+      </div>
+      <div class="row2">
+        <div class="fld"><label class="lbl">Tipo</label>
+          <select class="sel" id="cons-type">
+            <option value="primeira">Primeira consulta</option>
+            <option value="retorno">Retorno</option>
+            <option value="online">Online</option>
+            <option value="avaliacao">Avaliação corporal</option>
+            <option value="emergencia">Urgência</option>
+          </select>
+        </div>
+        <div class="fld"><label class="lbl">Duração</label>
+          <select class="sel" id="cons-dur">
+            <option value="30">30 min</option>
+            <option value="45">45 min</option>
+            <option value="60" selected>1 hora</option>
+            <option value="90">1h 30min</option>
+          </select>
+        </div>
+      </div>
+      <div class="fld"><label class="lbl">Observações</label>
+        <textarea class="textarea" id="cons-obs" placeholder="Ex: Trazer exames, jejum de 12h…"></textarea>
+      </div>
+      <div class="mf">
+        <button class="btn btn-ghost" onclick="closeM('m-consult')">Cancelar</button>
+        <button class="btn btn-p" onclick="saveConsulta()">Agendar</button>
+      </div>
+    </div>
+  </div>
+  <!-- MEAS -->
+  <div class="ov" id="m-meas">
+    <div class="modal">
+      <div class="mh">
+        <div class="mt">Registrar Medidas</div><button class="mc" onclick="closeM('m-meas')">×</button>
+      </div>
+      <div class="row2">
+        <div class="fld"><label class="lbl">Data</label><input type="date" class="inp" id="mm-data" /></div>
+        <div class="fld"><label class="lbl">Horário</label><input type="time" class="inp" value="08:00" /></div>
+      </div>
+      <div class="fsec">Composição Corporal</div>
+      <div class="row4">
+        <div class="fld"><label class="lbl">Peso (kg)</label><input class="inp" id="mm-peso" type="number" step="0.1" />
+        </div>
+        <div class="fld"><label class="lbl">% Gordura</label><input class="inp" id="mm-fat" type="number" step="0.1" />
+        </div>
+        <div class="fld"><label class="lbl">M. Magra (kg)</label><input class="inp" id="mm-mm" type="number"
+            step="0.1" /></div>
+        <div class="fld"><label class="lbl">Água corp. (%)</label><input class="inp" type="number" step="0.1" /></div>
+      </div>
+      <div class="row3">
+        <div class="fld"><label class="lbl">Cintura (cm)</label><input class="inp" id="mm-cin" type="number"
+            step="0.1" /></div>
+        <div class="fld"><label class="lbl">Quadril (cm)</label><input class="inp" type="number" step="0.1" /></div>
+        <div class="fld"><label class="lbl">Abdômen (cm)</label><input class="inp" type="number" step="0.1" /></div>
+      </div>
+      <div class="fsec">Exames (opcional)</div>
+      <div class="row3">
+        <div class="fld"><label class="lbl">Glicemia (mg/dL)</label><input class="inp" type="number" /></div>
+        <div class="fld"><label class="lbl">PA Sistólica</label><input class="inp" type="number" /></div>
+        <div class="fld"><label class="lbl">PA Diastólica</label><input class="inp" type="number" /></div>
+      </div>
+      <div class="fld"><label class="lbl">Observações</label><textarea class="textarea" id="mm-obs"
+          placeholder="Ex: medição em jejum, após exercício, uso de bioimpedância…"></textarea></div>
+      <div class="mf"><button class="btn btn-ghost" onclick="closeM('m-meas')">Cancelar</button><button
+          class="btn btn-p" onclick="saveMeas()">Salvar Medidas</button></div>
+    </div>
+  </div>
+
+  <!-- SUBS -->
+  <div class="ov" id="m-sub">
+    <div class="modal">
+      <div class="mh">
+        <div class="mt" id="sub-title">Substituições</div><button class="mc" onclick="closeM('m-sub')">×</button>
+      </div>
+      <div id="sub-body"></div>
+    </div>
+  </div>
+
+  <!-- TEMPLATE -->
+  <div class="ov" id="m-tpl">
+    <div class="modal">
+      <div class="mh">
+        <div class="mt">Salvar como Template</div><button class="mc" onclick="closeM('m-tpl')">×</button>
+      </div>
+      <div class="fld"><label class="lbl">Nome do template</label><input class="inp" id="tpl-name"
+          placeholder="Ex: Emagrecimento 1600kcal, Hipertrofia…" /></div>
+      <div class="fld"><label class="lbl">Descrição</label><textarea class="textarea" id="tpl-desc"
+          placeholder="Ideal para pacientes com objetivo de…"></textarea></div>
+      <div class="mf"><button class="btn btn-ghost" onclick="closeM('m-tpl')">Cancelar</button><button class="btn btn-p"
+          onclick="saveTpl()">Salvar Template</button></div>
+    </div>
+  </div>
+
+  <!-- DIARY -->
+  <div class="ov" id="m-diary">
+    <div class="modal modal-lg">
+      <div class="mh">
+        <div class="mt">Diário Alimentar do Paciente</div><button class="mc" onclick="closeM('m-diary')">×</button>
+      </div>
+      <div id="diary-body"></div>
+    </div>
+  </div>
+
+
+  <!-- ONBOARDING -->
+  <div class="ov" id="m-onboard">
+    <div class="modal" style="max-width:520px">
+      <div class="mh">
+        <div class="mt">👋 Bem-vindo ao DietOn!</div><button class="mc" onclick="closeM('m-onboard')">×</button>
+      </div>
+      <div id="onb-slides">
+      </div>
+    </div>
+  </div>
+  <div id="print-area"></div>
+
+  <!-- ── Supabase SDK ── -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ── JavaScript Principal ── -->
+  <script src="dieton.js?v=1.4"></script>
+  <script src="api.js?v=2.8"></script>
+  <script>console.log("DietOn v1.3 inicializado");</script>
+
+
+  <!-- Modal Suplementação -->
+  <div id="m-supl-form"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center;padding:20px">
+    <div id="mc-supl"></div>
+  </div>
+
+  <!-- Modal Financeiro -->
+  <div id="m-fin-form"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center;padding:20px">
+    <div id="mc-fin"></div>
+  </div>
+
+  <!-- Modal Termos de Uso -->
+  <div id="m-termos"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;overflow-y:auto;padding:20px">
+    <div
+      style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.2)">
+      <div
+        style="background:linear-gradient(135deg,#1f0d00,#3d1a00);padding:24px 28px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-family:'Jakarta',sans-serif;font-size:18px;font-weight:800;color:#fff">Termos de Uso e
+            Política de Privacidade</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">DietOn Plataforma Clínica · Versão 1.0 ·
+            Março 2026</div>
+        </div>
+        <button onclick="document.getElementById('m-termos').style.display='none'"
+          style="background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
+      </div>
+      <div style="padding:28px;font-size:13px;color:#374151;line-height:1.85;max-height:70vh;overflow-y:auto">
+
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:0 0 8px">1. Aceitação dos Termos</h3>
+        <p>Ao acessar e utilizar a plataforma DietOn, você concorda com estes Termos de Uso. O uso da plataforma implica
+          em total aceitação das condições aqui descritas. Caso não concorde, interrompa imediatamente o uso.</p>
+
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">2. Descrição do Serviço</h3>
+        <p>O DietOn é uma plataforma de gestão clínica nutricional destinada exclusivamente a <strong>nutricionistas
+            registrados no CFN</strong> (Conselho Federal de Nutricionistas). A plataforma permite gerenciar pacientes,
+          elaborar planos alimentares, registrar evoluções e utilizar ferramentas de inteligência artificial como
+          suporte à decisão clínica.</p>
+
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">3. Responsabilidade Profissional</h3>
+        <p>O DietOn é uma ferramenta de <strong>apoio clínico</strong>. Toda prescrição dietética é de responsabilidade
+          exclusiva do nutricionista habilitado. Os cálculos e sugestões gerados pela plataforma, incluindo aqueles
+          produzidos por inteligência artificial, devem ser revisados e validados pelo profissional antes de qualquer
+          aplicação clínica. O DietOn não se responsabiliza por condutas clínicas adotadas com base nas informações
+          geradas pela plataforma.</p>
+
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">4. Proteção de Dados — LGPD</h3>
+        <p>Em conformidade com a <strong>Lei Geral de Proteção de Dados (Lei nº 13.709/2018)</strong>:</p>
+        <ul style="padding-left:18px;margin:8px 0">
+          <li style="margin-bottom:6px"><strong>Finalidade:</strong> os dados coletados destinam-se exclusivamente à
+            prestação dos serviços de gestão clínica nutricional.</li>
+          <li style="margin-bottom:6px"><strong>Base legal:</strong> Art. 7º, VIII da LGPD — execução de contrato.</li>
+          <li style="margin-bottom:6px"><strong>Dados dos pacientes:</strong> são de titularidade do nutricionista. O
+            DietOn atua como operador. A responsabilidade pelo consentimento dos pacientes é do nutricionista
+            (controlador).</li>
+          <li style="margin-bottom:6px"><strong>Retenção:</strong> dados mantidos por 5 anos, conforme Resolução CFN nº
+            600/2018.</li>
+          <li style="margin-bottom:6px"><strong>Direitos:</strong> acesso, retificação, portabilidade e eliminação podem
+            ser solicitados via <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ddbeb2b3a9bca9b29db9b4b8a9b2b3f3beb2b0f3bfaf">[email&#160;protected]</a>.</li>
+          <li style="margin-bottom:6px"><strong>Segurança:</strong> dados armazenados em servidores na região de São
+            Paulo (AWS), com criptografia em trânsito (TLS 1.3) e em repouso.</li>
+        </ul>
+
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">5. Conformidade com o CFN</h3>
+        <p>O uso da plataforma deve estar em conformidade com as normas do Conselho Federal de Nutricionistas,
+          especialmente:</p>
+        <ul style="padding-left:18px;margin:8px 0">
+          <li style="margin-bottom:6px">Resolução CFN nº 600/2018 — Código de Ética e de Conduta do Nutricionista</li>
+          <li style="margin-bottom:6px">Resolução CFN nº 304/2003 — Prescrição dietética</li>
+          <li style="margin-bottom:6px">Resolução CFN nº 380/2005 — Atividades do nutricionista</li>
+        </ul>
+
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">6. Conta e Segurança</h3>
+        <p>O usuário é responsável pela confidencialidade de suas credenciais de acesso. É vedado compartilhar a conta
+          com terceiros não autorizados. O DietOn não solicita senha por e-mail, telefone ou chat. Em caso de suspeita
+          de acesso não autorizado, o usuário deve alterar sua senha imediatamente e notificar o suporte.</p>
+
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">7. Inteligência Artificial</h3>
+        <p>As funcionalidades de IA do DietOn utilizam modelos de linguagem para geração de sugestões nutricionais.
+          Estas sugestões <strong>não constituem prescrição médica ou nutricional autônoma</strong> e devem sempre ser
+          revisadas pelo profissional responsável antes de uso. O nutricionista assume integral responsabilidade pela
+          aplicação clínica de qualquer plano gerado com suporte de IA.</p>
+
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">8. Limitação de Responsabilidade</h3>
+        <p>O DietOn não se responsabiliza por: (a) danos decorrentes do uso inadequado da plataforma; (b) perda de dados
+          por falha do usuário em manter senhas seguras; (c) decisões clínicas tomadas com base nas ferramentas da
+          plataforma sem revisão profissional.</p>
+
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">9. Alterações nos Termos</h3>
+        <p>O DietOn reserva-se o direito de atualizar estes termos a qualquer momento. Alterações significativas serão
+          comunicadas por e-mail com antecedência de 15 dias. O uso continuado da plataforma após as alterações
+          constitui aceitação dos novos termos.</p>
+
+        <h3 style="font-size:14px;font-weight:700;color:#1f0d00;margin:16px 0 8px">10. Contato e DPO</h3>
+        <p>Encarregado de Proteção de Dados (DPO): <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fb9894958f9a8f94bb9f929e8f9495d5989496d59989">[email&#160;protected]</a></strong><br />
+          Para exercer seus direitos LGPD ou relatar incidentes de segurança, utilize o mesmo endereço.</p>
+
+        <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 16px;margin-top:20px">
+          <div style="font-size:12px;font-weight:700;color:#9a3412">⚖️ Foro competente</div>
+          <div style="font-size:12px;color:#7c2d12;margin-top:4px">Fica eleito o foro da comarca de São Paulo/SP para
+            dirimir quaisquer controvérsias oriundas destes termos, com renúncia a qualquer outro, por mais privilegiado
+            que seja.</div>
+        </div>
+      </div>
+      <div style="padding:16px 28px;border-top:1px solid #f3f4f6;display:flex;justify-content:flex-end">
+        <button onclick="document.getElementById('m-termos').style.display='none'"
+          style="background:#e85a0a;color:#fff;border:none;padding:10px 28px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">Entendi
+          e Aceito</button>
+      </div>
+    </div>
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    function openTermos(e) { if (e) e.preventDefault(); document.getElementById('m-termos').style.display = 'block'; }
+    function checkPwStrength(pw, id) {
+      var bar = document.getElementById(id + '-bar');
+      var txt = document.getElementById(id + '-txt');
+      if (!bar || !txt) return;
+      var score = 0;
+      if (pw.length >= 8) score++;
+      if (pw.length >= 12) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+      var levels = [
+        { w: '0%', c: '#e5e7eb', t: '' },
+        { w: '25%', c: '#ef4444', t: 'Muito fraca' },
+        { w: '50%', c: '#f97316', t: 'Fraca' },
+        { w: '75%', c: '#eab308', t: 'Razoável' },
+        { w: '90%', c: '#22c55e', t: 'Boa' },
+        { w: '100%', c: '#16a34a', t: 'Forte ✓' }
+      ];
+      var l = levels[Math.min(score, 5)];
+      bar.style.width = l.w; bar.style.background = l.c;
+      txt.textContent = l.t; txt.style.color = l.c;
+    }
+  </script>
+
+  <!-- ══ TOUR GUIADO ══ -->
+  <div id="tour-overlay" style="display:none;position:fixed;inset:0;z-index:9998;pointer-events:none">
+    <svg style="position:absolute;inset:0;width:100%;height:100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <mask id="tour-mask">
+          <rect width="100%" height="100%" fill="white" />
+          <rect id="tour-hole" x="0" y="0" width="0" height="0" rx="8" fill="black" />
+        </mask>
+      </defs>
+      <rect width="100%" height="100%" fill="rgba(0,0,0,0.55)" mask="url(#tour-mask)" />
+    </svg>
+    <div id="tour-ring"
+      style="position:absolute;border:2px solid #e85a0a;border-radius:10px;opacity:0;transition:all .3s ease;pointer-events:none;box-shadow:0 0 0 3px rgba(232,90,10,.25)">
+    </div>
+  </div>
+  <div id="tour-tip"
+    style="display:none;position:fixed;z-index:9999;background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 40px rgba(0,0,0,.18);font-family:'Plus Jakarta Sans',sans-serif;min-width:280px;max-width:320px">
+    <div style="height:3px;background:#f3f4f6;border-radius:99px;margin-bottom:12px">
+      <div id="tour-prog"
+        style="height:100%;background:linear-gradient(90deg,#e85a0a,#f97316);border-radius:99px;transition:width .3s ease;width:0%">
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span id="tour-step-lbl"
+        style="font-size:10px;color:#9ca3af;font-weight:600;letter-spacing:.05em;text-transform:uppercase"></span>
+      <button onclick="tourEnd()"
+        style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:16px;padding:0;line-height:1">×</button>
+    </div>
+    <div style="text-align:center;margin-bottom:10px"><span id="tour-icon" style="font-size:32px"></span></div>
+    <div id="tour-title" style="font-size:15px;font-weight:800;color:#111827;margin-bottom:6px;text-align:center"></div>
+    <div id="tour-body" style="font-size:12.5px;color:#6b7280;line-height:1.6;margin-bottom:14px;text-align:center">
+    </div>
+    <div id="tour-dots" style="display:flex;gap:4px;justify-content:center;margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px;justify-content:center">
+            <button id="tour-prev" onclick="tourPrev()"
+        style="display:none;background:#f3f4f6;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;color:#374151">← Anterior</button>
+      <button id="tour-next" onclick="tourNext()"
+        style="background:linear-gradient(135deg,#e85a0a,#f97316);border:none;border-radius:8px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer;color:#fff">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- ── Modal genérico ── -->
+
+
+  <!-- ── Modal Chat ── -->
+  <div class="ov" id="m-chat" onclick="if(event.target===this)closeM('m-chat')">
+    <div class="modal" style="max-width:480px;width:96%;height:580px;max-height:92vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
+      <div class="mh" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;flex-shrink:0">
+        <span class="mt" id="chat-title">💬 Chat com paciente</span>
+        <button class="mc" onclick="closeM('m-chat')" style="font-size:20px;line-height:1;padding:4px 8px">×</button>
+      </div>
+      <div id="chat-msgs" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--n0)"></div>
+      <div style="padding:10px 14px;border-top:1.5px solid var(--n2);display:flex;gap:8px;flex-shrink:0;background:var(--surf)">
+        <input id="chat-input" class="inp" placeholder="Digite uma mensagem..." style="flex:1;font-size:13px;min-height:40px"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg();}"/>
+        <button class="btn btn-p" onclick="sendChatMsg()" style="min-height:40px;padding:0 16px;flex-shrink:0">Enviar</button>
       </div>
     </div>
   </div>
@@ -1257,8 +2413,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ── Scripts principal ── -->
-  <script src="api.js?v=2.7"></script>
-  <script src="dieton.js?v=2.7"></script>
+  <script src="api.js?v=2.8"></script>
+  <script src="dieton.js?v=2.8"></script>
 
   <!-- ── Service Worker + PWA ── -->
   <script>
