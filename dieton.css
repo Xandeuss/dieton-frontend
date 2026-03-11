@@ -1150,3 +1150,112 @@ body.dark [style*="background:var(--n1)"]{background:var(--n1)!important}
  .fr{padding:12px!important}
 }
 
+
+/* ══════════════════════════════════════════
+   MISSING & IMPROVED CSS RULES
+   ══════════════════════════════════════════ */
+
+/* Notif items */
+.notif-item{
+ display:flex;align-items:flex-start;gap:12px;
+ padding:12px 14px;border-radius:12px;
+ border:1.5px solid var(--n2);background:var(--n0);
+ margin-bottom:8px;cursor:pointer;transition:all .15s;
+}
+.notif-item:hover{border-color:var(--g4);background:var(--g0)}
+.notif-item.unread{border-left:3px solid var(--g4);background:var(--g0)}
+
+/* Week view (plano semanal) */
+.week-view{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.week-col-hd{font-size:11px;font-weight:700;color:var(--n5);text-transform:uppercase;
+ letter-spacing:.05em;padding:6px 8px;background:var(--n1);border-radius:var(--r) var(--r) 0 0;
+ text-align:center;border-bottom:1.5px solid var(--n2)}
+
+/* Adherence chart */
+.adh-chart{display:flex;gap:3px;align-items:flex-end;height:60px;padding:4px 0}
+.adh-bar{flex:1;border-radius:3px 3px 0 0;min-width:6px;transition:height .3s ease}
+
+/* sr-item hover */
+.sr-item:hover{background:var(--g0)!important;border-color:var(--g4)!important}
+
+/* Chat bubbles */
+.chat-bubble-nutri{
+ background:var(--g4);color:#fff;
+ border-radius:16px 16px 4px 16px;
+ padding:9px 13px;max-width:78%;font-size:12.5px;line-height:1.5
+}
+.chat-bubble-pac{
+ background:var(--n1);color:var(--n8);
+ border:1.5px solid var(--n2);
+ border-radius:16px 16px 16px 4px;
+ padding:9px 13px;max-width:78%;font-size:12.5px;line-height:1.5
+}
+
+/* Nutrient chart panel */
+#nutrient-chart-panel .card{border:1.5px solid var(--g2);background:var(--g0)}
+
+/* Quick actions buttons */
+.btn-ghost:focus{outline:2px solid var(--g4);outline-offset:2px}
+
+/* ══ MOBILE — GENERAL IMPROVEMENTS ══ */
+@media(max-width:768px){
+ /* Bigger tap targets for all buttons */
+ .btn{min-height:38px}
+ .btn-sm{min-height:36px;padding:6px 12px}
+
+ /* Cards — reduce padding on mobile */
+ .card{padding:12px}
+
+ /* Sidebar overlay tap to close — full width */
+ .sb{touch-action:pan-y}
+
+ /* Week view — scroll horizontal on very small screens */
+ .week-view{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+
+ /* Notif list */
+ .notif-item{padding:10px 12px}
+
+ /* rPTask circle chart — center on mobile */
+ .ptask-ring-wrap{display:flex;justify-content:center;margin-bottom:12px}
+
+ /* Tables — horizontal scroll */
+ .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+ table{min-width:480px}
+}
+
+@media(max-width:540px){
+ /* rPTask — stack to single column */
+ .ptask-layout{grid-template-columns:1fr!important}
+
+ /* Remove horizontal padding on page for max space */
+ .page{padding:12px 8px!important}
+
+ /* KPI cards — 2 per row minimum */
+ .kpi-row{grid-template-columns:1fr 1fr!important}
+
+ /* rAnam — full width inputs */
+ .anam-grid{grid-template-columns:1fr!important}
+
+ /* Chat modal — full screen */
+ #m-chat .modal-box{max-width:100%!important;height:90vh!important;border-radius:16px 16px 0 0!important}
+}
+
+/* ══ HOVER:NONE (touch devices) — remove hover styles that get stuck ══ */
+@media(hover:none){
+ .fr:hover{background:transparent!important;border-color:var(--n2)!important}
+ .fr:active{background:var(--g0)!important;border-color:var(--g4)!important}
+ .card:hover{box-shadow:var(--s1)!important}
+ .ni:hover{background:transparent!important}
+ .ni:active{background:rgba(255,255,255,.1)!important}
+ .btn-ghost:hover{background:rgba(255,255,255,.06)!important}
+ .btn-ghost:active{background:rgba(255,255,255,.15)!important}
+}
+
+/* ══ DARK MODE — new classes ══ */
+body.dark .notif-item{background:var(--n1);border-color:var(--n2);color:var(--n7)}
+body.dark .notif-item.unread{background:var(--g0);border-left-color:var(--g4)}
+body.dark .notif-item:hover{background:var(--n2)!important}
+body.dark .chat-bubble-pac{background:var(--n2);border-color:var(--n3);color:var(--n8)}
+body.dark #nutrient-chart-panel .card{border-color:var(--g2);background:var(--g0)}
+body.dark .week-col-hd{background:var(--n2);border-color:var(--n3);color:var(--n6)}
+

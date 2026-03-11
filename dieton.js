@@ -578,7 +578,18 @@ function goP(id,btn){
  // Sync dark toggle icon with current state
  var _dt=document.getElementById('dark-toggle');
  if(_dt) _dt.textContent=document.body.classList.contains('dark')?'☀️':'🌙';
- if(pages[id]){pg.innerHTML=pages[id]();setTimeout(function(){afterRender(id);},50);}
+ if(pages[id]){
+  try{
+   pg.innerHTML=pages[id]();
+   setTimeout(function(){try{afterRender(id);}catch(e){console.warn('afterRender error',id,e);}},50);
+  }catch(e){
+   console.error('Page render error',id,e);
+   pg.innerHTML='<div style="padding:60px;text-align:center"><div style="font-size:40px;margin-bottom:12px">⚠️</div>'
+    +'<div style="font-weight:700;color:var(--n7);margin-bottom:8px">Erro ao carregar a página</div>'
+    +'<div style="font-size:12px;color:var(--n4);margin-bottom:16px">'+escHtml(e.message)+'</div>'
+    +'<button class="btn btn-p" onclick="location.reload()">↺ Recarregar</button></div>';
+  }
+ }
 }
 
 function afterRender(id){
@@ -684,6 +695,7 @@ function rDash(){
  }
 
  return kpiRow
+  +'<div class="card" style="margin-bottom:14px"><div class="ch"><span class="ct">⚡ Ações Rápidas</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">'+[['➕','Nova Consulta',"openM(\'m-consult\')"],['📋','Paciente',"openM(\'m-pat\')"],['💊','Prescrição',"goP(\'presc\',document.getElementById(\'ni-presc\')"],['📊','Evolução',"goP(\'ev\',document.getElementById(\'ni-ev\'))"],['💬','Chat',"goP(\'chat\',document.getElementById(\'ni-chat\'))"],['💰','Financeiro',"goP(\'fin\',document.getElementById(\'ni-fin\'))"]].map(function(a){return'<button class="btn btn-ghost" onclick="'+a[2]+'" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;font-size:11px;font-weight:600;border-radius:10px;min-height:58px;touch-action:manipulation"><span style="font-size:18px">'+a[0]+'</span>'+a[1]+'</button>';}).join('')+'</div></div>'
   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
   +'<div class="card"><div class="ch" style="margin-bottom:12px"><span class="ct">Consultas (8 semanas)</span><span class="cs">'+monthAppts+' este mês</span></div><div class="bchart" id="bchart"></div></div>'
   +'<div class="card" style="padding:18px"><div class="ch" style="margin-bottom:12px"><span class="ct">Agenda de Hoje</span>'
@@ -1149,7 +1161,7 @@ function recalcMacroPct() {
 }
 function renderMacSum() {
   var sum = document.getElementById('macro-sum'); if (!sum) return;
-  sum.innerHTML = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;margin-bottom:6px">'
+  sum.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;text-align:center;margin-bottom:6px">'
     + [['Proteínas', '#3b82f6', mP + 'g'], ['Carboidratos', '#f59e0b', mC + 'g'], ['Gorduras', '#ef4444', mF + 'g']].map(function (r) { return '<div style="background:var(--n0);border-radius:var(--r);padding:8px"><div style="font-family:var(--in);font-size:15px;font-weight:800;color:' + r[1] + '">' + r[2] + '</div><div style="font-size:9.5px;color:var(--n4);margin-top:1px;font-family:var(--jk)">' + r[0] + '</div></div>'; }).join('') + '</div>';
   updatePizza();
 }
@@ -1445,7 +1457,7 @@ function rWeek() {
 
   var avg = Math.round(weekData.reduce(function (s, d) { return s + d.meals.reduce(function (s2, m) { return s2 + m.items.reduce(function (s3, it) { return s3 + it.k; }, 0); }, 0); }, 0) / 7);
 
-  html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">'
     + '<div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:22px;font-weight:800;color:var(--g5)">' + (avg * 7).toLocaleString('pt-BR') + '</div><div style="font-size:11px;color:var(--n4);margin-top:3px">kcal na semana</div></div>'
     + '<div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:22px;font-weight:800;color:var(--n9)">' + avg + '</div><div style="font-size:11px;color:var(--n4);margin-top:3px">média diária</div></div>'
     + '<div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:22px;font-weight:800;color:var(--g5)">7</div><div style="font-size:11px;color:var(--n4);margin-top:3px">dias planejados</div></div>'
@@ -1459,7 +1471,7 @@ function rWeek() {
 function rEv() {
   var p = selPat || pats[0];
   if (!p) { return '<div class="alert alert-b"><span>Selecione um paciente para ver o acompanhamento.</span></div>'; }
-  var hist = [...p.historico].reverse();
+  var hist = [...(p.historico||[])].reverse();
   var loss = p.wStart - p.w;
   var ws = hist.map(function (h) { return h.peso });
   var mn = Math.min.apply(null, ws) - 2, mx = Math.max.apply(null, ws) + 2;
@@ -1667,7 +1679,7 @@ function rRec() {
     + (hasDiario ? '✓ Consumido extraído do diário de hoje de <strong>' + p.n + '</strong>'
       : hasPlan ? '📋 Prescrito baseado no plano de <strong>' + p.n + '</strong> · consumido estimado por adesão (' + p.prog + '%)'
         : '⚠ Sem plano ou diário — valores estimados pelo peso e objetivo') + '</span></div>'
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px">'
     + '<div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--g5)">' + tkP + '<span style="font-size:13px;font-weight:500;color:var(--n4)"> kcal</span></div><div style="font-size:11.5px;color:var(--n4);margin-top:2px">Meta prescrita</div></div>'
     + '<div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:26px;font-weight:800;letter-spacing:-1px;color:' + (Math.abs(diff) <= 100 ? '#16a34a' : diff > 0 ? '#dc2626' : '#f59e0b') + '">' + tkC + '<span style="font-size:13px;font-weight:500;color:var(--n4)"> kcal</span></div><div style="font-size:11.5px;color:var(--n4);margin-top:2px">Consumido · <strong style="color:' + (diff > 0 ? '#dc2626' : diff < 0 ? '#f59e0b' : '#16a34a') + '">' + (diff > 0 ? '+' : '') + diff + ' kcal</strong></div></div>'
     + '<div class="card" style="text-align:center"><div style="font-family:var(--in);font-size:26px;font-weight:800;letter-spacing:-1px;color:' + (adPct >= 90 && adPct <= 110 ? '#16a34a' : adPct >= 70 ? '#f59e0b' : '#dc2626') + '">' + adPct + '<span style="font-size:13px;font-weight:500;color:var(--n4)">%</span></div><div style="font-size:11.5px;color:var(--n4);margin-top:2px">Adesão ao plano</div></div></div>'
@@ -2009,6 +2021,13 @@ function rPDash(){
   });
  });
  var prescKcal = planKcal || p.meta || 1800;
+
+ // Today's diary
+ var todayISO = new Date().toISOString().slice(0,10);
+ var todayEntry = (p.diary||[]).find(function(d){return d.isoDate===todayISO;});
+ var todayKcal = todayEntry ? (todayEntry.totalKcal||0) : 0;
+ var todayPct = prescKcal>0 ? Math.min(100, Math.round(todayKcal/prescKcal*100)) : 0;
+ var todayColor = todayPct>110?'#ef4444':todayPct>90?'#22c55e':todayPct>60?'#f59e0b':'#3b82f6';
 
  // Next appointment for this patient
  var nextAppt = null;
@@ -2396,7 +2415,7 @@ function rPTask(){
  var pending=tasks.filter(function(t){return!t.done});var done=tasks.filter(function(t){return t.done});
  var pct=tasks.length?Math.round(done.length/tasks.length*100):0;
  var circ=2*Math.PI*44,off=circ*(1-pct/100);
- return'<div style="display:grid;grid-template-columns:1fr 280px;gap:14px">'
+ return'<div style="display:grid;grid-template-columns:minmax(0,1fr) min(280px,100%);gap:14px">'
  +'<div><div class="card" style="margin-bottom:10px"><div class="ch"><span class="ct">Pendentes</span><span class="cs">'+pending.length+' itens</span></div>'
  +(pending.length?pending.map(function(t){return'<div class="task-item"><div class="task-chk'+(t.done?' checked':'')+'" onclick="toggleTask('+t.id+')">'+(t.done?'✓':'')+'</div><span class="task-txt">'+t.text+'</span><span class="task-cat '+catMap[t.cat]+'">'+catLabel[t.cat]+'</span><button class="task-del" onclick="delTask('+t.id+')">×</button></div>';}).join(''):'<p style="font-size:12.5px;color:var(--n4);padding:6px 0">Nenhuma tarefa pendente 🎉</p>')
  +'</div><div class="card" style="margin-bottom:10px"><div class="ch"><span class="ct">Concluídas</span><span class="cs" style="color:var(--g5)">'+done.length+' itens</span></div>'
@@ -2412,7 +2431,8 @@ function addTask() { var inp = document.getElementById('new-task'); var sel = do
 
 function rPEv(){
  var p=selPat||_getPacPatient()||pats[0];if(!p){return '<div style="padding:40px;text-align:center;color:var(--n4)">Nenhum dado disponível.</div>';}var hist=[...p.historico].reverse();var loss=p.wStart-p.w;
- var ws=hist.map(function(h){return h.peso});
+ var ws=hist.map(function(h){return h.peso||0}).filter(function(w){return w>0;});
+ if(!ws.length){return'<div style="padding:40px;text-align:center"><div style="font-size:40px;margin-bottom:12px">📈</div><div style="font-weight:700;color:var(--n7)">Nenhuma medida ainda</div><div style="font-size:12px;color:var(--n4);margin-top:6px">Seu nutricionista vai registrar suas evoluções nas consultas.</div></div>';}
  var mn=Math.min.apply(null,ws)-1,mx=Math.max.apply(null,ws)+1,nf=hist.length,cw=480,ch=130;
  var pts=hist.map(function(h,i){var x=20+i*(cw-40)/(nf>1?nf-1:1);var y=10+(mx-h.peso)/(mx-mn)*(ch-20);return{x:x.toFixed(1),y:y.toFixed(1),h:h}});
  var line=pts.map(function(p,i){return(i===0?'M':'L')+p.x+','+p.y}).join(' ');
@@ -3905,28 +3925,53 @@ function rBusca(){
    }).join('')
   +'</div></div></div>';
 }
-function globalSearch(q) {
-  var el = document.getElementById('global-results'); if (!el) return;
-  var ql = (q || '').toLowerCase().trim();
-  if (ql.length < 2) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--n4)">Digite ao menos 2 caracteres para buscar</div>'; return; }
-  var results = [];
-  pats.forEach(function (p) { if (p.n.toLowerCase().indexOf(ql) !== -1 || (p.goal || '').toLowerCase().indexOf(ql) !== -1 || (p.cond || '').toLowerCase().indexOf(ql) !== -1) results.push({ type: 'pac', icon: '👤', title: p.n, sub: p.age + ' anos · ' + p.goal + (p.cond ? ' · ' + p.cond : ''), pid: p.id, badge: p.stxt, bc: p.st }); });
-  FOOD_DB.filter(function (f) { return f.n.toLowerCase().indexOf(ql) !== -1 && results.length < 18; }).slice(0, 6).forEach(function (f) { results.push({ type: 'alim', icon: f.e, title: f.n, sub: f.k + ' kcal/100g · P:' + f.p + 'g · C:' + f.c + 'g · G:' + f.g + 'g', pid: 0, badge: f.cat, bc: 'tg' }); });
-  templates.filter(function (t) { return (t.name || '').toLowerCase().indexOf(ql) !== -1; }).forEach(function (t) { results.push({ type: 'tpl', icon: '📁', title: t.name, sub: t.desc || t.kcal + ' kcal', pid: 0, badge: 'Template', bc: 'tg' }); });
-  if (!results.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--n4)"><div style="font-size:32px;margin-bottom:10px">😕</div><div>Nenhum resultado para "' + q + '"</div></div>'; return; }
-  var typeLabels = { pac: '👥 Pacientes', alim: '🥗 Alimentos', tpl: '📁 Templates' };
-  var grouped = {}; results.forEach(function (r) { if (!grouped[r.type]) grouped[r.type] = []; grouped[r.type].push(r); });
-  var html = '<div style="font-size:11px;color:var(--n4);margin-bottom:10px">' + results.length + ' resultado(s) para "' + q + '"</div>';
-  Object.keys(grouped).forEach(function (type) {
-    html += '<div style="font-size:10px;font-weight:700;color:var(--n4);letter-spacing:.08em;text-transform:uppercase;margin:12px 0 6px">' + typeLabels[type] + '</div>';
-    grouped[type].forEach(function (r) {
-      var ca = r.pid ? 'selPat=pats.find(function(x){return x.id===' + r.pid + '});goP(\'ev\',document.getElementById(\'ni-ev\'))' : 'goP(\'presc\',document.getElementById(\'ni-presc\'))';
-      if (r.type === 'tpl') ca = 'goP(\'tpl\',document.getElementById(\'ni-tpl\'))';
-      html += '<div onclick="' + ca + '" class="sr-item" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:9px;border:1.5px solid var(--n2);margin-bottom:6px;cursor:pointer;transition:background .13s"><span style="font-size:22px;flex-shrink:0">' + r.icon + '</span><div style="flex:1;min-width:0"><div style="font-family:var(--jk);font-size:13px;font-weight:600;color:var(--n9)">' + r.title + '</div><div style="font-size:11px;color:var(--n5);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + r.sub + '</div></div><span class="tag ' + r.bc + '">' + r.badge + '</span></div>';
-    });
-  });
-  el.innerHTML = html;
+function globalSearch(q){
+ var el=document.getElementById('global-results');if(!el)return;
+ var ql=(q||document.getElementById('global-q')&&document.getElementById('global-q').value||'').toLowerCase().trim();
+ if(ql.length<2){
+  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--n4)">Digite ao menos 2 caracteres para buscar</div>';
+  return;
+ }
+ var results=[];
+ // Patients
+ pats.forEach(function(p){
+  var nm=(p.n||'').toLowerCase(),em=(p.email||'').toLowerCase();
+  var ob=(p.obj||p.objetivo||'').toLowerCase(),dx=(p.diag||'').toLowerCase();
+  if(nm.includes(ql)||em.includes(ql)||ob.includes(ql)||dx.includes(ql)){
+   results.push({type:'pac',icon:'👤',title:p.n||'—',sub:(p.obj||p.objetivo||'Sem objetivo')+(p.w?' · '+p.w+'kg':''),onclick:"openPatById("+p.id+")"});
+  }
+ });
+ // Templates
+ (templates||[]).forEach(function(t){
+  if((t.name||'').toLowerCase().includes(ql)){
+   results.push({type:'tpl',icon:'📋',title:t.name,sub:'Template de plano',onclick:"goP('tpl',document.getElementById('ni-tpl'))"});
+  }
+ });
+ // Foods
+ var foods=FOOD_DB.filter(function(f){return (f.n||'').toLowerCase().includes(ql);}).slice(0,5);
+ foods.forEach(function(f){
+  results.push({type:'food',icon:f.e||'🍽️',title:f.n,sub:f.k+'kcal · P:'+f.p+'g C:'+f.c+'g G:'+f.g+'g',onclick:"goP('presc',document.getElementById('ni-presc'))"});
+ });
+
+ if(!results.length){
+  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--n4)">Nenhum resultado para "'+escHtml(ql)+'"</div>';
+  return;
+ }
+
+ el.innerHTML=results.map(function(r){
+  return '<div class="sr-item" onclick="'+r.onclick+'" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;margin-bottom:6px;border:1.5px solid var(--n2);transition:all .15s" '
+   +'onmouseover="this.style.borderColor=\'var(--g4)\';this.style.background=\'var(--g0)\'" '
+   +'onmouseout="this.style.borderColor=\'var(--n2)\';this.style.background=\'\'">'
+   +'<span style="font-size:22px;flex-shrink:0">'+r.icon+'</span>'
+   +'<div style="flex:1;min-width:0">'
+   +'<div style="font-weight:700;font-size:13px;color:var(--n9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(r.title)+'</div>'
+   +'<div style="font-size:11px;color:var(--n5);margin-top:2px">'+escHtml(r.sub)+'</div>'
+   +'</div>'
+   +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--n3)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>'
+   +'</div>';
+ }).join('');
 }
+
 
 // ─── HELPER ───
 function _anamSelChange(pid) { var pp = pats.find(function (x) { return x.id === pid; }); if (pp) { selPat = pp; goP('anam', document.getElementById('ni-anam')); } }
@@ -4052,7 +4097,7 @@ function exportAnamPDF() {
 function showToast(msg,type){
  var conf={s:{cls:'t-s',ic:'✓'},i:{cls:'t-i',ic:'i'},w:{cls:'t-w',ic:'!'},e:{cls:'t-e',ic:'✕'}};
  var c=conf[type]||conf.i;
- var t=document.createElement('div');t.className='toast '+c.cls;
+ if(!msg)return;var t=document.createElement('div');t.className='toast '+c.cls;
  t.innerHTML='<div class="t-ico">'+c.ic+'</div><span>'+msg+'</span>';
  document.body.appendChild(t);
  setTimeout(function(){t.style.transition='opacity .3s,transform .3s';t.style.opacity='0';t.style.transform='translateY(8px)';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},310);},3200);
@@ -4427,8 +4472,9 @@ function _dvUpdateBadges(patId){
 
 // ── CHAT & NEW FEATURES ──
 
-function escHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+function escHtml(s){
+ if(s==null)return'';
+ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function rChat(){
