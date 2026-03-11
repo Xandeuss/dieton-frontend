@@ -522,61 +522,97 @@ function openChatFromPat(){
 // CHAT PAGE — nutricionista side
 // ════════════════════════════════════════════════════════════
 function rChat(){
- var all = pats.map(function(p){
-  var msgs = p.msgs||[];
-  var last = msgs.length ? msgs[msgs.length-1] : null;
-  var unread = msgs.filter(function(m){return m.role==='pac'&&!m.read;}).length;
-  return {p:p, last:last, unread:unread};
- }).sort(function(a,b){
-  // Conversations with messages first, sorted by most recent
-  if(!!a.last !== !!b.last) return a.last ? -1 : 1;
-  var ta = a.last?a.last.ts||'':'';
-  var tb = b.last?b.last.ts||'':'';
-  return tb>ta?1:-1;
+ // Ensure msgs array exists on all patients
+ pats.forEach(function(p){ if(!p.msgs) p.msgs=[]; });
+
+ var totalUnread = pats.reduce(function(sum,p){
+  return sum + p.msgs.filter(function(m){return m.role==='pac'&&!m.read;}).length;
+ }, 0);
+
+ // Sort: unread first, then by last message time, then alphabetical
+ var sorted = pats.slice().sort(function(a,b){
+  var ua = a.msgs.filter(function(m){return m.role==='pac'&&!m.read;}).length;
+  var ub = b.msgs.filter(function(m){return m.role==='pac'&&!m.read;}).length;
+  if(ua !== ub) return ub - ua;
+  var la = a.msgs.length ? a.msgs[a.msgs.length-1].ts||'' : '';
+  var lb = b.msgs.length ? b.msgs[b.msgs.length-1].ts||'' : '';
+  if(lb !== la) return lb > la ? 1 : -1;
+  return (a.n||'').localeCompare(b.n||'');
  });
 
- var withMsgs = all.filter(function(x){return x.last;});
- var noMsgs   = all.filter(function(x){return !x.last;});
- var totalUnread = all.reduce(function(s,x){return s+x.unread;},0);
+ var html = '';
 
- // ── Search bar
- var html = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">'
+ // Header
+ html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">'
   +'<div class="search-wrap" style="flex:1">'
   +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
   +'<input class="search-inp" id="chat-search-inp" placeholder="Buscar paciente..." oninput="_filterChatList(this.value)"/>'
   +'</div>'
-  +(totalUnread?'<span style="background:#ef4444;color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:2px 10px;flex-shrink:0">'+totalUnread+' não lida'+(totalUnread>1?'s':'')+'</span>':'')
+  +(totalUnread ? '<span style="background:#ef4444;color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:3px 10px;flex-shrink:0">'+totalUnread+' não lida'+(totalUnread>1?'s':'')+'</span>' : '')
   +'</div>';
 
- if(!pats.length){
-  return html+'<div class="card" style="text-align:center;padding:48px 20px">'
+ if(!sorted.length){
+  html += '<div class="card" style="text-align:center;padding:48px 20px">'
    +'<div style="font-size:48px;margin-bottom:12px">💬</div>'
-   +'<div style="font-weight:800;font-size:15px;color:var(--n8);margin-bottom:6px">Nenhum paciente cadastrado</div>'
+   +'<div style="font-weight:800;font-size:15px;color:var(--n8);margin-bottom:6px">Nenhum paciente</div>'
    +'<div style="font-size:12px;color:var(--n4);margin-bottom:16px">Cadastre pacientes para iniciar conversas</div>'
-   +'<button class="btn btn-p" onclick="goP(\'pat\',document.getElementById(\'ni-pat\'))">+ Novo Paciente</button></div>';
+   +'<button class="btn btn-p" onclick="goP(\'pat\',document.getElementById(\'ni-pat\'))">+ Novo Paciente</button>'
+   +'</div>';
+  return html;
  }
 
- html += '<div id="chat-list-wrap">';
+ // Patient list
+ sorted.forEach(function(p){
+  var msgs = p.msgs||[];
+  var last = msgs.length ? msgs[msgs.length-1] : null;
+  var unread = msgs.filter(function(m){return m.role==='pac'&&!m.read;}).length;
+  var initials = p.n ? p.n.split(' ').slice(0,2).map(function(w){return w[0].toUpperCase();}).join('') : '?';
 
- // ── Active conversations
- if(withMsgs.length){
-  html += '<div style="font-size:11px;font-weight:700;color:var(--n4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding:0 2px">Conversas</div>';
-  withMsgs.forEach(function(x){
-   html += _chatRow(x, true);
-  });
- }
+  var preview, previewColor, previewStyle;
+  if(last){
+   preview = (last.role==='nutri' ? 'Você: ' : '') + last.txt;
+   if(preview.length > 55) preview = preview.slice(0,55)+'…';
+   previewColor = unread ? 'var(--n8)' : 'var(--n4)';
+   previewStyle = 'normal';
+  } else {
+   preview = 'Toque para iniciar conversa →';
+   previewColor = 'var(--g4)';
+   previewStyle = 'italic';
+  }
 
- // ── All patients (to start new conversation)
- var label = withMsgs.length ? 'Todos os pacientes' : 'Pacientes';
- html += '<div style="font-size:11px;font-weight:700;color:var(--n4);text-transform:uppercase;letter-spacing:.05em;margin:'+(withMsgs.length?'20px':'0')+'px 0 8px;padding:0 2px">'+label+'</div>';
+  html += '<div class="chat-row card" data-name="'+escHtml(p.n.toLowerCase())+'" '
+   +'onclick="openChat('+p.id+')" '
+   +'style="display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;'
+   +'border-color:'+(unread?'var(--g3)':'var(--n2)')+'!important;'
+   +'background:'+(unread?'var(--g0)':'')+'!important">'
 
- all.forEach(function(x){
-  html += _chatRow(x, false);
+   // Avatar
+   +'<div class="av '+(p.av||'a1')+'" style="width:46px;height:46px;border-radius:50%;'
+   +'display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;'
+   +'flex-shrink:0;position:relative">'
+   +initials
+   +(unread ? '<span style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;'
+    +'background:#ef4444;border-radius:50%;border:2px solid var(--card-bg,#fff)"></span>' : '')
+   +'</div>'
+
+   // Info
+   +'<div style="flex:1;min-width:0">'
+   +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
+   +'<span style="font-weight:'+(unread?'800':'600')+';font-size:13px;color:var(--n9);'
+   +'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%">'+escHtml(p.n)+'</span>'
+   +(last ? '<span style="font-size:10px;color:var(--n4);flex-shrink:0">'+last.time+'</span>' : '')
+   +'</div>'
+   +'<div style="display:flex;justify-content:space-between;align-items:center">'
+   +'<span style="font-size:11.5px;color:'+previewColor+';font-style:'+previewStyle+';'
+   +'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80%">'+escHtml(preview)+'</span>'
+   +(unread ? '<span style="background:#ef4444;color:#fff;border-radius:99px;font-size:10px;'
+    +'font-weight:700;padding:1px 7px;flex-shrink:0;margin-left:6px">'+unread+'</span>' : '')
+   +'</div></div></div>';
  });
 
- html += '</div>';
  return html;
 }
+
 
 function _chatRow(x, compact){
  var p=x.p, last=x.last, unread=x.unread;
@@ -1983,6 +2019,7 @@ var DB = {
      if(!p.historico)p.historico=[];
      if(!p.recordatorios)p.recordatorios=[];
      if(!p.exams)p.exams={gli:90,col:180,vitd:30,hem:13,fer:50,tgo:22,tgp:22,tsh:2.0};
+     if(!p.msgs)p.msgs=[];
     });
    }
    if(data.tasks&&data.tasks.length){tasks=data.tasks;}
