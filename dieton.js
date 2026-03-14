@@ -541,6 +541,8 @@ function initPac(){
 }
 
 function goP(id,btn){
+ if(window.innerWidth<=1024){closeSidebar();}
+
  if(window.innerWidth<=1024)closeSidebar();
  document.querySelectorAll('.ni').forEach(function(b){b.classList.remove('on')});
  if(btn)btn.classList.add('on');
