@@ -1,3 +1,4 @@
+html,body{height:100%;margin:0;padding:0}
 /* DietOn — Estilos Principais */
 /* Gerado automaticamente do dieton.html */
 
@@ -20,7 +21,7 @@
   --jk:'Plus Jakarta Sans',system-ui,sans-serif;
   --in:'Inter',system-ui,sans-serif;
 }
-html{height:100%}body{height:100%;touch-action:pan-y}
+
 body{font-family:var(--in);background:var(--bg);color:var(--n9);-webkit-font-smoothing:antialiased}
 input,select,textarea,button{font-family:var(--in)}
 ::-webkit-scrollbar{width:5px;height:5px}
@@ -105,7 +106,6 @@ body.dark .seg-tabs{background:#2e2218}
 
 /* ── LAYOUT ── */
 #app{display:none;height:100vh;height:100dvh;flex-direction:row}
-body.app-open{overflow:hidden}
 .sb{width:232px;background:#1f0d00!important;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
 .sb-head{padding:18px 14px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
 .sb-role{margin:8px 10px 2px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:5px 10px;font-size:9px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:5px}
@@ -380,7 +380,7 @@ body.app-open{overflow:hidden}
 .tl-item{display:flex;gap:11px;position:relative}
 .tl-item:not(:last-child)::before{content:'';position:absolute;left:12px;top:26px;bottom:-4px;width:1px;background:var(--n2)}
 .tl-dot{width:25px;height:25px;border-radius:50%;background:var(--g0);border:2px solid var(--g4);display:flex;align-items:center;justify-content:center;font-family:var(--jk);font-size:8px;font-weight:800;color:var(--g5);flex-shrink:0;margin-top:1px}
-.tl-body{flex:1;padding-bottom:13px}
+.tl-
 
 /* ── NOTIF DOT ── */
 .notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:#ef4444;border-radius:50%;border:2px solid #163318}
@@ -442,7 +442,7 @@ body.app-open{overflow:hidden}
 .fr:hover{background:var(--n0)}
 .fr.sel{background:var(--g0);border-left:3px solid var(--g4)}
 /* ── LOGIN ── */
-#login{display:flex;height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden}
+#login{display:flex;height:100vh;height:100dvh}
 
 /* LEFT PANEL */
 .ll{width:54%;background:linear-gradient(160deg,#3d1800 0%,#a03000 35%,#e04800 70%,#f06020 100%);display:flex;flex-direction:column;padding:48px 52px;position:relative;overflow:hidden;flex-shrink:0}
@@ -567,6 +567,8 @@ body.dark .reg-ok{background:rgba(22,163,74,.12);border-color:rgba(134,239,172,.
 
 /* ── VARIÁVEIS MOBILE ── */
 :root{
+  --sb-w:232px;
+  --top-h:58px;
 }
 
 /* ══ LOGIN PAGE ══ */
@@ -590,7 +592,7 @@ body.dark .reg-ok{background:rgba(22,163,74,.12);border-color:rgba(134,239,172,.
 /* Overlay da sidebar no mobile */
 #sb-overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
-  z-index:199;backdrop-filter:blur(2px);opacity:0;transition:opacity .25s
+  z-index:399;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;transition:opacity .25s
 }
 #sb-overlay.open{opacity:1}
 
@@ -722,13 +724,6 @@ body.dark .dv-react-btn{background:var(--n1);border-color:var(--n2)}
 body.dark .dv-comment-inp{background:var(--n2);border-color:var(--n3);color:var(--n9)}
 body.dark .dv-upload-btn{background:var(--g0);border-color:var(--g2)}
 
-/* ── PRESCRIÇÃO: food preview ── */
-.preview-box{background:var(--g0);border:1.5px solid var(--g2);border-radius:var(--r2);padding:12px 14px;margin-top:8px}
-.preview-box .pb-name{font-weight:700;font-size:13px;color:var(--n9);margin-bottom:6px}
-.preview-box .pb-macros{display:flex;gap:10px;flex-wrap:wrap}
-.preview-box .pb-mac{font-size:11.5px;color:var(--n6)}
-.preview-box .pb-mac strong{color:var(--n9);font-weight:700}
-
 /* ── NOTIF ITEMS ── */
 .notif-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--n2);background:var(--n0);margin-bottom:8px;cursor:pointer;transition:all .15s}
 .notif-item:hover{border-color:var(--g4);background:var(--g0)}
@@ -746,11 +741,11 @@ body.dark .dv-upload-btn{background:var(--g0);border-color:var(--g2)}
 .chat-bubble-nutri{background:var(--g4);color:#fff;border-radius:16px 16px 4px 16px;padding:9px 13px;max-width:78%;font-size:12.5px;line-height:1.5}
 .chat-bubble-pac{background:var(--n1);color:var(--n8);border:1.5px solid var(--n2);border-radius:16px 16px 16px 4px;padding:9px 13px;max-width:78%;font-size:12.5px;line-height:1.5}
 
-/* ── NUTRIENT CHART PANEL ── */
+/* ── NUTRIENT PANEL ── */
 #nutrient-chart-panel .card{border:1.5px solid var(--g2);background:var(--g0)}
 
-/* ── DARK MODE: new components ── */
-body.dark .notif-item{background:var(--n1);border-color:var(--n2);color:var(--n7)}
+/* ── DARK MODE: extras ── */
+body.dark .notif-item{background:var(--n1);border-color:var(--n2)}
 body.dark .notif-item.unread{background:var(--g0);border-left-color:var(--g4)}
 body.dark .chat-bubble-pac{background:var(--n2);border-color:var(--n3);color:var(--n8)}
 body.dark #nutrient-chart-panel .card{border-color:var(--g2);background:var(--g0)}
@@ -758,44 +753,82 @@ body.dark .week-col-hd{background:var(--n2);border-color:var(--n3);color:var(--n
 body.dark .topbar{background:var(--n1)!important;border-color:var(--n2)}
 
 
-/* ════════════════════════════════════════════════════
-   RESPONSIVE — DIETON (breakpoints: 1024·900·768·640·480·375)
-   ════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   RESPONSIVE — DIETON v2.11
+   ════════════════════════════════════════════════════════ */
 
 /* ── PRINT ── */
 @media print{
-  body{overflow:visible!important}
-  #login,#app .sb,#app .topbar,.btn,#app .tb-right{display:none!important}
-  #app{display:block!important;height:auto}
-  .main{overflow:visible!important}
-  .page{overflow:visible!important;background:#fff!important;padding:0!important}
+  #login,#app .sb,#app .topbar,#app .tb-right{display:none!important}
+  #app{display:block!important;height:auto!important}
+  .main,.page{overflow:visible!important}
+  .page{background:#fff!important;padding:0!important}
   #print-area{display:block!important}
 }
 
-/* ── DESKTOP ── */
+/* ── DESKTOP ONLY ── */
 @media(min-width:1025px){
-  .tb-mob-logo{display:none}
+  .tb-mob-logo{display:none!important}
   #mob-menu-btn{display:none!important}
+  /* App scroll chain for desktop */
+  body.app-open{overflow:hidden}
+  /* desktop: app shown via JS style.display=flex */
 }
 
-/* ── ≤1024px: sidebar drawer ── */
+/* ── ALL MOBILE (≤1024px) — sidebar drawer + scroll fix ── */
 @media(max-width:1024px){
-  /* Sidebar: drawer deslizante */
-  .sb{position:fixed;left:0;top:0;bottom:0;z-index:200;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
-  .sb.mob-open{transform:translateX(0)}
-  .tb-mob-logo{display:flex;align-items:center;gap:7px;font-family:var(--jk);font-size:15px;font-weight:800;color:var(--n9)}
-  .tb-mob-logo em{color:var(--g4);font-style:normal}
-  #mob-menu-btn{display:flex!important}
-  /* App shell: altura dinâmica */
-  #app{height:100dvh;height:100vh}
-  .main{width:100%;min-height:0}
-  /* Page: scroll nativo iOS/Android */
+  /* Body: never overflow:hidden (login must scroll) */
+  body{overflow-x:hidden;overflow-y:auto}
+  body.app-open{overflow:hidden}
+
+  /* App shell fills viewport */
+  #app{height:100vh;height:100dvh}
+
+  /* Page: native iOS/Android scroll */
   .page{
-    overflow-y:scroll;
-    -webkit-overflow-scrolling:touch;
+    overflow-y:scroll!important;
+    -webkit-overflow-scrolling:touch!important;
     overscroll-behavior-y:contain;
     touch-action:pan-y;
   }
+
+  /* Login: always scrollable */
+  #login{
+    height:auto!important;
+    min-height:100vh;
+    min-height:100dvh;
+    overflow-y:auto!important;
+    overflow-x:hidden;
+  }
+
+  /* Sidebar: drawer */
+  .sb{
+    position:fixed;left:0;top:0;bottom:0;
+    height:100vh;height:100dvh;
+    z-index:400;
+    transform:translateX(-100%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    overflow-y:auto;
+  }
+  .sb.mob-open{transform:translateX(0)}
+
+  /* Overlay backdrop */
+  #sb-overlay{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,.55);
+    z-index:399;
+    backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px);
+  }
+  #sb-overlay.open{display:block}
+
+  /* Topbar: show logo + hamburger */
+  .tb-mob-logo{display:flex;align-items:center;gap:7px;font-family:var(--jk);font-size:15px;font-weight:800;color:var(--n9)}
+  .tb-mob-logo em{color:var(--g4);font-style:normal}
+  #mob-menu-btn{display:flex!important}
+  .main{width:100%;min-height:0}
+
+  /* Grids */
   .dash-row2,.presc-layout{grid-template-columns:1fr!important}
 }
 
@@ -809,39 +842,52 @@ body.dark .topbar{background:var(--n1)!important;border-color:var(--n2)}
   [style*="grid-template-columns:1fr 300px"]{grid-template-columns:1fr!important}
   [style*="grid-template-columns:280px 1fr"]{grid-template-columns:1fr!important}
   [style*="grid-template-columns:1fr 280px"]{grid-template-columns:1fr!important}
-  .week-scroll{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .week-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .dv-grid{grid-template-columns:repeat(4,1fr)}
 }
 
 /* ── ≤768px ── */
 @media(max-width:768px){
-  #login{flex-direction:column;height:auto;min-height:100vh;overflow-y:auto}
+  /* Login layout */
+  #login{flex-direction:column}
   .ll{width:100%;min-height:auto;padding:28px 24px 24px;flex-shrink:0;overflow:visible}
   .ll-hero h1{font-size:28px}
   .ll-hero p{font-size:12px;max-width:100%}
   .ll-stats{grid-template-columns:repeat(3,1fr);gap:7px}
+  .lr{width:100%;flex:unset;padding:32px 24px 48px}
   .lr-box{max-width:480px;margin:0 auto}
-  .page{padding:14px 12px;-webkit-overflow-scrolling:touch}
+
+  /* App layout */
+  .page{padding:14px 12px}
   .topbar{padding:0 14px;height:54px}
   .card{padding:14px}
   .btn{min-height:40px}
   .btn-sm{min-height:36px;font-size:11.5px}
   .tb-right .btn-sm{padding:5px 10px;font-size:11px}
+
+  /* Grids */
   .dash-row2,.presc-layout,.row2,.row3,.row4{grid-template-columns:1fr!important}
   .dash-bottom{flex-direction:column!important}
   .dash-bottom > div{width:100%!important;min-width:0!important}
-  [style*="grid-template-columns:340px 1fr;gap:14px;align-items:start"]{grid-template-columns:1fr!important}
+  [style*="grid-template-columns:340px 1fr;gap:14px"]{grid-template-columns:1fr!important}
   .ev-metrics{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
   .ev-m{padding:10px!important}
+
+  /* Food search */
   .fr{padding:10px 12px!important;min-height:48px!important;touch-action:manipulation}
   .fr:active{background:var(--g0)!important}
   #food-results{max-height:200px!important;-webkit-overflow-scrolling:touch}
+
+  /* KPI */
   .kpi-row{grid-template-columns:1fr 1fr;gap:8px}
   .kpi{padding:14px}
   .kpi-n{font-size:26px}
-  .cal-day{min-height:48px}
-  #m-chat .modal{max-width:100%!important;width:100%!important;height:100vh!important;max-height:100vh!important;border-radius:0!important;margin:0}
-  #m-chat{align-items:flex-end}
+
+  /* Chat modal */
+  #m-chat .modal{max-width:100%!important;width:100%!important;height:96vh!important;max-height:96vh!important;border-radius:16px 16px 0 0!important}
+  #m-chat{align-items:flex-end!important}
+
+  /* Tables */
   .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .table-wrap table{min-width:460px}
 }
@@ -858,15 +904,17 @@ body.dark .topbar{background:var(--n1)!important;border-color:var(--n2)}
 
 /* ── ≤480px ── */
 @media(max-width:480px){
-  .reg-tabs{margin-bottom:16px}
-  .reg-tab{font-size:10.5px;padding:8px 6px}
-  #f-up{margin-top:0}
-  .lr-box{max-width:100%}
+  /* Login */
   .ll{padding:20px 16px}
-  .ll-hero h1{font-size:24px;margin-bottom:12px}
-  .ll-hero{padding:20px 0 16px}
-  .ll-stats{gap:5px}
-  .ll-stat{padding:8px 6px;font-size:10px}
+  .ll-hero h1{font-size:22px;margin-bottom:10px}
+  .ll-hero{padding:16px 0 12px}
+  .ll-stats{display:none}
+  .lr{padding:24px 16px 48px}
+  .lr-box{max-width:100%}
+  .reg-tabs{margin-bottom:14px}
+  .reg-tab{font-size:10.5px;padding:8px 6px}
+
+  /* App */
   .page{padding:10px 8px}
   .card{padding:11px}
   .topbar{padding:0 10px;height:52px}
@@ -874,17 +922,17 @@ body.dark .topbar{background:var(--n1)!important;border-color:var(--n2)}
   .kpi{padding:12px}
   .kpi-n{font-size:22px;letter-spacing:-1px}
   .kpi-l{font-size:11px}
-  .kpi-ft{margin-top:10px;padding-top:8px;font-size:10.5px}
   .kpi-ico{width:32px;height:32px}
   .row2,.row3{grid-template-columns:1fr!important}
   [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
   [style*="grid-template-columns:repeat(2,1fr)"]{grid-template-columns:1fr!important}
   .tb-right .btn-s,.tb-right .btn-ghost{display:none!important}
   #food-results{max-height:150px!important}
-  .fr{padding:12px!important}
   .dv-grid{grid-template-columns:repeat(2,1fr)}
-  .modal{width:100%!important;max-width:100%!important;border-radius:16px 16px 0 0!important;margin:0!important}
+
+  /* Modals: bottom sheet */
   .ov{align-items:flex-end!important}
+  .modal{width:100%!important;max-width:100%!important;border-radius:16px 16px 0 0!important;margin:0!important}
 }
 
 /* ── ≤375px ── */
@@ -894,15 +942,13 @@ body.dark .topbar{background:var(--n1)!important;border-color:var(--n2)}
   .kpi{padding:10px}
   .kpi-n{font-size:20px}
   .topbar{padding:0 8px}
+  .ll{padding:16px 12px}
+  .ll-hero h1{font-size:20px}
 }
 
-/* ── SIDEBAR OVERLAY ── */
-#sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;backdrop-filter:blur(2px);opacity:0;transition:opacity .25s}
-#sb-overlay.open{opacity:1;display:block}
-
-/* ── TOUCH DEVICES ── */
+/* ── TOUCH: remove sticky hover states ── */
 @media(hover:none){
-  .ni{padding:10px;min-height:46px}
+  .ni{min-height:46px}
   .btn{min-height:42px}
   .btn-sm{min-height:36px}
   .cal-day{min-height:50px}
