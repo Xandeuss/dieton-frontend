@@ -431,6 +431,7 @@ function doLogin() {
   var u = USERS.find(function (x) { return x.email === e && x.pw === p; });
   if (!u) { showErr('E-mail ou senha incorretos.'); return; }
   cu = u;
+  _saveSession(cu);
 
   // Carregar dados salvos — se não houver, manter os dados demo
   DB.load();
@@ -448,7 +449,7 @@ function doLogin() {
 function doLogout() {
   DB.save();
   if (window._autoSaveInterval) clearInterval(window._autoSaveInterval);
-  cu = null;
+  cu = null; _clearSession();
   document.getElementById('app').style.display = 'none'; document.body.classList.remove('app-open');
   document.getElementById('login').style.display = 'flex';
 }
@@ -5880,3 +5881,59 @@ function _manualSync(){
   .then(function(){showToast('✅ Sincronizado!','s');})
   .catch(function(){showToast('Erro ao sincronizar','w');});
 }
+
+
+// ═══════════════════════════════════════════════════
+// SESSÃO PERSISTENTE
+// ═══════════════════════════════════════════════════
+var SESSION_KEY = 'dieton_session_v1';
+
+function _saveSession(user) {
+ try {
+  // Salva só campos seguros (sem senha)
+  var safe = { id: user.id, name: user.name, email: user.email,
+   role: user.role, av: user.av, init: user.init, crn: user.crn };
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ user: safe, ts: Date.now() }));
+ } catch(e) {}
+}
+
+function _clearSession() {
+ try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+
+function _restoreSession() {
+ try {
+  var raw = localStorage.getItem(SESSION_KEY);
+  if (!raw) return false;
+  var s = JSON.parse(raw);
+  // Expira após 30 dias
+  if (!s || !s.user || (Date.now() - s.ts) > 30 * 24 * 60 * 60 * 1000) {
+   _clearSession(); return false;
+  }
+  // Reconstrói cu a partir dos dados salvos
+  var saved = s.user;
+  var fullUser = USERS.find(function(u) { return u.email === saved.email; });
+  cu = fullUser || saved;
+  _saveSession(cu); // renova timestamp
+  return true;
+ } catch(e) { return false; }
+}
+
+// Auto-restaura sessão ao carregar a página
+(function _autoLogin() {
+ if (!_restoreSession()) return;
+ // Sessão válida — pula o login
+ DB.load();
+ if (cu.role === 'pro') {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.body.classList.add('app-open');
+  initPro();
+  _startSyncPolling && _startSyncPolling();
+ } else if (cu.role === 'pac') {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.body.classList.add('app-open');
+  initPac();
+ }
+})();
