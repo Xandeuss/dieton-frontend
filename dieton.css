@@ -567,8 +567,6 @@ body.dark .reg-ok{background:rgba(22,163,74,.12);border-color:rgba(134,239,172,.
 
 /* ── VARIÁVEIS MOBILE ── */
 :root{
-  --sb-w:232px;
-  --top-h:58px;
 }
 
 /* ══ LOGIN PAGE ══ */

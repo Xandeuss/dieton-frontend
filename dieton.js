@@ -274,6 +274,13 @@ function upTab(t) {
   var eb = document.getElementById('err-up'); if (eb) eb.style.display = 'none';
   var ob = document.getElementById('ok-up'); if (ob) ob.style.display = 'none';
 }
+// ── Runtime state
+var selPat = null, notifs = [], financeiro = [];
+var mP = 0, mC = 0, mF = 0, prescGoal = 0;
+var meals = [], _selFood = null;
+var _calYear = null, _calMonth = null;
+var _weekOffset = 0, _chatPat = null;
+
 var _cfPassed = { pro: false, pac: false };
 function cfCheckChange(who) { var cb = document.getElementById('cf-check-' + who); _cfPassed[who] = cb && cb.checked; }
 var _crnVerified = false;
@@ -594,14 +601,76 @@ function goP(id,btn){
  }
 }
 
-function afterRender(id){
- if(id==='dash'){buildBChart();animRing(6,10);setTimeout(buildAdherenceChart,80);}
- if(id==='presc'){bindPrescEvents();}
- if(id==='busca'){document.getElementById('global-q')&&document.getElementById('global-q').focus();}
- if(id==='diary-pro'){_dvProAfterRender();}
- if(id==='pac-diary'){_dvPacAfterRender();}
- if(id==='pdiary'){setTimeout(_diarySetPhotoSrcs,80);}
+// ═══════════════════════════════════════════════════════
+// HTML HELPERS — evita inline styles repetitivos
+// ═══════════════════════════════════════════════════════
+function _card(content, opts){
+  opts=opts||{};
+  var cls='card'+(opts.cls?' '+opts.cls:'');
+  var sty=opts.style?(' style="'+opts.style+'"'):'';
+  return '<div class="'+cls+'"'+sty+'>'+content+'</div>';
 }
+function _ch(title, sub, action){
+  return '<div class="ch">'
+    +'<div><span class="ct">'+title+'</span>'+(sub?'<span class="cs">'+sub+'</span>':'')+'</div>'
+    +(action||'')+'</div>';
+}
+function _badge(text, type){
+  // type: 'g'=green, 'r'=red, 'y'=yellow, 'b'=blue, 'n'=neutral
+  var colors={g:'#22c55e',r:'#ef4444',y:'#f59e0b',b:'#3b82f6',n:'var(--n4)'};
+  var bgs={g:'#f0fdf4',r:'#fef2f2',y:'#fffbeb',b:'#eff6ff',n:'var(--n1)'};
+  var c=colors[type]||colors.n, bg=bgs[type]||bgs.n;
+  return '<span style="display:inline-flex;align-items:center;background:'+bg+';color:'+c
+    +';border-radius:99px;font-size:10px;font-weight:700;padding:2px 8px">'+text+'</span>';
+}
+function _macroBar(label, val, meta, color){
+  var pct=meta>0?Math.min(100,val/meta*100):0;
+  var over=meta>0&&val>meta;
+  return '<div style="margin-bottom:8px">'
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+    +'<span style="font-size:11.5px;font-weight:700;color:var(--n8)">'+label+'</span>'
+    +'<span style="font-size:11px;color:'+(over?'#ef4444':'var(--n5)')+'">'+val.toFixed(1)+'g'+(meta>0?' / '+meta+'g':'')+'</span>'
+    +'</div>'
+    +'<div style="height:7px;background:var(--n2);border-radius:99px;overflow:hidden">'
+    +'<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:99px;transition:width .4s"></div>'
+    +'</div></div>';
+}
+function _kpiCard(icon, label, value, sub, color){
+  color=color||'var(--g4)';
+  return '<div class="kpi">'
+    +'<div class="kpi-ico" style="background:'+color+'20;color:'+color+'">'+icon+'</div>'
+    +'<div class="kpi-n" style="color:'+color+'">'+value+'</div>'
+    +'<div class="kpi-l">'+label+'</div>'
+    +(sub?'<div class="kpi-ft">'+sub+'</div>':'')
+    +'</div>';
+}
+function _emptyState(icon, title, sub, action){
+  return '<div style="text-align:center;padding:48px 20px;color:var(--n4)">'
+    +'<div style="font-size:48px;margin-bottom:12px">'+icon+'</div>'
+    +'<div style="font-weight:800;font-size:15px;color:var(--n8);margin-bottom:6px">'+title+'</div>'
+    +(sub?'<div style="font-size:12.5px;margin-bottom:16px">'+sub+'</div>':'')
+    +(action||'')
+    +'</div>';
+}
+function _avatar(p, size){
+  size=size||38;
+  var init=p&&p.n?p.n.split(' ').slice(0,2).map(function(w){return w[0].toUpperCase();}).join(''):'?';
+  return '<div class="av '+(p&&p.av?p.av:'a1')+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:'+(size*0.36).toFixed(0)+'px;font-weight:800;flex-shrink:0">'+init+'</div>';
+}
+
+
+
+function afterRender(id){
+  if(id==='dash'){try{buildBChart();animRing(6,10);setTimeout(buildAdherenceChart,80);}catch(e){}}
+  if(id==='presc'){try{bindPrescEvents();}catch(e){}}
+  if(id==='fin'){try{buildFinChart();}catch(e){}}
+  if(id==='busca'){var q=document.getElementById('global-q');if(q)q.focus();}
+  if(id==='diary-pro'){try{_dvProAfterRender();}catch(e){}}
+  if(id==='pac-diary'){try{_dvPacAfterRender();}catch(e){}}
+  if(id==='pdiary'){setTimeout(_diarySetPhotoSrcs,80);}
+  if(id==='ev'){try{setTimeout(function(){buildEvChart&&buildEvChart();},80);}catch(e){}}
+}
+
 
 
 // ─── DASHBOARD ───
@@ -755,13 +824,27 @@ function animRing(v, t) {
 
 // ─── PATIENTS ───
 function rPat(){
- return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-  <div class="search-wrap" style="flex:1;min-width:180px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="search-inp" id="pat-q" placeholder="Buscar paciente…" oninput="filterPats(this.value)"/></div>
-  <select class="sel" style="width:auto" id="pat-gf" onchange="filterPats(document.getElementById('pat-q').value)"><option value="">Todos os objetivos</option><option>Emagrecimento</option><option>Hipertrofia</option><option>Manutenção</option><option>Saúde geral</option><option>Condição clínica</option></select>
-  <select class="sel" style="width:auto" id="pat-sf" onchange="filterPats(document.getElementById('pat-q').value)"><option value="">Todos os status</option><option value="tg">Em dia</option><option value="ty">Atenção</option><option value="tr">Alerta</option></select>
- </div>
- <div class="pat-grid" id="pat-grid">${buildPatGrid(pats)}</div>`;
+  var q=document.getElementById('pat-q')&&document.getElementById('pat-q').value||'';
+  var st=document.getElementById('pat-status')&&document.getElementById('pat-status').value||'all';
+  var list=pats.filter(function(p){
+    var nm=(p.n||'').toLowerCase();
+    var match=!q||nm.includes(q.toLowerCase())||(p.obj||'').toLowerCase().includes(q.toLowerCase());
+    var stMatch=st==='all'||(p.st||'tg')===st;
+    return match&&stMatch;
+  });
+  return '<div>'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">'
+    +'<input class="inp" id="pat-q" placeholder="🔍 Buscar paciente..." oninput="rePat()" style="flex:1;min-width:180px;max-width:300px"/>'
+    +'<select class="sel" id="pat-status" onchange="rePat()" style="min-width:120px">'
+    +'<option value="all">Todos</option>'
+    +'<option value="tg">✅ Em dia</option>'
+    +'<option value="ty">⚠️ Atenção</option>'
+    +'<option value="tr">🔴 Alerta</option>'
+    +'</select></div>'
+    +'<div class="pat-grid-wrap" id="pat-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">'
+    +buildPatGrid(list)+'</div></div>';
 }
+
 function buildPatGrid(list){
  return list.map(function(p){
   var loss = (p.wStart||p.w||0) - (p.w||0);
@@ -825,7 +908,7 @@ function openPatDetail(id){
  if(p.exams.fer&&p.exams.fer<20)alerts.push({t:'Ferritina baixa — risco de anemia ('+p.exams.fer+' ng/mL)',c:'r'});
  var hist=p.historico||[];
  var modal=document.createElement('div');modal.className='ov';modal.id='m-pd';
- modal.innerHTML='<div class="modal modal-xl"><div class="mh"><div><div class="mt">'+p.n+'</div><div style="font-size:12px;color:var(--n4);margin-top:3px">'+p.age+' anos · '+(p.sex==='F'?'Feminino':'Masculino')+' · '+p.goal+' · Última: '+p.last+'</div></div><div style="display:flex;gap:7px"><button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id==='+p.id+'});closeM(\'m-pd\');goP(\'presc\',document.getElementById(\'ni-presc\'))">Prescrever</button><button class="btn btn-p btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id==='+p.id+'});goP(\'ev\',document.getElementById(\'ni-ev\'))">Acompanhamento</button><button class="mc" onclick="closeM(\'m-pd\')">×</button></div></div>'
+ modal.innerHTML='<div class="modal modal-xl"><div class="mh"><div><div class="mt">'+escHtml(p.n||'')+'</div><div style="font-size:12px;color:var(--n4);margin-top:3px">'+p.age+' anos · '+(p.sex==='F'?'Feminino':'Masculino')+' · '+p.goal+' · Última: '+p.last+'</div></div><div style="display:flex;gap:7px"><button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id==='+p.id+'});closeM(\'m-pd\');goP(\'presc\',document.getElementById(\'ni-presc\'))">Prescrever</button><button class="btn btn-p btn-sm" onclick="closeM(\'m-pd\');selPat=pats.find(function(x){return x.id==='+p.id+'});goP(\'ev\',document.getElementById(\'ni-ev\'))">Acompanhamento</button><button class="mc" onclick="closeM(\'m-pd\')">×</button></div></div>'
  +(alerts.length?'<div style="margin-bottom:12px">'+alerts.map(function(a){return'<div class="alert alert-'+a.c+'"><span>⚠ '+a.t+'</span></div>';}).join('')+'</div>':'')
  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
  +'<div><div class="ct" style="margin-bottom:10px;font-family:var(--jk)">Dados Clínicos</div>'
@@ -941,7 +1024,7 @@ function saveEditPat(id){
 
  DB.save();
  closeM('m-pat');
- showToast('Dados de "'+p.n+'" atualizados!','s');
+ showToast('Dados de "'+escHtml(p.n||'')+'" atualizados!','s');
  goP('pat',document.getElementById('ni-pat'));
 }
 
@@ -1712,7 +1795,7 @@ function rAI(){
  +'<div style="background:var(--n0);border-radius:10px;padding:10px 12px;margin-bottom:14px;display:flex;gap:10px;align-items:center">'
  +'<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--g5),var(--g4));display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">'+p.av+'</div>'
  +'<div style="flex:1">'
- +'<div style="font-family:var(--jk);font-size:12px;font-weight:700;color:var(--n9)">'+p.n+'</div>'
+ +'<div style="font-family:var(--jk);font-size:12px;font-weight:700;color:var(--n9)">'+escHtml(p.n||'')+'</div>'
  +'<div style="font-size:10.5px;color:var(--n5);margin-top:1px">'+p.age+' anos · '+p.w+'kg · '+p.h+'cm · '+p.sex+' · IMC '+p.bmi+'</div>'
  +'</div>'
  +'<div style="text-align:right;flex-shrink:0"><div style="font-family:var(--in);font-size:16px;font-weight:800;color:var(--g5)">'+targetKcal+'</div><div style="font-size:9px;color:var(--n4)">kcal alvo</div></div>'
@@ -1907,51 +1990,28 @@ function _removeNotif(idx) { notifs.splice(idx, 1); updateNotifBadge(); if (type
 function _goPatEv(pid) { selPat = pats.find(function (x) { return x.id === pid; }); goP('ev', document.getElementById('ni-ev')); }
 function _showDay(d) { showDayConsultas(d); }
 function rNotif(){
- var smartAlerts=_generateSmartAlerts();
- var manualNotifs=notifs.filter(function(n){return !n.auto;});
- var autoAlerts=smartAlerts.map(function(a){return Object.assign({},a,{auto:true});});
- var allNotifs=manualNotifs.concat(autoAlerts);
- return'<div style="max-width:640px">'
- +'<div class="card" style="margin-bottom:10px"><div class="ch"><span class="ct">Central de Alertas</span>'
- +'<div style="display:flex;gap:6px"><span style="font-size:10.5px;color:var(--n4);align-self:center">'+allNotifs.length+' alertas</span>'
- +'<button class="btn btn-ghost btn-sm" onclick="notifs=[];updateNotifBadge();DB.save();goP(\'notif\',null);showToast(\'Alertas manuais limpos\',\'s\')">Limpar manuais</button><button class="btn btn-danger btn-sm" onclick="_clearAllNotifs()">Limpar todas</button></div></div>'
- +(allNotifs.filter(function(n){return n.type==='r';}).length
-  ?'<div style="background:#fef2f2;border-radius:var(--r);padding:10px;margin-bottom:8px">'
-  +'<div style="font-size:9.5px;font-weight:800;color:#dc2626;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">🚨 Urgente</div>'
-  +allNotifs.filter(function(n){return n.type==='r';}).map(function(n){
-   return'<div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:6px;background:#fff;margin-bottom:5px;border-left:3px solid #dc2626">'
-   +'<div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--n8)">'+n.txt+'</div>'
-   +(n.cat?'<span style="font-size:9px;background:#fee2e2;color:#dc2626;padding:1px 7px;border-radius:99px;font-weight:700">'+n.cat+'</span>':'')+'</div>'
-   +(n.patId?'<button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id==='+n.patId+'});goP(\'ev\',document.getElementById(\'ni-ev\'))">Ver</button>':'')
-   +'<span style="font-size:9px;color:var(--n4)">'+(n.auto?'Auto':'Manual')+'</span>'
-   +'</div>';
-  }).join('')+'</div>':'')
- +(allNotifs.filter(function(n){return n.type==='w';}).length
-  ?'<div style="margin-bottom:8px">'
-  +'<div style="font-size:9.5px;font-weight:800;color:#d97706;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">⚠ Atenção</div>'
-  +allNotifs.filter(function(n){return n.type==='w';}).map(function(n,i){
-   return'<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);background:var(--n0);margin-bottom:5px;border-left:3px solid #f59e0b">'
-   +'<div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--n8)">'+n.txt+'</div>'
-   +(n.cat?'<span style="font-size:9px;background:#fef3c7;color:#d97706;padding:1px 7px;border-radius:99px;font-weight:700;display:inline-block;margin-top:3px">'+n.cat+'</span>':'')+'</div>'
-   +(n.patId?'<button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id==='+n.patId+'});goP(\'ev\',document.getElementById(\'ni-ev\'))">Ver</button>':'')
-   +(!n.auto?'<button class="btn btn-ghost btn-sm" onclick="notifs.splice(\'+i+\',1);updateNotifBadge();DB.save();goP(\'notif\',null)">✓</button>':'<span style="font-size:9px;color:var(--n4)">Auto</span>')
-   +'</div>';
-  }).join('')+'</div>':'')
- +(allNotifs.filter(function(n){return n.type==='i';}).length
-  ?'<div style="margin-bottom:8px">'
-  +'<div style="font-size:9.5px;font-weight:800;color:#3b82f6;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">ℹ Informativo</div>'
-  +allNotifs.filter(function(n){return n.type==='i';}).map(function(n,i){
-   return'<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);background:var(--n0);margin-bottom:5px;border-left:3px solid #3b82f6">'
-   +'<div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--n8)">'+n.txt+'</div>'
-   +(n.cat?'<span style="font-size:9px;background:#eff6ff;color:#3b82f6;padding:1px 7px;border-radius:99px;font-weight:700;display:inline-block;margin-top:3px">'+n.cat+'</span>':'')+'</div>'
-   +(n.patId?'<button class="btn btn-s btn-sm" onclick="selPat=pats.find(function(x){return x.id==='+n.patId+'});goP(\'ev\',document.getElementById(\'ni-ev\'))">Ver</button>':'')
-   +(!n.auto?'<button class="btn btn-ghost btn-sm" onclick="notifs.splice(\'+i+\',1);updateNotifBadge();DB.save();goP(\'notif\',null)">✓</button>':'<span style="font-size:9px;color:var(--n4)">Auto</span>')
-   +'</div>';
-  }).join('')+'</div>':'')
- +(!allNotifs.length?'<div class="card" style="text-align:center;padding:28px 0"><div style="font-size:32px;margin-bottom:8px">🎉</div><div style="font-weight:600">Tudo em dia!</div><div style="font-size:12px;color:var(--n4);margin-top:4px">Nenhum alerta no momento</div></div>':'')
- +'<div style="background:var(--g0);border-radius:var(--r);padding:10px 14px;font-size:11px;color:var(--n5);margin-top:8px">🤖 <strong>'+smartAlerts.length+' alertas automáticos</strong> gerados em tempo real com base nos dados clínicos.</div>'
- +'</div>';
+  var all=notifs||[];
+  var unread=all.filter(function(n){return !n.read;});
+  return '<div>'
+    +_ch('🔔 Notificações','<span style="font-size:11px;color:var(--n5)">'+all.length+' total · '+unread.length+' não lidas</span>',
+      all.length?'<button class="btn btn-ghost btn-sm" onclick="markAllRead()">✓ Marcar todas</button>':'')
+    +(all.length?all.map(function(n){
+        var icons={r:'🔴',w:'⚠️',i:'ℹ️',s:'✅'};
+        var colors={r:'#ef4444',w:'#f59e0b',i:'#3b82f6',s:'#22c55e'};
+        var tc=colors[n.type]||colors.i;
+        return '<div class="notif-item'+(n.read?'':' unread')+'" onclick="readNotif('+n.id+')">'
+          +'<span style="font-size:18px;flex-shrink:0">'+(icons[n.type]||'ℹ️')+'</span>'
+          +'<div style="flex:1;min-width:0">'
+          +'<div style="font-size:12.5px;font-weight:'+(n.read?'500':'700')+';color:var(--n9);margin-bottom:2px">'+escHtml(n.txt)+'</div>'
+          +(n.ts?'<div style="font-size:10.5px;color:var(--n4)">'+n.ts+'</div>':'')
+          +'</div>'
+          +(n.read?'':'<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;margin-top:4px"></span>')
+          +'</div>';
+      }).join('')
+      :_emptyState('🔔','Sem notificações','Você está em dia!',''))
+    +'</div>';
 }
+
 
 // ─── TEMPLATES ───
 function rTpl(){
@@ -2859,7 +2919,7 @@ function saveMeas(){
 
  DB.save();
  closeM('m-meas');
- showToast('Medidas de '+p.n+' registradas com sucesso!','s');
+ showToast('Medidas de '+escHtml(p.n||'')+' registradas com sucesso!','s');
 
  // Atualizar a tela de acompanhamento se estiver ativa
  var evBtn=document.getElementById('ni-ev');
@@ -3052,7 +3112,6 @@ function regenInviteCode() {
 // ══════════════════════════════════════════════════════════════════
 // AGENDA / CONSULTAS
 // ══════════════════════════════════════════════════════════════════
-var _calYear, _calMonth;
 
 function rAgenda() {
   var now = new Date();
@@ -3644,7 +3703,7 @@ function rFin(){
  // ── KPI cards
  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">';
  [
-  ['💰','R$ '+mesPago.toFixed(0),'Recebido no mês','var(--green)','#f0fdf4','#bbf7d0'],
+  ['💰','R$ '+mesPago.toFixed(0),'Recebido no mês','var(--g4)','#f0fdf4','#bbf7d0'],
   ['⏳','R$ '+mesPend.toFixed(0),'Pendente no mês','#f59e0b','#fffbeb','#fde68a'],
   ['📊','R$ '+totalPago.toFixed(0),'Total recebido','#3b82f6','#eff6ff','#bfdbfe'],
   ['⚠️',inadimPct+'%','Inadimplência','#ef4444','#fef2f2','#fecaca'],
@@ -3724,7 +3783,7 @@ function rFin(){
     +'<div class="ch" style="margin-bottom:8px">'
     +'<span class="ct">'+m.label+'</span>'
     +'<div style="display:flex;gap:10px;font-size:11px">'
-    +'<span style="color:var(--green);font-weight:700">R$ '+m.pago.toFixed(0)+' recebido</span>'
+    +'<span style="color:var(--g4);font-weight:700">R$ '+m.pago.toFixed(0)+' recebido</span>'
     +(m.pendente>0?'<span style="color:#f59e0b;font-weight:700">R$ '+m.pendente.toFixed(0)+' pendente</span>':'')
     +'</div></div>';
    m.items.forEach(function(r,i){
@@ -3734,7 +3793,7 @@ function rFin(){
      +'<div style="font-size:12.5px;font-weight:700;color:var(--n8)">'+escHtml(r.desc||r.descricao||'Sem descrição')+'</div>'
      +(r.pat?'<div style="font-size:10.5px;color:var(--n4)">👤 '+escHtml(r.pat)+'</div>':'')
      +'</div>'
-     +'<div style="font-family:var(--in);font-size:14px;font-weight:800;color:'+(r.status==='pago'?'var(--green)':'#f59e0b')+'">R$ '+r.valor.toFixed(2)+'</div>'
+     +'<div style="font-family:var(--in);font-size:14px;font-weight:800;color:'+(r.status==='pago'?'var(--g4)':'#f59e0b')+'">R$ '+r.valor.toFixed(2)+'</div>'
      +'<span class="tag '+(r.status==='pago'?'tg':'ty')+'">'+(r.status==='pago'?'Pago':'Pendente')+'</span>'
      +(r.status!=='pago'?'<button class="btn btn-ghost btn-sm" style="font-size:10px" onclick="finPagar('+gi+')">✓ Pagar</button>':'')
      +'<button onclick="finDel('+gi+')" style="background:none;border:none;cursor:pointer;color:var(--n3);font-size:16px;padding:0 4px">✕</button>'
@@ -4004,7 +4063,7 @@ function rAnam(){
   +'<div class="card" style="margin-bottom:12px"><div class="ch"><span class="ct">Selecionar Paciente</span></div>'
   +'<select class="sel" id="anam-pat-sel" style="width:100%;margin-bottom:10px">'+selOpts+'</select>'
   +'<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--n0);border-radius:9px"><div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--g5),var(--g4));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">'+p.i+'</div>'
-  +'<div><div style="font-family:var(--jk);font-size:13px;font-weight:700;color:var(--n9)">'+p.n+'</div><div style="font-size:11px;color:var(--n5);margin-top:2px">'+p.age+' anos · '+p.w+'kg · '+p.goal+'</div></div></div></div>'
+  +'<div><div style="font-family:var(--jk);font-size:13px;font-weight:700;color:var(--n9)">'+escHtml(p.n||'')+'</div><div style="font-size:11px;color:var(--n5);margin-top:2px">'+p.age+' anos · '+p.w+'kg · '+p.goal+'</div></div></div></div>'
   +alertHtml
   +'<div class="card" style="margin-bottom:12px"><div class="ch"><span class="ct">Exames</span></div><div style="display:flex;flex-direction:column;gap:4px">'+examFields.map(function(f){var st=exSt(f[0],f[3]);return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--n1)"><span style="width:7px;height:7px;border-radius:50%;background:'+examColors[st]+';flex-shrink:0"></span><span style="flex:1;font-size:11.5px;color:var(--n6)">'+f[0]+'</span><span style="font-family:var(--in);font-size:13px;font-weight:700;color:'+examColors[st]+'">'+f[3]+'</span><span style="font-size:10px;color:var(--n4)">'+f[2]+'</span></div>';}).join('')+'</div></div>'
   +'<div class="card"><div class="ch"><span class="ct">Aderência</span></div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:600;color:var(--n7)">Geral</span><span style="font-family:var(--in);font-size:14px;font-weight:800;color:var(--g5)">'+p.prog+'%</span></div><div style="height:10px;background:var(--n2);border-radius:99px;overflow:hidden"><div style="width:'+p.prog+'%;height:100%;background:linear-gradient(90deg,var(--g5),var(--g4));border-radius:99px"></div></div></div>'
@@ -4962,7 +5021,7 @@ function printPlan(){
  var plan=p.plans[0];
  var meals=plan.mealData||[];
  var html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
-  +'<title>Plano Alimentar — '+p.n+'</title>'
+  +'<title>Plano Alimentar — '+escHtml(p.n||'')+'</title>'
   +'<style>body{font-family:Arial,sans-serif;font-size:12px;color:#222;padding:20px;max-width:700px;margin:0 auto}'
   +'h1{font-size:18px;color:#e85a0a;margin-bottom:4px}h2{font-size:13px;color:#555;margin-bottom:16px;font-weight:400}'
   +'.meal{margin-bottom:16px;border-left:3px solid #e85a0a;padding-left:10px}'
@@ -4971,7 +5030,7 @@ function printPlan(){
   +'.macro{text-align:center}.macro-v{font-size:16px;font-weight:700;color:#e85a0a}'
   +'@media print{body{padding:10px}}</style></head><body>'
   +'<h1>Plano Alimentar</h1>'
-  +'<h2>'+p.n+' · '+plan.kcal+' kcal/dia · Gerado em '+plan.date+'</h2>'
+  +'<h2>'+escHtml(p.n||'')+' · '+plan.kcal+' kcal/dia · Gerado em '+plan.date+'</h2>'
   +'<div class="macros">'
   +'<div class="macro"><div class="macro-v">'+plan.prot+'g</div><div>Proteína</div></div>'
   +'<div class="macro"><div class="macro-v">'+plan.carb+'g</div><div>Carboidratos</div></div>'
@@ -5022,7 +5081,7 @@ function savePlan(){
  if(p.plans.length>10)p.plans=p.plans.slice(0,10);
  p.meta=totalK;
  DB.save();
- showToast('✅ Plano salvo para '+p.n+'!','s');
+ showToast('✅ Plano salvo para '+escHtml(p.n||'')+'!','s');
 }
 
 function saveWeekPlan(){
@@ -5118,7 +5177,7 @@ function applyAIGenPlan(){
   };
  });
  savePlan();
- showToast('✅ Plano da IA aplicado e salvo para '+p.n+'!','s');
+ showToast('✅ Plano da IA aplicado e salvo para '+escHtml(p.n||'')+'!','s');
  setTimeout(function(){goP('presc',document.getElementById('ni-presc'));},700);
 }
 
@@ -5252,7 +5311,7 @@ function doneAppt(patId, apptId){
 function _checkAndAddRetornoAlert(p, dateStr){
  if(!p||!dateStr) return;
  var d = new Date(dateStr);
- var txt = 'Retorno agendado: '+p.n+' em '+d.toLocaleDateString('pt-BR');
+ var txt = 'Retorno agendado: '+escHtml(p.n||'')+' em '+d.toLocaleDateString('pt-BR');
  if(!notifs) notifs=[];
  var exists = notifs.find(function(n){return n.txt&&n.txt.indexOf(p.n)>=0&&n.txt.indexOf('Retorno')>=0;});
  if(!exists){
@@ -5338,7 +5397,7 @@ function _buildWeekView(){
     +'<div style="flex:1"><div style="font-size:12.5px;font-weight:700">'+escHtml(a.patName)+'</div>'
     +'<div style="font-size:10.5px;color:var(--n4)">'+escHtml(a.type||'Consulta')+(a.dur?' · '+a.dur+'min':'')+'</div></div>'
     +'<div style="display:flex;gap:4px">'
-    +(a.status!=='done'?'<button class="btn btn-ghost btn-sm" style="font-size:10px;color:var(--green)" onclick="doneAppt('+a.patId+',\''+a.id+'\')">✓ Concluir</button>':'<span class="tag tg">Concluído</span>')
+    +(a.status!=='done'?'<button class="btn btn-ghost btn-sm" style="font-size:10px;color:var(--g4)" onclick="doneAppt('+a.patId+',\''+a.id+'\')">✓ Concluir</button>':'<span class="tag tg">Concluído</span>')
     +(a.status==='cancel'?'<span class="tag tr">Cancelado</span>':'')
     +(a.status==='pendente'?'<button class="btn btn-ghost btn-sm" style="font-size:10px;color:#ef4444" onclick="cancelAppt('+a.patId+',\''+a.id+'\')">✕ Cancelar</button>':'')
     +'</div></div>';
@@ -5467,7 +5526,7 @@ function _checkAutoReminders(){
    var apptDate=new Date(a.isoDate);
    var diffH=(apptDate-now)/3600000;
    if(diffH>0&&diffH<=24){
-    reminders.push({txt:'Consulta com '+p.n+' amanhã às '+a.time,type:'i',patId:p.id,patName:p.n,tag:'appt_'+a.id});
+    reminders.push({txt:'Consulta com '+escHtml(p.n||'')+' amanhã às '+a.time,type:'i',patId:p.id,patName:p.n,tag:'appt_'+a.id});
    }
   });
 
@@ -5656,4 +5715,26 @@ function _renderNutrientChart(tk,tp,tc,tf,tfb,tna){
      +'</div>';
    }).join('')
   +'</div></div>';
+}
+function rePat(){
+  var el=document.getElementById('pat-grid');
+  if(!el)return;
+  var q=(document.getElementById('pat-q')&&document.getElementById('pat-q').value)||'';
+  var st=(document.getElementById('pat-status')&&document.getElementById('pat-status').value)||'all';
+  var list=pats.filter(function(p){
+    var nm=(p.n||'').toLowerCase();
+    var match=!q||nm.includes(q.toLowerCase())||(p.obj||'').toLowerCase().includes(q.toLowerCase());
+    var stMatch=st==='all'||(p.st||'tg')===st;
+    return match&&stMatch;
+  });
+  el.innerHTML=buildPatGrid(list);
+}
+
+function markAllRead(){
+  notifs.forEach(function(n){n.read=true;});
+  DB.save(); goP('notif',document.getElementById('ni-notif'));
+}
+function readNotif(id){
+  var n=notifs.find(function(x){return x.id===id;});
+  if(n){n.read=true;DB.save();goP('notif',document.getElementById('ni-notif'));}
 }
