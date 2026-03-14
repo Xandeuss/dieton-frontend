@@ -425,27 +425,8 @@ function doRegisterPac() {
     setTimeout(updateNotifBadge, 100); setTimeout(updatePatBadge, 100);
   }, 1200);
 }
-function showErr(m) { var b = document.getElementById('err-box'); b.style.display = 'flex'; document.getElementById('err-msg').textContent = m; }
-function doLogin() {
-  var e = document.getElementById('inp-em').value.trim(), p = document.getElementById('inp-pw').value;
-  var u = USERS.find(function (x) { return x.email === e && x.pw === p; });
-  if (!u) { showErr('E-mail ou senha incorretos.'); return; }
-  cu = u;
-  _saveSession(cu);
 
-  // Carregar dados salvos — se não houver, manter os dados demo
-  DB.load();
 
-  // Notificações padrão só se não houver salvas
-  if (!notifs.length) {
-    notifs = [{ id: 1, txt: 'Pedro Alves não registra consulta há 53 dias', type: 'w' }, { id: 2, txt: 'Maria Santos: Vitamina D crítica (18 ng/mL)', type: 'r' }, { id: 3, txt: '5 pacientes com retorno esta semana', type: 'i' }];
-  }
-
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('app').style.display = 'flex'; document.body.classList.add('app-open');
-  if (cu.role === 'pro') initPro(); else initPac();
-  setTimeout(updateNotifBadge, 100); setTimeout(updatePatBadge, 100);
-}
 function doLogout() {
   DB.save();
   if (window._autoSaveInterval) clearInterval(window._autoSaveInterval);
@@ -5910,30 +5891,35 @@ function _restoreSession() {
   if (!s || !s.user || (Date.now() - s.ts) > 30 * 24 * 60 * 60 * 1000) {
    _clearSession(); return false;
   }
-  // Reconstrói cu a partir dos dados salvos
   var saved = s.user;
   var fullUser = USERS.find(function(u) { return u.email === saved.email; });
   cu = fullUser || saved;
-  _saveSession(cu); // renova timestamp
+  _saveSession(cu);
   return true;
  } catch(e) { return false; }
 }
 
+
 // Auto-restaura sessão ao carregar a página
-(function _autoLogin() {
+document.addEventListener('DOMContentLoaded', function() {
  if (!_restoreSession()) return;
- // Sessão válida — pula o login
+ // Sessão válida — pula login
  DB.load();
- if (cu.role === 'pro') {
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  document.body.classList.add('app-open');
-  initPro();
-  _startSyncPolling && _startSyncPolling();
- } else if (cu.role === 'pac') {
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  document.body.classList.add('app-open');
-  initPac();
+ try {
+  if (cu.role === 'pro') {
+   document.getElementById('login').style.display = 'none';
+   document.getElementById('app').style.display = 'flex';
+   document.body.classList.add('app-open');
+   initPro();
+   if (typeof _startSyncPolling === 'function') _startSyncPolling();
+  } else if (cu.role === 'pac') {
+   document.getElementById('login').style.display = 'none';
+   document.getElementById('app').style.display = 'flex';
+   document.body.classList.add('app-open');
+   initPac();
+  }
+ } catch(e) {
+  console.warn('Auto-login error:', e);
+  _clearSession();
  }
-})();
+});
