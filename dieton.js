@@ -1297,19 +1297,49 @@ function selectFood(id){
  var el=document.getElementById('fr-'+id);
  if(el) el.classList.add('sel');
  var pv=document.getElementById('food-preview');
- if(pv&&_selFood){
-  pv.style.display='block';
-  pv.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g0);border:1.5px solid var(--g3);border-radius:10px;margin-top:8px">'
-   +'<div style="flex:1;min-width:0">'
-   +'<div style="font-weight:700;font-size:13px;color:var(--n9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_selFood.e+' '+escHtml(_selFood.n)+'</div>'
-   +'<div style="font-size:11px;color:var(--n5);margin-top:2px">'+_selFood.k+' kcal · P:'+_selFood.p+'g · C:'+_selFood.c+'g · G:'+_selFood.g+'g</div>'
-   +'</div>'
-   +'<button class="btn btn-p" style="flex-shrink:0;padding:10px 14px;font-size:13px;font-weight:700;min-height:44px;touch-action:manipulation" onclick="addFood()">+ Adicionar</button>'
-   +'</div>';
-  // Scroll preview into view on mobile
-  setTimeout(function(){pv.scrollIntoView({block:'nearest',behavior:'smooth'});},80);
- }
+ if(!pv||!_selFood) return;
+
+ // Build meal options from current meals array
+ var mealOpts=meals.map(function(m,i){
+  return '<option value="'+i+'">'+m.em+' '+escHtml(m.name)+'</option>';
+ }).join('');
+
+ // Get current qty/meal selection to preserve them
+ var curQty=document.getElementById('add-qty')&&document.getElementById('add-qty').value||'100';
+ var curMi=document.getElementById('add-meal-sel')&&document.getElementById('add-meal-sel').value||'0';
+
+ pv.style.display='block';
+ pv.innerHTML=
+  '<div style="background:var(--g0);border:1.5px solid var(--g3);border-radius:12px;padding:12px 14px;margin-top:8px">'
+  // Food info row
+  +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+  +'<span style="font-size:22px">'+_selFood.e+'</span>'
+  +'<div style="flex:1;min-width:0">'
+  +'<div style="font-weight:700;font-size:13px;color:var(--n9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(_selFood.n)+'</div>'
+  +'<div style="font-size:11px;color:var(--n5);margin-top:1px">'+_selFood.k+' kcal · P:'+_selFood.p+'g · C:'+_selFood.c+'g · G:'+_selFood.g+'g</div>'
+  +'</div></div>'
+  // Refeição + Qtd row
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+  +'<div>'
+  +'<label style="font-size:10.5px;font-weight:700;color:var(--n6);display:block;margin-bottom:4px">🍽️ Refeição</label>'
+  +'<select id="add-meal-sel" class="sel" style="width:100%;font-size:12.5px;min-height:40px">'+mealOpts+'</select>'
+  +'</div>'
+  +'<div>'
+  +'<label style="font-size:10.5px;font-weight:700;color:var(--n6);display:block;margin-bottom:4px">⚖️ Quantidade (g)</label>'
+  +'<input id="add-qty" type="number" class="inp" value="'+curQty+'" min="1" max="2000" step="1" inputmode="decimal" style="width:100%;font-size:13px;min-height:40px">'
+  +'</div></div>'
+  // Add button
+  +'<button class="btn btn-p" onclick="addFood()" style="width:100%;min-height:44px;font-size:14px;font-weight:700;touch-action:manipulation">+ Adicionar à Refeição</button>'
+  +'</div>';
+
+ // Restore previous meal selection
+ var sel=document.getElementById('add-meal-sel');
+ if(sel&&curMi) sel.value=curMi;
+
+ // Scroll into view on mobile
+ setTimeout(function(){pv.scrollIntoView({block:'nearest',behavior:'smooth'});},80);
 }
+
 function addFood(){
  if(!_selFood){showToast('Selecione um alimento primeiro','w');return;}
  var qty=parseFloat(document.getElementById('add-qty').value)||100;
