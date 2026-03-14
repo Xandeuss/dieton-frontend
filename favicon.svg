@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f06020"/>
+      <stop offset="100%" stop-color="#3d1800"/>
+    </radialGradient>
+    <radialGradient id="b" cx="37%" cy="30%" r="68%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#ffaa50"/>
+      <stop offset="28%" stop-color="#f56818"/>
+      <stop offset="62%" stop-color="#d84200"/>
+      <stop offset="100%" stop-color="#962800"/>
+    </radialGradient>
+    <radialGradient id="h" cx="28%" cy="22%" r="38%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="rgba(255,255,255,.75)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <linearGradient id="lf1" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#88d040"/>
+      <stop offset="100%" stop-color="#3a6c10"/>
+    </linearGradient>
+    <linearGradient id="lf2" x1="90%" y1="0%" x2="10%" y2="100%">
+      <stop offset="0%" stop-color="#5aa025"/>
+      <stop offset="100%" stop-color="#2a5208"/>
+    </linearGradient>
+    <linearGradient id="st" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4e7018"/>
+      <stop offset="100%" stop-color="#6e9028"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="28" cy="28" r="28" fill="url(#bg)"/>
+  <!-- Fruit body -->
+  <ellipse cx="28" cy="32" rx="15" ry="14" fill="url(#b)"/>
+  <!-- Highlight -->
+  <ellipse cx="28" cy="32" rx="15" ry="14" fill="url(#h)"/>
+  <!-- Stem -->
+  <path d="M28.5 20 C29.2 16.5 30.8 13.5 31.5 10" fill="none" stroke="url(#st)" stroke-width="2.4" stroke-linecap="round"/>
+  <!-- Leaf back -->
+  <path d="M28 21 C24 16 16.5 15.5 16 20.5 C19.5 20 25 21 28 24 Z" fill="url(#lf2)" opacity=".8"/>
+  <path d="M28 21 C32 16 39.5 15.5 40 20.5 C36.5 20 31 21 28 24 Z" fill="url(#lf1)" opacity=".8"/>
+  <!-- Leaf front -->
+  <path d="M28 21 C24.5 17.5 17 17 17 21.5 C20 20.5 25.5 21.5 28 24.5 Z" fill="url(#lf2)"/>
+  <path d="M28 21 C31.5 17.5 39 17 39 21.5 C36 20.5 30.5 21.5 28 24.5 Z" fill="url(#lf1)"/>
+</svg>
