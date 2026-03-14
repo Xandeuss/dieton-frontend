@@ -500,6 +500,7 @@ function initPro(){
   <button class="ni" id="ni-busca" onclick="goP('busca',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>Busca Global</button>
   <button class="ni" id="ni-pac-diary" onclick="goP('pac-diary',this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 5h-3.17L15 3H9L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 14H4V7h4.05l1.83-2h4.24l1.83 2H20v12zm-8-11c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>Di\u00e1rio Visual<span class="nb nb-y" id="nb-pac-diary" style="display:none">0</span></button>`;
  goP('dash',document.getElementById('ni-dash'));
+ _startSyncPolling();
  // Show onboarding if first visit
  if(!localStorage.getItem||!localStorage.getItem('dieton_onboarded')){
   setTimeout(showOnboarding,600);
@@ -568,7 +569,7 @@ function goP(id,btn){
   pdash:rPDash,pplan:rPPlan,pdiary:rPDiary,ptask:rPTask,pev:rPEv,psupl:rPSupl
  };
  var rbts={
-  dash:'<button class="btn btn-s btn-sm" onclick=""><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5z"/></svg> Exportar PDF</button><button class="btn btn-p btn-sm" onclick="openM(\'m-pat\')">+ Novo Paciente</button>',
+  dash:'<button class="btn btn-ghost btn-sm" onclick="_manualSync()" title="Sincronizar">🔄 Sincronizar</button><button class="btn btn-s btn-sm" onclick=""><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5z"/></svg> Exportar PDF</button><button class="btn btn-p btn-sm" onclick="openM(\'m-pat\')">+ Novo Paciente</button>',
   pat:'<button class="btn btn-s btn-sm" onclick="loadTpl()">📋 Usar Template</button><button class="btn btn-p btn-sm" onclick="openM(\'m-pat\')">+ Novo Paciente</button>',
   presc:'<button class="btn btn-s btn-sm" onclick="openM(\'m-tpl\')">💾 Salvar Template</button><button class="btn btn-gold btn-sm" onclick="exportPDF()">⬇ PDF Plano</button>',
   ev:'<button class="btn btn-s btn-sm" onclick="openM(\'m-meas\')">+ Medidas</button><button class="btn btn-p btn-sm" onclick="rptMensal()">📊 Relatório PDF</button>',
@@ -3359,73 +3360,81 @@ var _origGoP = window.goP;
 // DB.save() e DB.load() abaixo. O resto do app não muda.
 // ══════════════════════════════════════════════════════════════════
 var DB = {
-  KEY: 'dieton_v1',
+ KEY: 'dieton_v1',
 
-  _keyFor: function (userId) {
-    return 'dieton_v1_' + (userId || 'anon');
-  },
+ _keyFor: function(userId){
+  return 'dieton_v1_'+(userId||'anon');
+ },
 
-  save: function () {
-    if (!cu) return;
-    try {
-      var snapshot = {
-        pats: pats,
-        tasks: tasks,
-        notifs: notifs,
-        templates: templates,
-        userProfiles: userProfiles,
-        savedAt: Date.now()
-      };
-      localStorage.setItem(DB._keyFor(cu.id || cu.email), JSON.stringify(snapshot));
-    } catch (e) { console.warn('DietOn: falha ao salvar dados', e); }
-  },
-
-  load: function () {
-    if (!cu) return false;
-    try {
-      var raw = localStorage.getItem(DB._keyFor(cu.id || cu.email));
-      if (!raw) return false;
-      var data = JSON.parse(raw);
-      if (data.pats && data.pats.length) { pats = data.pats; }
-      if (data.tasks && data.tasks.length) { tasks = data.tasks; }
-      if (data.notifs) { notifs = data.notifs; }
-      if (data.templates && data.templates.length) { templates = data.templates; }
-      if (data.userProfiles) { userProfiles = data.userProfiles; }
-      return true;
-    } catch (e) { console.warn('DietOn: falha ao carregar dados', e); return false; }
-  },
-
-  clear: function () {
-    if (!cu) return;
-    try { localStorage.removeItem(DB._keyFor(cu.id || cu.email)); } catch (e) { }
-  },
-
-  // Exportar backup JSON — caminho para futura migração para backend
-  exportJSON: function () {
-    var data = { pats: pats, tasks: tasks, notifs: notifs, templates: templates, exportedAt: new Date().toISOString(), version: '1.0' };
-    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = 'dieton-backup-' + new Date().toISOString().slice(0, 10) + '.json';
-    a.click(); URL.revokeObjectURL(a.href);
-    showToast('Backup exportado com sucesso!', 's');
-  },
-
-  // Importar backup JSON
-  importJSON: function (file) {
-    var reader = new FileReader();
-    reader.onload = function (e) {
-      try {
-        var data = JSON.parse(e.target.result);
-        if (data.pats) pats = data.pats;
-        if (data.tasks) tasks = data.tasks;
-        if (data.templates) templates = data.templates;
-        DB.save();
-        showToast('Dados importados! Recarregue a tela.', 's');
-        setTimeout(function () { location.reload(); }, 1500);
-      } catch (err) { showToast('Arquivo inválido.', 'w'); }
-    };
-    reader.readAsText(file);
+ // Salva localmente E no backend se disponível
+ save: function(){
+  if(!cu) return;
+  try{
+   var snapshot={pats:pats,tasks:tasks,notifs:notifs,templates:templates,userProfiles:userProfiles,savedAt:Date.now()};
+   localStorage.setItem(DB._keyFor(cu.id||cu.email),JSON.stringify(snapshot));
+  }catch(e){console.warn('DietOn: falha ao salvar local',e);}
+  // Sync backend assíncrono (não bloqueia UI)
+  if(typeof API_MODE!=='undefined'&&API_MODE&&typeof apiSyncPats==='function'){
+   apiSyncPats().catch(function(e){console.warn('sync backend:',e);});
   }
+ },
+
+ // Carrega local; depois puxa backend se disponível
+ load: function(){
+  if(!cu) return false;
+  var loaded=false;
+  try{
+   var raw=localStorage.getItem(DB._keyFor(cu.id||cu.email));
+   if(raw){
+    var data=JSON.parse(raw);
+    if(data.pats&&data.pats.length){
+     pats=data.pats;
+     // ensure msgs array
+     pats.forEach(function(p){if(!p.msgs)p.msgs=[];});
+    }
+    if(data.tasks&&data.tasks.length) tasks=data.tasks;
+    if(data.notifs) notifs=data.notifs;
+    if(data.templates&&data.templates.length) templates=data.templates;
+    if(data.userProfiles) userProfiles=data.userProfiles;
+    loaded=true;
+   }
+  }catch(e){console.warn('DietOn: falha ao carregar local',e);}
+  // Puxa backend em background e atualiza UI
+  if(typeof API_MODE!=='undefined'&&API_MODE&&typeof apiPullPats==='function'){
+   apiPullPats().catch(function(e){console.warn('pull backend:',e);});
+  }
+  return loaded;
+ },
+
+ clear: function(){
+  if(!cu) return;
+  try{localStorage.removeItem(DB._keyFor(cu.id||cu.email));}catch(e){}
+ },
+
+ exportJSON: function(){
+  var data={pats:pats,tasks:tasks,notifs:notifs,templates:templates,exportedAt:new Date().toISOString(),version:'1.0'};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='dieton-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+  showToast('Backup exportado!','s');
+ },
+
+ importJSON: function(file){
+  var reader=new FileReader();
+  reader.onload=function(e){
+   try{
+    var data=JSON.parse(e.target.result);
+    if(data.pats) pats=data.pats;
+    if(data.tasks) tasks=data.tasks;
+    if(data.templates) templates=data.templates;
+    DB.save();
+    showToast('Dados importados! Recarregando...','s');
+    setTimeout(function(){location.reload();},1500);
+   }catch(err){showToast('Arquivo inválido.','w');}
+  };
+  reader.readAsText(file);
+ }
 };
 
 // Auto-save: salva sempre que pats, tasks ou templates mudam
@@ -5767,4 +5776,107 @@ function markAllRead(){
 function readNotif(id){
   var n=notifs.find(function(x){return x.id===id;});
   if(n){n.read=true;DB.save();goP('notif',document.getElementById('ni-notif'));}
+}
+
+
+// ═══════════════════════════════════════════════════
+// SINCRONIZAÇÃO BACKEND ↔ FRONTEND
+// ═══════════════════════════════════════════════════
+
+// Envia pacientes locais para o backend
+async function apiSyncPats(){
+ if(!API_MODE||!cu||cu.role!=='pro') return;
+ try{
+  // Pega lista atual do backend
+  var serverPats=await apiGetPatients();
+  if(!serverPats) return;
+  var serverIds=serverPats.map(function(p){return p.id;});
+
+  // Para cada paciente local, cria ou atualiza no backend
+  for(var i=0;i<pats.length;i++){
+   var p=pats[i];
+   if(!p._serverId&&!serverIds.includes(p.id)){
+    // Novo — cria no backend
+    var created=await apiCreatePatient(p);
+    if(created&&created.id) p._serverId=created.id;
+   } else {
+    // Atualiza
+    var sid=p._serverId||p.id;
+    if(serverIds.includes(sid)) await apiUpdatePatient(sid,p);
+   }
+  }
+  DB.save(); // persiste _serverId atualizado
+ }catch(e){console.warn('apiSyncPats:',e);}
+}
+
+// Puxa pacientes do backend e atualiza UI
+async function apiPullPats(){
+ if(!API_MODE||!cu||cu.role!=='pro') return;
+ try{
+  var serverPats=await apiGetPatients();
+  if(!serverPats||!serverPats.length) return;
+
+  // Merge: backend é a fonte verdade para pacientes existentes no servidor
+  var merged=serverPats.map(function(sp){
+   // Procura versão local para preservar campos não-sincronizados (msgs, diary, etc)
+   var local=pats.find(function(lp){return lp._serverId===sp.id||lp.id===sp.id;});
+   if(local){
+    // Atualiza campos do servidor, preserva campos locais
+    return Object.assign({},local,{
+     id:sp.id,_serverId:sp.id,
+     n:sp.n,age:sp.age,sex:sp.sex,
+     w:sp.w,h:sp.h,bmi:sp.bmi,
+     goal:sp.goal,cond:sp.cond,
+     fat:sp.fat,wStart:sp.wStart||local.wStart
+    });
+   }
+   // Novo do servidor — adiciona localmente
+   if(!sp.msgs) sp.msgs=[];
+   sp._serverId=sp.id;
+   return sp;
+  });
+
+  // Adiciona pacientes só locais que ainda não foram sincronizados
+  pats.forEach(function(lp){
+   var noServerId=!lp._serverId;
+   var notInMerged=!merged.find(function(mp){return mp.id===lp.id;});
+   if(noServerId&&notInMerged) merged.push(lp);
+  });
+
+  if(merged.length){
+   pats=merged;
+   pats.forEach(function(p){if(!p.msgs)p.msgs=[];});
+   // Salva localmente com dados atualizados
+   try{
+    var snap={pats:pats,tasks:tasks,notifs:notifs,templates:templates,savedAt:Date.now()};
+    localStorage.setItem(DB._keyFor(cu.id||cu.email),JSON.stringify(snap));
+   }catch(e){}
+   // Atualiza UI se estiver na página de pacientes
+   var patGrid=document.getElementById('pat-grid');
+   if(patGrid) patGrid.innerHTML=buildPatGrid(pats);
+   _updateChatBadge&&_updateChatBadge();
+   console.log('✅ Pacientes sincronizados:',pats.length);
+  }
+ }catch(e){console.warn('apiPullPats:',e);}
+}
+
+// Polling: atualiza a cada 30s se o app estiver aberto
+function _startSyncPolling(){
+ if(typeof API_MODE==='undefined'||!API_MODE) return;
+ setInterval(function(){
+  if(cu&&cu.role==='pro') apiPullPats().catch(function(){});
+ },30000);
+}
+
+function _manualSync(){
+ if(typeof API_MODE==='undefined'||!API_MODE){
+  showToast('Modo offline — backend não disponível','i');
+  return;
+ }
+ showToast('Sincronizando...','i');
+ Promise.resolve()
+  .then(function(){return apiSyncPats();})
+  .then(function(){return apiPullPats();})
+  .then(function(){showToast('✅ Sincronizado!','s');})
+  .catch(function(){showToast('Erro ao sincronizar','w');});
 }
