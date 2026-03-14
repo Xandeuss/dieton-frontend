@@ -420,7 +420,7 @@ function doRegisterPac() {
   setTimeout(function () {
     cu = newUser;
     document.getElementById('login').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
+    document.getElementById('app').style.display = 'flex'; document.body.classList.add('app-open');
     initPac();
     setTimeout(updateNotifBadge, 100); setTimeout(updatePatBadge, 100);
   }, 1200);
@@ -441,7 +441,7 @@ function doLogin() {
   }
 
   document.getElementById('login').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+  document.getElementById('app').style.display = 'flex'; document.body.classList.add('app-open');
   if (cu.role === 'pro') initPro(); else initPac();
   setTimeout(updateNotifBadge, 100); setTimeout(updatePatBadge, 100);
 }
@@ -449,7 +449,7 @@ function doLogout() {
   DB.save();
   if (window._autoSaveInterval) clearInterval(window._autoSaveInterval);
   cu = null;
-  document.getElementById('app').style.display = 'none';
+  document.getElementById('app').style.display = 'none'; document.body.classList.remove('app-open');
   document.getElementById('login').style.display = 'flex';
 }
 
